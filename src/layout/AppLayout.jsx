@@ -15,11 +15,19 @@ import { setSelectedClient } from "../Store/Slices/GlobalSaveSlice";
 import Header from "./StickyHeader";
 
 import { menuData } from "./StickyHeader"; // shared menu
+import { AuthenticateUser } from "../Store/Auth/Action";
+import { useEffect } from "react";
+
 
 const LayoutContent = () => {
   const { isMobileOpen } = useSidebar();
   const dispatch = useDispatch();
   const { GlobalSaveStore, GlobalStore } = useSelector((state) => state);
+
+
+    useEffect(()=>{
+    dispatch(AuthenticateUser())
+  }, [])
 
   return (
     <TooltipProvider>

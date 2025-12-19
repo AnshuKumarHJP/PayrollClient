@@ -74,16 +74,17 @@ export const AuthenticateUser = () => async (dispatch) => {
     );
 
     const encryptedResult = res?.data?.Result;
+console.log("encryptedResult",encryptedResult);
 
     // FULL decrypt
     const decrypted = aesUtils.decryptAES(encryptedResult);
 
     console.log("FINAL DECRYPTED =", decrypted);
-    console.log("MfiLog =", decrypted.MfiLog);   // decrypted
-    console.log("GfiLog =", decrypted.GfiLog);   // decrypted
-    console.log("Token =", decrypted.Token);     // decrypted
+    // console.log("MfiLog =", decrypted.MfiLog);   // decrypted
+    // console.log("GfiLog =", decrypted.GfiLog);   // decrypted
+    // console.log("Token =", decrypted.Token);     // decrypted
 
-    dispatch(getAuthSuccess({ apiRaw: res.data, decrypted }));
+    // dispatch(getAuthSuccess({ apiRaw: res.data, decrypted }));
 
 
   } catch (error) {

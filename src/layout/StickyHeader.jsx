@@ -81,9 +81,7 @@ function StickyHeader() {
   const { isMobile } = useScreen(); // 👈 AUTO DETECT SCREEN SIZE
 
 
-  useEffect(()=>{
-    dispatch(AuthenticateUser())
-  })
+
 
   return (
     <header className="fixed top-2 left-0 w-full z-50 px-2 md:px-8">

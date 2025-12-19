@@ -1,6 +1,6 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
+import 'react-json-view-lite/dist/index.css';
 // Pages / Layout
 import AppLayout from "./layout/AppLayout";
 import Login from "./Pages/Login";
@@ -35,6 +35,7 @@ import PayrollInputMapping from "./Pages/PayrollInputMapping";
 import ProtectedRoute from "./Component/ProtectedRoute";
 import Form from "./Pages/Builder/Form";
 import Employee from "./Pages/Employee/Employee";
+import SessionStorageTest from "./components/SessionStorageTest";
 
 
 
@@ -163,6 +164,10 @@ const router = createBrowserRouter([
       { path: "processing/register", element: <SalaryRegister /> },
       {
         path: "processing/payslips", element: <Payslips />
+      },
+      {
+        path: "test/session-storage",
+        element: <SessionStorageTest />
       }
     ],
   },

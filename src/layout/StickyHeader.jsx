@@ -10,6 +10,8 @@ import UserDropdown from "../Component/header/UserDropdown";
 import DesktopMenu from "./DesktopMenu";
 import MobileMenu from "./MobileMenu";
 import useScreen from "../Hooks/useScreen";
+import { useEffect } from "react";
+import { AuthenticateUser } from "../Store/Auth/Action";
 
 export const menuData = [
   {
@@ -77,6 +79,11 @@ function StickyHeader() {
   const { isMenuOpen } = GlobalStore;
 
   const { isMobile } = useScreen(); // 👈 AUTO DETECT SCREEN SIZE
+
+
+  useEffect(()=>{
+    dispatch(AuthenticateUser())
+  })
 
   return (
     <header className="fixed top-2 left-0 w-full z-50 px-2 md:px-8">

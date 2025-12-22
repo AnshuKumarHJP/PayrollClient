@@ -1093,7 +1093,7 @@
   "templates": [
     {
       "id": "1",
-      "clientCode": "CLI002",
+      "clientCode": null,
       "name": "Employee Onboarding",
       "description": "Standard employee onboarding form used across all clients",
       "status": "active",
@@ -1169,7 +1169,7 @@
           "id": 1764759779055,
           "name": "address",
           "label": "Address",
-          "type": "select",
+          "type": "text",
           "required": true,
           "validation": "none",
           "maxLength": null,
@@ -1244,7 +1244,7 @@
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-15T06:56:36.103Z"
+      "lastModified": "2025-12-22T12:29:12.463Z"
     },
     {
       "id": "2",
@@ -4254,6 +4254,7 @@
       "id": "8ac1"
     }
   ],
+  "columnMapping": [],
   "payslips": [
     {
       "id": "1",

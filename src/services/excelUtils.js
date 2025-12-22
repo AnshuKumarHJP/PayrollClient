@@ -102,7 +102,7 @@ export const downloadExcelTemplate = async (
           break;
 
         case "select":
-          if (field.options?.length) {
+          if (Array.isArray(field.options) && field.options.length) {
             ws.getCell(r, index + 1).dataValidation = {
               type: "list",
               formulae: [`"${field.options.join(",")}"`],
@@ -146,7 +146,7 @@ export const downloadExcelTemplate = async (
       `${f.label}${f.required ? " *" : ""}`,
       f.type,
       f.required ? "Required" : "Optional",
-      f.type === "select" ? f.options?.join(", ") : "",
+      f.type === "select" && Array.isArray(f.options) ? f.options.join(", ") : "",
     ]),
   ];
   instructions.forEach((row) => ins.addRow(row));
@@ -171,6 +171,18 @@ export const downloadExcelTemplate = async (
 ============================================================================================ */
 export const validateExcelStructure = async (file, fields) => {
   try {
+    let fieldArray = fields;
+    if (!Array.isArray(fields)) {
+      if (Array.isArray(fields?.fields)) {
+        fieldArray = fields.fields;
+      } else {
+        return { valid: false, error: "Invalid fields data: fields must be an array or an object with a fields array" };
+      }
+    }
+
+    // Filter fields to only include those applicable for upload
+    const filteredFields = fieldArray.filter(f => Array.isArray(f.applicable) && f.applicable.includes("upload"));
+
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(await file.arrayBuffer());
     const ws = workbook.getWorksheet("Data Entry");
@@ -180,7 +192,7 @@ export const validateExcelStructure = async (file, fields) => {
     }
 
     const headerRow = ws.getRow(2);
-    const expected = fields?.map((f) =>
+    const expected = filteredFields.map((f) =>
       f.required ? `${f.label} *` : f.label
     );
 
@@ -194,12 +206,22 @@ export const validateExcelStructure = async (file, fields) => {
         return value;
       });
 
-    /* ✔ FIX 2: Compare both arrays safely */
+    /* ✔ FIX 2: Compare both arrays safely - check if all expected headers are present (order doesn't matter) */
     for (let i = 0; i < expected.length; i++) {
-      if (extractedHeaders[i] !== expected[i]) {
+      if (!extractedHeaders.includes(expected[i])) {
         return {
           valid: false,
-          error: `Header mismatch at column ${i + 1}. Expected "${expected[i]}", found "${extractedHeaders[i]}"`,
+          error: `Header mismatch. Expected header "${expected[i]}" not found in the Excel file.`,
+        };
+      }
+    }
+
+    // Also check if there are extra headers
+    for (let i = 0; i < extractedHeaders.length; i++) {
+      if (!expected.includes(extractedHeaders[i])) {
+        return {
+          valid: false,
+          error: `Extra header found: "${extractedHeaders[i]}". Please ensure the Excel file matches the template exactly.`,
         };
       }
     }

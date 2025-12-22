@@ -9,39 +9,43 @@ import {
   SelectItem,
 } from "../Lib/select";
 
+// ⭐ ADD FRAMER MOTION
+import { motion, AnimatePresence } from "framer-motion";
+
 const MonthYearSelector = ({
-  onChange = () => { },
+  onChange = () => {},
   rangeFormat = "single",
   monthFormat = "short",
   showYear = true,
   showMonth = true,
   showMonthGrid = true,
-  className=""
+  className = ""
 }) => {
-  // ------------------------------------------------------
+
+  // ---------------------------------------------
   // SYSTEM CONSTANTS
-  // ------------------------------------------------------
+  // ---------------------------------------------
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth(); // 0..11
 
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec",
   ];
 
   const longMonths = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ];
 
   const pad = (n) => String(n).padStart(2, "0");
   const isoLocal = (d) =>
     `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-  // ------------------------------------------------------
+  // ---------------------------------------------
   // FORMATTERS
-  // ------------------------------------------------------
+  // ---------------------------------------------
   const formatMonthLabel = (monthIndex, year) => {
     const short = months[monthIndex - 1];
     const long = longMonths[monthIndex - 1];
@@ -53,7 +57,7 @@ const MonthYearSelector = ({
       case "longYear": return `${long} ${year}`;
       case "num": return pad(monthIndex);
       case "numYear": return `${pad(monthIndex)}/${year}`;
-      case "rangeShort": return `${short} - ${months[(monthIndex % 12)]} `;
+      case "rangeShort": return `${short} - ${months[(monthIndex % 12)]}`;
       case "rangeLong": return `${long} - ${longMonths[(monthIndex % 12)]}`;
       case "quarter":
         const q = Math.ceil(monthIndex / 3);
@@ -83,9 +87,9 @@ const MonthYearSelector = ({
     }
   };
 
-  // ------------------------------------------------------
+  // ---------------------------------------------
   // YEAR OPTIONS
-  // ------------------------------------------------------
+  // ---------------------------------------------
   const yearOptions = useMemo(() => {
     const arr = [];
     for (let i = -5; i <= 5; i++) {
@@ -107,9 +111,9 @@ const MonthYearSelector = ({
   const [selectedRangeItem, setSelectedRangeItem] =
     useState(defaultYearItem);
 
-  // ------------------------------------------------------
+  // ---------------------------------------------
   // MONTH OPTIONS
-  // ------------------------------------------------------
+  // ---------------------------------------------
   const monthData = months.map((m, i) => ({
     name: m,
     monthIndex: i + 1,
@@ -119,9 +123,9 @@ const MonthYearSelector = ({
   const defaultMonth = monthData[currentMonthIndex];
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
 
-  // ------------------------------------------------------
+  // ---------------------------------------------
   // MAIN PAYROLL OBJECT
-  // ------------------------------------------------------
+  // ---------------------------------------------
   const buildPayrollObject = (m, selectedRange) => {
     const year = m.year;
     const month = m.monthIndex;
@@ -152,37 +156,31 @@ const MonthYearSelector = ({
       financialYear: `FY ${fyStart}-${fyEnd}`,
       quarter: `Q${Math.ceil(month / 3)}`,
 
-      // ⭐ NEW FIELDS YOU ASKED FOR
       startLabel: `${pad(first.getDate())} ${months[first.getMonth()]} ${year}`,
       endLabel: `${pad(last.getDate())} ${months[last.getMonth()]} ${year}`,
 
       monthLabel: formatMonthLabel(month, year),
       range: selectedRange,
     };
-
   };
 
-  // ------------------------------------------------------
-  // FIRE DEFAULT getData ON LOAD
-  // ------------------------------------------------------
+  // ---------------------------------------------
+  // FIRE DEFAULT ON FIRST LOAD
+  // ---------------------------------------------
   useEffect(() => {
     const payload = buildPayrollObject(defaultMonth, defaultYearItem);
     onChange(payload);
-  }, []); // only once at first render
+  }, []);
 
-  // ------------------------------------------------------
-  // HANDLE MONTH CHANGE
-  // ------------------------------------------------------
+  // ---------------------------------------------
+  // HANDLERS
+  // ---------------------------------------------
   const handleMonthSelect = (m) => {
     setSelectedMonth(m);
-
     const full = buildPayrollObject(m, selectedRangeItem);
     onChange(full);
   };
 
-  // ------------------------------------------------------
-  // HANDLE YEAR CHANGE
-  // ------------------------------------------------------
   const handleRangeItemSelect = (key) => {
     const item = yearOptions.find((it) => it.key === key);
     if (!item) return;
@@ -200,90 +198,117 @@ const MonthYearSelector = ({
     onChange(full);
   };
 
-  // ------------------------------------------------------
-  // UI
-  // ------------------------------------------------------
+  // ---------------------------------------------
+  // UI START
+  // ---------------------------------------------
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
       <div className="space-y-2 relative">
-
+        
         {/* YEAR DROPDOWN */}
-        {showYear && (
-          <div className="flex justify-end">
-            <Select
-              value={selectedRangeItem.key}
-              onValueChange={handleRangeItemSelect}
+        <AnimatePresence>
+          {showYear && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-end"
             >
-              <SelectTrigger className="w-48 h-9 text-sm">
-                <SelectValue placeholder="Select Year" />
-              </SelectTrigger>
-
-              <SelectContent>
-                {yearOptions.map((it) => (
-                  <SelectItem key={it.key} value={it.key}>
-                    {it.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+              <Select
+                value={selectedRangeItem.key}
+                onValueChange={handleRangeItemSelect}
+              >
+                <SelectTrigger className="w-48 h-9 text-sm">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((it) => (
+                    <SelectItem key={it.key} value={it.key}>
+                      {it.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* MONTH DROPDOWN */}
-        {showMonth && (
-          <div className="flex justify-end">
-            <Select
-              value={`${selectedMonth.monthIndex}`}
-              onValueChange={(v) => {
-                const m = monthData[Number(v) - 1];
-                handleMonthSelect(m);
-              }}
+        <AnimatePresence>
+          {showMonth && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-end"
             >
-              <SelectTrigger className="w-48 h-9 text-sm">
-                <SelectValue placeholder="Select Month" />
-              </SelectTrigger>
+              <Select
+                value={`${selectedMonth.monthIndex}`}
+                onValueChange={(v) => {
+                  const m = monthData[Number(v) - 1];
+                  handleMonthSelect(m);
+                }}
+              >
+                <SelectTrigger className="w-48 h-9 text-sm">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
 
-              <SelectContent>
-                {monthData.map((m) => (
-                  <SelectItem key={m.monthIndex} value={`${m.monthIndex}`}>
-                    {formatMonthLabel(m.monthIndex, m.year)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
+                <SelectContent>
+                  {monthData.map((m) => (
+                    <SelectItem key={m.monthIndex} value={`${m.monthIndex}`}>
+                      {formatMonthLabel(m.monthIndex, m.year)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* MONTH GRID */}
       {showMonthGrid && (
-        <Card className={`w-full space-y-4 p-3 my-2 ${className}`}>
-          <div className="flex overflow-x-auto gap-3 py-2 scrollbar-hide">
-            {monthData.map((m) => {
-              const active =
-                selectedMonth.monthIndex === m.monthIndex &&
-                selectedMonth.year === m.year;
-              return (
-                <div
-                  key={`${m.year}-${m.monthIndex}`}
-                  onClick={() => handleMonthSelect(m)}
-                  className={`min-w-[120px] h-[70px] rounded-xl px-3 py-2 
-                    cursor-pointer flex flex-col items-center justify-center
-                    transition-all ${active
-                      ? "bg-emerald-600 text-white scale-[1.03] shadow"
-                      : "bg-emerald-100 hover:bg-emerald-200"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className={`w-full space-y-4 p-3 my-2 ${className}`}>
+            <div className="flex overflow-x-auto gap-3 py-2 scrollbar-hide">
+              {monthData.map((m) => {
+                const active =
+                  selectedMonth.monthIndex === m.monthIndex &&
+                  selectedMonth.year === m.year;
+
+                return (
+                  <motion.div
+                    key={`${m.year}-${m.monthIndex}`}
+                    onClick={() => handleMonthSelect(m)}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className={`min-w-[120px] h-[70px] rounded-xl px-3 py-2 cursor-pointer flex flex-col items-center justify-center transition-all ${
+                      active
+                        ? "bg-emerald-600 text-white scale-[1.03] shadow-lg"
+                        : "bg-emerald-100 hover:bg-emerald-200"
                     }`}
-                >
-                  <span className="text-sm font-semibold">{m.name}</span>
-                  <span className="text-xs opacity-70">{m.year}</span>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+                  >
+                    <span className="text-sm font-semibold">{m.name}</span>
+                    <span className="text-xs opacity-70">{m.year}</span>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </Card>
+        </motion.div>
       )}
-    </>
+    </motion.div>
   );
 };
 

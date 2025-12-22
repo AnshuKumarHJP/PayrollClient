@@ -1,2 +1,8 @@
-- [x] Edit Login.jsx: Dispatch setUserCode with formData.UserName before dispatching AuthenticateUser, remove await, remove incorrect setUserCode dispatch, remove setIsAuthenticated dispatch.
-- [x] Edit Action.js: Import setIsAuthenticated, dispatch it on success after decryption.
+- [ ] Convert configItemsNew to state using useState
+- [ ] Add state for editingItem (null or object)
+- [ ] Add "Add New" button in header
+- [ ] Add edit button in MenuList for each item
+- [ ] Add form in right content for editing/adding item
+- [ ] Implement save logic (add or update item)
+- [ ] Implement cancel logic
+- [ ] Update activeMenu when items change

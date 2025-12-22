@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
 import { Button } from "../../Lib/button";
@@ -36,18 +35,14 @@ import TemplatePreviewDialog from "../TemplatePreviewDialog";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedClient } from "../../Store/Slices/GlobalSaveSlice";
 
-const TemplateEdit = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
+  const templateId = propId;
   const { toast } = useToast();
   const dispatch = useDispatch();
-
   // GLOBAL Redux Client
   const clientCode = useSelector((state) => state.GlobalSaveStore?.SelectedClient);
-
   const [loading, setLoading] = useState(false);
   const [version, setVersion] = useState("1.0");
-
   const [templateName, setTemplateName] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
@@ -57,7 +52,6 @@ const TemplateEdit = () => {
   const [getApi, setGetApi] = useState("");
   const [bulkApi, setBulkApi] = useState("");
   const [groupSave, setGroupSave] = useState(false);
-
   const [fields, setFields] = useState([]);
   const [ruleTypes, setRuleTypes] = useState([]);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState(false);
@@ -85,9 +79,9 @@ const TemplateEdit = () => {
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (id) loadTemplate(id);
+    if (templateId) loadTemplate(templateId);
     loadRuleTypes();
-  }, [id]);
+  }, [templateId]);
 
   const loadRuleTypes = async () => {
     try {
@@ -138,7 +132,9 @@ const TemplateEdit = () => {
         description: "Failed to load template.",
         variant: "destructive",
       });
-      navigate("/config/templates");
+      if (onCancel) {
+        onCancel();
+      }
     } finally {
       setLoading(false);
     }
@@ -271,15 +267,18 @@ const TemplateEdit = () => {
         createdBy: "currentUser",
       };
 
-      if (id) {
-        await templateService.update(id, payload);
+      let savedTemplate;
+      if (templateId) {
+        savedTemplate = await templateService.update(templateId, payload);
         toast({ title: "Updated", description: "Template updated." });
       } else {
-        await templateService.create(payload);
+        savedTemplate = await templateService.create(payload);
         toast({ title: "Created", description: "Template created." });
       }
 
-      navigate("/config/templates");
+      if (onSave) {
+        onSave(savedTemplate);
+      }
     } catch (err) {
       toast({
         title: "Failed",
@@ -331,7 +330,7 @@ const TemplateEdit = () => {
         <div className="flex items-center gap-2">
           <Settings size={22} />
           <h1 className="text-xl font-bold">
-            {id ? "Edit Template" : "Create Template"}
+            {templateId ? "Edit Template" : "Create Template"}
           </h1>
         </div>
 

@@ -112,7 +112,9 @@ const UserDropdown = () => {
         {/* USER INFO */}
         <DropdownMenuLabel className="font-normal">
           <div className="flex justify-center mb-2">
-            <img src={Logo} alt="image" className="rounded-full" />
+            <img
+            className="rounded-full h-20" 
+             src={"https://firebasestorage.googleapis.com/v0/b/linkedin-clone-d79a1.appspot.com/o/man.png?alt=media&token=4b126130-032a-45b5-bea4-87adb0d096dc%22"} alt="image" />
           </div>
           <div className="flex flex-col space-y-1 items-center space-y-4">
             <p className="text-sm font-medium leading-none">

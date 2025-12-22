@@ -1,13 +1,9 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import 'react-json-view-lite/dist/index.css';
 // Pages / Layout
 import AppLayout from "./layout/AppLayout";
 import Login from "./Pages/Login";
 import Home from "./Pages/Home";
-import InputModule from "./Pages/InputModule";
-import OnboardingForm from "./Pages/OnboardingForm";
-import ReimbursementForm from "./Pages/ReimbursementForm";
 import ImportHistory from "./Pages/ImportHistory";
 import TemplateList from "./Pages/Builder/TemplateList";
 import TemplateEdit from "./Pages/Builder/TemplateEdit";
@@ -24,7 +20,7 @@ import OpsDashboard from "./Pages/OpsDashboard";
 import UnclaimedTasksView from "./Pages/UnclaimedTasksView";
 import TaskActionScreen from "./Pages/TaskActionScreen";
 import TeamDashboard from "./Pages/TeamDashboard";
-import ExcelTemplatePreview from "./Pages/ExcelTemplatePreview";
+import ExcelTemplatePreview from "./Pages/Builder/ExcelTemplatePreview";
 import Configuration from "./Pages/Configuration";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import SalaryRegister from "./Pages/SalaryRegister";
@@ -36,6 +32,7 @@ import ProtectedRoute from "./Component/ProtectedRoute";
 import Form from "./Pages/Builder/Form";
 import Employee from "./Pages/Employee/Employee";
 import SessionStorageTest from "./components/SessionStorageTest";
+import InputModule from "./Pages/InputModule";
 
 
 
@@ -61,14 +58,6 @@ const router = createBrowserRouter([
       {
         path: "inputs/:templateID",
         element: <Form />,
-      },
-      {
-        path: "inputs/onboarding",
-        element: <OnboardingForm />,
-      },
-      {
-        path: "inputs/reimbursements",
-        element: <ReimbursementForm />,
       },
       {
         path: "inputs/history",

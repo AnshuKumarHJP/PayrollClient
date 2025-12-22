@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
-import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
-import { Label } from "../Lib/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Lib/table";
-import { Badge } from "../Lib/badge";
-import { Alert, AlertDescription } from "../Lib/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Button } from "../../Lib/button";
+import { Input } from "../../Lib/input";
+import { Label } from "../../Lib/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Lib/table";
+import { Badge } from "../../Lib/badge";
+import { Alert, AlertDescription } from "../../Lib/alert";
 import { FileSpreadsheet, Download, Eye, CheckCircle, AlertTriangle, Info } from "lucide-react";
-import { useToast } from "../Lib/use-toast";
-import { templateService } from "../../api/services/templateService";
-import { downloadExcelTemplate, downloadCSV } from "../services/excelUtils";
+import { useToast } from "../../Lib/use-toast";
+import { templateService } from "../../../api/services/templateService";
+import { downloadExcelTemplate, downloadCSV } from "../../services/excelUtils";
 
 const ExcelTemplatePreview = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("");

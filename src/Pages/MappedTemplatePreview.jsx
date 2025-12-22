@@ -108,6 +108,9 @@ const MappedTemplatePreview = () => {
   };
 
   const getValidationStatus = () => {
+    if (!validationResults) {
+      return { status: "loading", color: "border-gray-500", icon: Loader2, message: "Validation in progress..." };
+    }
     if (validationResults.errors > 0) {
       return { status: "error", color: "border-red-500", icon: AlertTriangle, message: `${validationResults.errors} errors found` };
     } else if (validationResults.warnings > 0) {

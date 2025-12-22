@@ -6,6 +6,7 @@ import FullLogo from "../Image/hfactor-logo-dark.png";
 import Logo from "../Image/HFLogo.png";
 import AppIcon from "../Component/AppIcon";
 import UserDropdown from "../Component/UserDropdown";
+import NotificationDropdown from "../Component/NotificationDropdown";
 
 import DesktopMenu from "./DesktopMenu";
 import MobileMenu from "./MobileMenu";
@@ -167,7 +168,7 @@ function StickyHeader() {
         </div>
 
         <div className="flex items-center gap-3">
-          <AppIcon name="Bell" className="text-emerald-700" />
+          <NotificationDropdown />
           <UserDropdown />
         </div>
       </div>

@@ -4,6 +4,23 @@ import PageBuilder from "./PageBuilder";
 import { templateService } from "../../../api/services/templateService";
 import axios from "axios";
 
+// 🟢 Add Framer Motion
+import { motion } from "framer-motion";
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 120, damping: 16 }
+  }
+};
+
+const fadeInSlow = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.5 } }
+};
+
 const Form = () => {
   const { templateID } = useParams();
   const [loading, setLoading] = useState(false);
@@ -32,7 +49,7 @@ const Form = () => {
   }, [templateID]);
 
   /* ----------------------------------------------
-        GET TABLE DATA FROM TEMPLATE API
+        GET TABLE DATA
   ---------------------------------------------- */
   const handleGetData = useCallback(async (temp) => {
     try {
@@ -46,19 +63,15 @@ const Form = () => {
   }, []);
 
   /* ----------------------------------------------
-        CREATE NEW RECORD
+        CREATE
   ---------------------------------------------- */
   const handleCreate = useCallback(
     async (payload) => {
       try {
-        if (!template?.addApi) {
-          console.error("Add API missing");
-          return false;
-        }
+        if (!template?.addApi) return false;
 
         await axios.post(template.addApi, payload);
-        await handleGetData(template); // reload table
-
+        await handleGetData(template);
         return true;
       } catch (err) {
         console.error("Create failed:", err);
@@ -69,21 +82,15 @@ const Form = () => {
   );
 
   /* ----------------------------------------------
-        UPDATE EXISTING RECORD
+        UPDATE
   ---------------------------------------------- */
   const handleUpdate = useCallback(
     async (id, payload) => {
-      console.log(payload);
       try {
-        if (!template?.updateApi) {
-          console.error("Update API missing");
-          return false;
-        }
+        if (!template?.updateApi) return false;
 
-        // PUT or PATCH depending on your API preference
         await axios.patch(`${template.updateApi}/${id}`, payload);
-
-        await handleGetData(template); // refresh table
+        await handleGetData(template);
 
         return true;
       } catch (err) {
@@ -95,7 +102,7 @@ const Form = () => {
   );
 
   /* ----------------------------------------------
-        LOAD TEMPLATE INITIALLY
+        INIT LOAD
   ---------------------------------------------- */
   useEffect(() => {
     loadTemplate();
@@ -109,23 +116,36 @@ const Form = () => {
   }, [template, handleGetData]);
 
   return (
-    <div className="p-4">
+    <motion.div
+      variants={fadeInSlow}
+      initial="hidden"
+      animate="show"
+    >
       {/* HEADER */}
-      <h2 className="text-lg font-bold mb-4">
-        Form: {template?.name} ({templateID})
-      </h2>
+      <motion.h2
+        className="text-lg font-bold mb-4"
+        variants={fadeIn}
+      >
+        Form : {template?.name} ({templateID})
+      </motion.h2>
 
       {/* PAGE BUILDER */}
-      <PageBuilder
-        moduleName={template?.name}
-        templateId={template?.id}
-        rows={tableData}
-        AddMore={true}
-        onCreate={handleCreate}
-        onUpdate={handleUpdate}
-        onBulkSuccess={() => handleGetData(template)}
-      />
-    </div>
+      <motion.div
+        variants={fadeIn}
+        initial="hidden"
+        animate="show"
+      >
+        <PageBuilder
+          moduleName={template?.name}
+          templateId={template?.id}
+          rows={tableData}
+          AddMore={true}
+          onCreate={handleCreate}
+          onUpdate={handleUpdate}
+          onBulkSuccess={() => handleGetData(template)}
+        />
+      </motion.div>
+    </motion.div>
   );
 };
 

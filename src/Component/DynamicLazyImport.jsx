@@ -4,7 +4,7 @@ import Loading from './Loading'
 // ⭐ Scan ALL pages and subfolders inside /src/Pages
 const modules = import.meta.glob("/src/**/*.jsx");
 
-export default function DynamicLazyImport({ path }) {
+export default function DynamicLazyImport({ path, ...props }) {
   if (!path) return null;
 
   // Normalize path → convert "../Builder/Page.jsx" → "/src/Pages/Builder/Page.jsx"
@@ -24,7 +24,7 @@ export default function DynamicLazyImport({ path }) {
 
   return (
     <Suspense fallback={<Loading/>}>
-      <Component />
+      <Component {...props} />
     </Suspense>
   );
 }

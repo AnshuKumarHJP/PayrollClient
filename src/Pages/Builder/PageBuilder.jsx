@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "../../Lib/button";
 import { Edit, Eye } from "lucide-react";
+import { motion } from "framer-motion";
 
 import AdvanceTable from "../../Component/AdvanceTable";
 import DynamicForm from "../../Component/DynamicForm";
@@ -23,9 +24,16 @@ import {
   DialogTitle
 } from "../../Lib/dialog";
 
-/* -------------------------------------------------
-   PAGE BUILDER
-------------------------------------------------- */
+const fadeIn = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 16 } }
+};
+
+const fadeInSlow = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.4 } }
+};
+
 const PageBuilder = ({
   templateId = "",
   rows = [],
@@ -34,7 +42,6 @@ const PageBuilder = ({
   onUpdate = () => {},
   onBulkSuccess = () => {}
 }) => {
-  /* ---------------- STATE ---------------- */
   const [activeTab, setActiveTab] = useState("single");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -48,20 +55,11 @@ const PageBuilder = ({
   const [loading, setLoading] = useState(false);
   const [template, setTemplate] = useState(null);
 
-  /* --------------------------------------------------
-     SAFE TEMPLATE LOADER — supports string/number ID
-  -------------------------------------------------- */
   const loadTemplate = useCallback(async () => {
     try {
       setLoading(true);
-
       const templates = await templateService.getByStatus("active");
-      const cleanId = String(templateId).trim();
-
-      const found = templates.find(
-        (t) => String(t.id).trim() === cleanId
-      );
-
+      const found = templates.find((t) => String(t.id).trim() === String(templateId).trim());
       setTemplate(found || null);
     } catch (err) {
       console.error("Template load failed:", err);
@@ -75,37 +73,25 @@ const PageBuilder = ({
     loadTemplate();
   }, [loadTemplate]);
 
-  /* --------------------------------------------------
-     DYNAMIC COLUMNS FROM TEMPLATE
-  -------------------------------------------------- */
-const filteredFields = useMemo(() => {
-  return template?.fields?.filter(
-    (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
-  ) || [];
-}, [template]);
+  const filteredFields = useMemo(() => {
+    return template?.fields?.filter(
+      (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
+    ) || [];
+  }, [template]);
 
-const dynamicColumns = useMemo(() => {
-  if (!filteredFields.length) return [];
+  const dynamicColumns = useMemo(() => {
+    if (!filteredFields.length) return [];
 
-  // If grouping is enabled => use groupBackendKey.fieldName
-  if (template?.groupSave === true) {
-    return filteredFields.map((f) => ({
-      key: `${f.groupBackendKey || "general"}.${f.name}`,
-      label: f.label
-    }));
-  }
+    if (template?.groupSave === true) {
+      return filteredFields.map((f) => ({
+        key: `${f.groupBackendKey || "general"}.${f.name}`,
+        label: f.label
+      }));
+    }
 
-  // Else plain flat fields
-  return filteredFields.map((f) => ({
-    key: f.name,
-    label: f.label
-  }));
-}, [filteredFields, template?.groupSave]);
+    return filteredFields.map((f) => ({ key: f.name, label: f.label }));
+  }, [filteredFields, template?.groupSave]);
 
-
-  /* --------------------------------------------------
-     BASE COLUMNS
-  -------------------------------------------------- */
   const baseColumns = [
     {
       key: "createdAt",
@@ -136,37 +122,32 @@ const dynamicColumns = useMemo(() => {
     label: "Action",
     render: (_, row) => (
       <div className="flex gap-2">
-        <Button size="sm" variant="outline" onClick={() => openView(row)}>
-          <Eye />
-        </Button>
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button size="sm" variant="outline" onClick={() => openView(row)}>
+            <Eye />
+          </Button>
+        </motion.div>
 
-        <Button size="sm" variant="warning" onClick={() => openEdit(row)}>
-          <Edit />
-        </Button>
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button size="sm" variant="warning" onClick={() => openEdit(row)}>
+            <Edit />
+          </Button>
+        </motion.div>
       </div>
     )
   };
 
-  // Avoid duplicate keys by filtering baseColumns
   const uniqueBaseColumns = baseColumns.filter(
     (baseCol) => !dynamicColumns.some((dynCol) => dynCol.key === baseCol.key)
   );
 
   const columns = [...dynamicColumns, ...uniqueBaseColumns, actionColumn];
-  // console.log(columns);
-  
 
-  /* --------------------------------------------------
-     VIEW RECORD HANDLER
-  -------------------------------------------------- */
   const openView = (row) => {
     setViewRecord(row);
     setDialogOpen(true);
   };
 
-  /* --------------------------------------------------
-     EDIT HANDLER
-  -------------------------------------------------- */
   const openEdit = (row) => {
     setIsEditing(true);
     setActiveTab("single");
@@ -174,17 +155,11 @@ const dynamicColumns = useMemo(() => {
     setEditRecord(row);
   };
 
-  /* --------------------------------------------------
-     FILTER ROWS
-  -------------------------------------------------- */
   const filteredRows = useMemo(() => {
     if (statusFilter === "all") return rows;
     return rows.filter((r) => r.status === statusFilter);
   }, [rows, statusFilter]);
 
-  /* --------------------------------------------------
-     FORM SUBMIT
-  -------------------------------------------------- */
   const handleSuccess = async (payload) => {
     try {
       if (payload.isEdit) {
@@ -192,9 +167,7 @@ const dynamicColumns = useMemo(() => {
       } else {
         await onCreate(payload.data);
       }
-
       setIsEditing(false);
-      setEditRecord(null);
       setActiveTab("view");
       return true;
     } catch (err) {
@@ -203,13 +176,16 @@ const dynamicColumns = useMemo(() => {
     }
   };
 
-  /* --------------------------------------------------
-     UI RENDER
-  -------------------------------------------------- */
   return (
-    <div className="p-4">
+    <div className="">
+
       {/* TABS */}
-      <div className="flex gap-4 border-b mb-5">
+      <motion.div
+        className="flex gap-4 border-b mb-5"
+        variants={fadeIn}
+        initial="hidden"
+        animate="show"
+      >
         {["single", "bulk", "view"].map((tab) => (
           <button
             key={tab}
@@ -233,46 +209,51 @@ const dynamicColumns = useMemo(() => {
               : "View"}
           </button>
         ))}
-      </div>
+      </motion.div>
 
-      {/* SINGLE ENTRY FORM */}
+      {/* SINGLE FORM */}
       {activeTab === "single" && (
-        <DynamicForm
-          templateId={templateId}
-          GroupData={template?.groupSave || false}
-          editId={isEditing ? editId : null}
-          editData={isEditing ? editRecord : null}
-          AddMore={AddMore}
-          onSuccess={handleSuccess}
-          onCancel={() => {
-            setActiveTab("view");
-            setIsEditing(false);
-          }}
-        />
+        <motion.div variants={fadeIn} initial="hidden" animate="show">
+          <DynamicForm
+            templateId={templateId}
+            GroupData={template?.groupSave || false}
+            editId={isEditing ? editId : null}
+            editData={isEditing ? editRecord : null}
+            AddMore={AddMore}
+            onSuccess={handleSuccess}
+            onCancel={() => {
+              setActiveTab("view");
+              setIsEditing(false);
+            }}
+          />
+        </motion.div>
       )}
 
-      {/* BULK */}
+      {/* BULK UPLOAD */}
       {activeTab === "bulk" && (
-        <BulkUpload
-          onSuccess={(res) => {
-            onBulkSuccess(res);
-            setActiveTab("view");
-          }}
-        />
+        <motion.div variants={fadeIn} initial="hidden" animate="show">
+          <BulkUpload
+            onSuccess={(res) => {
+              onBulkSuccess(res);
+              setActiveTab("view");
+            }}
+          />
+        </motion.div>
       )}
 
       {/* VIEW TABLE */}
       {activeTab === "view" && (
         <>
-          <div className="flex justify-end mb-3">
-            <Select
-              onValueChange={setStatusFilter}
-              defaultValue="all"
-            >
+          <motion.div
+            className="flex justify-end mb-3"
+            variants={fadeIn}
+            initial="hidden"
+            animate="show"
+          >
+            <Select defaultValue="all" onValueChange={setStatusFilter}>
               <SelectTrigger className="w-52 border-emerald-400">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
-
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
@@ -281,27 +262,39 @@ const dynamicColumns = useMemo(() => {
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </motion.div>
 
-          <AdvanceTable
-            title="Records"
-            columns={columns}
-            data={filteredRows}
-            loading={loading}
-          />
+          <motion.div
+            variants={fadeInSlow}
+            initial="hidden"
+            animate="show"
+          >
+            <AdvanceTable
+              title="Records"
+              columns={columns}
+              data={filteredRows}
+              loading={loading}
+            />
+          </motion.div>
         </>
       )}
 
       {/* VIEW MODAL */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Details</DialogTitle>
-          </DialogHeader>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 150, damping: 15 }}
+          >
+            <DialogHeader>
+              <DialogTitle>Details</DialogTitle>
+            </DialogHeader>
 
-          <pre className="bg-gray-100 p-4 rounded text-xs">
-            {JSON.stringify(viewRecord, null, 2)}
-          </pre>
+            <pre className="bg-gray-100 p-4 rounded text-xs">
+              {JSON.stringify(viewRecord, null, 2)}
+            </pre>
+          </motion.div>
         </DialogContent>
       </Dialog>
     </div>

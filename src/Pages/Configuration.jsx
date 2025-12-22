@@ -1,113 +1,62 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import {
   Settings,
-  Users,
-  Menu,
-  FileText,
-  Wrench,
-  ShieldCheck,
-  Link as LinkIcon,
-  Database,
-  ArrowRightLeft,
-  Calendar,
-  Building,
-  RulerDimensionLine,
+  X,
 } from "lucide-react";
 import AppIcon from "../Component/AppIcon";
 import DynamicLazyImport from "../Component/DynamicLazyImport";
 
+// Dynamic lazy loading for edit components
+const EditComponent = ({ path, id, onSave, onCancel }) => {
+  const LazyComponent = React.lazy(() => import(path));
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <LazyComponent
+        id={id}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    </React.Suspense>
+  );
+};
+
 
 const configItemsNew = [
-  { key: "role", title: "Role", icon: "Users", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "menu-setting", title: "Menu Setting", icon: "Menu", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "templates-preview", title: "Template Preview", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "rule-types", title: "Validation Rule Types", icon: "ShieldCheck", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "mapping-inputs", title: "Mapping Payroll Inputs to Clients", icon: "ArrowRightLeft", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx" },
-  { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "templates-preview", title: "Template Preview", icon: "FileText", PagePath: "../Pages/Builder/ExcelTemplatePreview.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "rule-types", title: "Validation Rule Types", icon: "ShieldCheck", PagePath: "../Pages/RuleTypesManagement.jsx", PageEditPath: "../Pages/RuleTypesManagement.jsx" },
+  { key: "mapping-inputs", title: "Mapping Payroll Inputs to Clients", icon: "ArrowRightLeft", PagePath: "../Pages/PayrollInputMapping.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "config", title: "Configuration Menu", icon: "Settings2", PagePath: "../Pages/ConfigurationPage.jsx", PageEditPath: "../Pages/ConfigurationPage.jsx" },
 ];
 
 const Configuration = () => {
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeMenu, setActiveMenu] = useState(configItemsNew[0].key);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAddEditMode, setIsAddEditMode] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
 
   const activeItem = configItemsNew.find((x) => x.key === activeMenu);
 
-
-  const configItems = [
-    {
-      title: "Role",
-      description: "Manage user roles and permissions",
-      icon: <Users size={24} />,
-      path: "/config/role",
-      status: "Coming Soon",
-    },
-    {
-      title: "Menu Setting",
-      description: "Configure menu options and navigation",
-      icon: <Menu size={24} />,
-      path: "/config/menu-setting",
-      status: "Coming Soon",
-    },
-    {
-      title: "Form / Excel Templates",
-      description: "Manage input templates for data collection",
-      icon: <FileText size={24} />,
-      path: "/config/templates",
-      status: "Available",
-    },
-    {
-      title: "Template Preview",
-      description: "Preview Excel templates before use",
-      icon: <FileText size={24} />,
-      path: "/config/templates/preview",
-      status: "Available",
-    },
-    {
-      title: "Validation Rule Types",
-      description: "Manage different types of validation rules",
-      icon: <ShieldCheck size={24} />,
-      path: "/config/rule-types",
-      status: "Available",
-    },
-
-    {
-      title: "Mapping Payroll Inputs to Clients",
-      description: "Map input configurations to clients",
-      icon: <ArrowRightLeft size={24} />,
-      path: "/config/mapping-inputs-clients",
-      status: "Available",
-    },
-    {
-      title: "Payroll Period",
-      description: "Set up payroll processing periods",
-      icon: <Calendar size={24} />,
-      path: "/config/payroll-period",
-      status: "Coming Soon",
-    },
-    {
-      title: "Inputs Configuration",
-      description: "Configure inputs for Onboarding, Payroll, and Loan",
-      icon: <Database size={24} />,
-      path: "/config/inputs-config",
-      status: "Coming Soon",
-      subItems: ["Onboarding", "Payroll", "Loan"],
-    },
-    {
-      title: "Client Setup",
-      description: "Configure client settings (Standard/Custom Mode)",
-      icon: <Building size={24} />,
-      path: "/modes",
-      status: "Available",
-      subItems: ["Standard Mode", "Custom Mode"],
-    },
-  ];
+  // Handle URL params for add/edit mode
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    const id = searchParams.get('id');
+    if (mode === 'add' || mode === 'edit') {
+      setIsAddEditMode(true);
+      setCurrentItem(id ? { id: parseInt(id) } : null);
+    } else {
+      setIsAddEditMode(false);
+      setCurrentItem(null);
+    }
+  }, [searchParams]);
 
   const MenuList = () => (
     <div>
@@ -146,12 +95,26 @@ const Configuration = () => {
           <h1 className="md:text-xl font-bold">Configuration</h1>
         </div>
 
-        <button
-          className="md:hidden p-2 bg-emerald-600 text-white rounded-lg shadow"
-          onClick={() => setMobileMenuOpen(true)}
-        >
-          <AppIcon name="Menu" />
-        </button>
+        <div className="flex items-center gap-2">
+          {isAddEditMode && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddEditMode(false);
+                setCurrentItem(null);
+              }}
+            >
+              <X size={16} className="mr-2" />
+              Cancel
+            </Button>
+          )}
+          <button
+            className="md:hidden p-2 bg-emerald-600 text-white rounded-lg shadow"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <AppIcon name="Menu" />
+          </button>
+        </div>
       </div>
 
       {/* MOBILE OVERLAY */}
@@ -183,19 +146,65 @@ const Configuration = () => {
       <div className="hidden md:grid grid-cols-[280px_1fr] gap-3">
 
         {/* LEFT SIDEBAR */}
-        <div className="border shadow-md rounded-xl bg-white overflow-hidden max-h-[80vh] overflow-y-auto">
+        <div className="border shadow-sm rounded-xl bg-white overflow-hidden max-h-[80vh] overflow-y-auto">
           <MenuList />
         </div>
 
         {/* RIGHT CONTENT */}
         <div className="bg-white shadow rounded-xl p-4 min-h-[250px] overflow-y-auto">
-          <DynamicLazyImport path={activeItem.PagePath} />
+          {isAddEditMode ? (
+            <EditComponent
+              path={activeItem.PageEditPath}
+              id={currentItem?.id}
+              onSave={() => {
+                setIsAddEditMode(false);
+                setCurrentItem(null);
+                // Clear URL params
+                setSearchParams({});
+              }}
+              onCancel={() => {
+                setIsAddEditMode(false);
+                setCurrentItem(null);
+                // Clear URL params
+                setSearchParams({});
+              }}
+            />
+          ) : (
+            <DynamicLazyImport
+              path={activeItem.PagePath}
+              onAddEditMode={(mode, item) => {
+                setIsAddEditMode(mode);
+                setCurrentItem(item);
+              }}
+            />
+          )}
         </div>
       </div>
 
       {/* MOBILE CONTENT */}
       <div className="md:hidden mt-4 bg-white shadow rounded-xl p-4 min-h-[150px]">
-        <DynamicLazyImport path={activeItem.PagePath} />
+        {isAddEditMode ? (
+          <EditComponent
+            path={activeItem.PageEditPath}
+            id={currentItem?.id}
+            onSave={() => {
+              setIsAddEditMode(false);
+              setCurrentItem(null);
+            }}
+            onCancel={() => {
+              setIsAddEditMode(false);
+              setCurrentItem(null);
+            }}
+          />
+        ) : (
+          <DynamicLazyImport
+            path={activeItem.PagePath}
+            onAddEditMode={(mode, item) => {
+              setIsAddEditMode(mode);
+              setCurrentItem(item);
+            }}
+          />
+        )}
       </div>
     </div>
 

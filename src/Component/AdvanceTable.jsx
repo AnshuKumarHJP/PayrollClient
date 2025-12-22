@@ -55,9 +55,10 @@ const AdvanceTable = ({
 
   // Filter data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm.trim()) return data;
+    const safeData = Array.isArray(data) ? data : [];
+    if (!searchTerm.trim()) return safeData;
     const lowerSearchTerm = searchTerm.toLowerCase();
-    return data.filter((row) =>
+    return safeData.filter((row) =>
       columns.some((col) => {
         const rawValue = getValue(row, col.key);
         const cellValue = col.render
@@ -87,23 +88,26 @@ const AdvanceTable = ({
   if (!filteredData.length) return null;
 
   return (
-    <Card className="mt-5 border-t-4 border-emerald-300 shadow-lg">
-      <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-        {title && (
+    <Card className="mt-5 border-t-4 border-emerald-300 shadow-md space-y-1">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-2 px-6">
+        {/* TITLE (Render ONLY if exists) */}
+        {title ? (
           <div className="flex items-center gap-2">
             {icon && <div className="text-blue-600">{icon}</div>}
             <CardTitle className="text-base font-semibold">{title}</CardTitle>
           </div>
+        ) : (
+          <div /> /* keeps spacing consistent */
         )}
-
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        {/* SEARCH ALWAYS LEFT SIDE */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-64"
+              className="pl-8 w-full"
             />
           </div>
 
@@ -113,7 +117,9 @@ const AdvanceTable = ({
             </Button>
           )}
         </div>
+
       </CardHeader>
+
 
       <CardContent className="space-y-4 overflow-x-auto">
         <div className="border rounded-md">

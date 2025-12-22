@@ -7,10 +7,20 @@ import { cn } from "../Lib/utils";
 import { UploadCloud, Delete, FileIcon, Loader2 } from "lucide-react";
 import { toast } from "../Lib/use-toast";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 /* ===========================================================
-   MAIN INPUT RENDERER
+   ANIMATION VARIANTS
 =========================================================== */
+const fade = {
+  hidden: { opacity: 0, y: 4 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.15 } }
+};
+
+const fadeFast = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.12 } }
+};
 
 const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
   const typeRaw = (f.InputType || f.DataType || "string").toLowerCase();
@@ -20,9 +30,15 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
   /* ---------------- FILE ---------------- */
   if (type === "file" || type === "image" || type === "document") {
     return (
-      <div className="flex flex-col items-start w-full max-w-[280px]">
+      <motion.div
+        variants={fade}
+        initial="hidden"
+        animate="show"
+        className="flex flex-col items-start w-full max-w-[280px]"
+      >
         <label className="w-full">
-          <div
+          <motion.div
+            whileHover={{ scale: disabled ? 1 : 1.02 }}
             className={cn(
               "flex items-center justify-center w-full h-9 border border-dashed rounded-md text-xs md:text-sm font-medium gap-2",
               disabled
@@ -34,7 +50,7 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
           >
             <UploadCloud className="h-4 w-4" />
             <span>{disabled ? "File Disabled" : "Choose File"}</span>
-          </div>
+          </motion.div>
 
           {!disabled && (
             <input
@@ -56,7 +72,12 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
         </label>
 
         {value && (
-          <div className="mt-2 flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded-md text-xs text-emerald-700 border border-emerald-200 w-fit">
+          <motion.div
+            variants={fadeFast}
+            initial="hidden"
+            animate="show"
+            className="mt-2 flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded-md text-xs text-emerald-700 border border-emerald-200 w-fit"
+          >
             <FileIcon className="h-3 w-3" />
             <span className="truncate max-w-[160px]">{value}</span>
 
@@ -71,32 +92,42 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
                 <Delete className="h-3 w-3" />
               </Button>
             )}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
   /* ---------------- SWITCH ---------------- */
   if (["boolean", "switch"].includes(type)) {
     return (
-      <div className="flex items-center gap-2">
+      <motion.div
+        variants={fade}
+        initial="hidden"
+        animate="show"
+        className="flex items-center gap-2"
+      >
         <Switch
           checked={Boolean(value)}
           onCheckedChange={(v) => onChange(Boolean(v))}
           disabled={disabled}
         />
         <span className="text-xs text-gray-700">{value ? "True" : "False"}</span>
-      </div>
+      </motion.div>
     );
   }
 
   /* ---------------- RADIO ---------------- */
   if (type === "radio") {
     return (
-      <div className="flex flex-col gap-2">
+      <motion.div
+        variants={fade}
+        initial="hidden"
+        animate="show"
+        className="flex flex-col gap-2"
+      >
         {f.Options?.map((o, i) => (
-          <label key={i} className="flex items-center gap-2 text-sm">
+          <motion.label key={i} variants={fadeFast} className="flex items-center gap-2 text-sm">
             <input
               type="radio"
               disabled={disabled}
@@ -104,19 +135,20 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
               onChange={() => onChange(o)}
             />
             {o}
-          </label>
+          </motion.label>
         ))}
-      </div>
+      </motion.div>
     );
   }
 
   /* ---------------- CHECKBOX GROUP ---------------- */
   if (type === "checkbox-group") {
     const arr = Array.isArray(value) ? value : [];
+
     return (
-      <div className="flex flex-col gap-2">
+      <motion.div variants={fade} initial="hidden" animate="show" className="flex flex-col gap-2">
         {f.Options?.map((o, i) => (
-          <label key={i} className="flex items-center gap-2 text-sm">
+          <motion.label key={i} variants={fadeFast} className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               disabled={disabled}
@@ -130,62 +162,34 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
               }}
             />
             {o}
-          </label>
+          </motion.label>
         ))}
-      </div>
+      </motion.div>
     );
   }
 
-  /* ---------------- MULTI SELECT ---------------- */
-  if (type === "multi-select") {
-    return (
-      <MultiSelectComponent
-        f={f}
-        value={value}
-        onChange={onChange}
-        hasError={hasError}
-        disabled={disabled}
-      />
-    );
-  }
-
-  /* ---------------- API SELECT ---------------- */
+  /* ---------------- SELECT ---------------- */
   if (type === "api-select" || type === "select") {
     return (
-      <SelectComponent
-        f={f}
-        value={value}
-        onChange={onChange}
-        hasError={hasError}
-        disabled={disabled}
-      />
-    );
-  }
-
-  /* ---------------- TAGS ---------------- */
-  if (type === "tags") {
-    const tags = Array.isArray(value) ? value : [];
-    return (
-      <Input
-        type="text"
-        placeholder="Type and press Enter"
-        value=""
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const v = e.target.value.trim();
-            if (v) onChange([...tags, v]);
-            e.target.value = "";
-          }
-        }}
-      />
+      <motion.div variants={fade} initial="hidden" animate="show">
+        <SelectComponent
+          f={f}
+          value={value}
+          onChange={onChange}
+          hasError={hasError}
+          disabled={disabled}
+        />
+      </motion.div>
     );
   }
 
   /* ---------------- TEXTAREA ---------------- */
   if (type === "textarea") {
     return (
-      <textarea
+      <motion.textarea
+        variants={fade}
+        initial="hidden"
+        animate="show"
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -198,144 +202,18 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
     );
   }
 
-  /* ---------------- PASSWORD ---------------- */
-  if (type === "password") {
-    return (
-      <Input
-        type="password"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className={cn(hasError && "border-red-400")}
-      />
-    );
-  }
-
-  /* ---------------- TEL ---------------- */
-  if (type === "tel") {
-    return (
-      <Input
-        type="tel"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Phone number"
-        disabled={disabled}
-        className={cn(hasError && "border-red-400")}
-      />
-    );
-  }
-
-  /* ---------------- URL ---------------- */
-  if (type === "url") {
-    return (
-      <Input
-        type="url"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="https://example.com"
-        disabled={disabled}
-        className={cn(hasError && "border-red-400")}
-      />
-    );
-  }
-
-  /* ---------------- DATE & TIME TYPES ---------------- */
-  if (type === "datetime" || type === "datetime-local") {
-    return (
-      <Input
-        type="datetime-local"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className={cn(hasError && "border-red-400")}
-      />
-    );
-  }
-
-  if (type === "month") {
-    return (
-      <Input
-        type="month"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-    );
-  }
-
-  if (type === "year") {
-    return (
-      <Input
-        type="number"
-        min="1900"
-        max="2100"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-    );
-  }
-
-  if (type === "time") {
-    return (
-      <Input
-        type="time"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-    );
-  }
-
-  /* ---------------- COLOR ---------------- */
-  if (type === "color") {
-    return (
-      <Input
-        type="color"
-        value={value || "#000000"}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-    );
-  }
-
-  /* ---------------- RANGE ---------------- */
-  if (type === "range") {
-    return (
-      <Input
-        type="range"
-        min={f.min || 0}
-        max={f.max || 100}
-        value={value || 0}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-    );
-  }
-
-  /* ---------------- NUMBER ---------------- */
-  if (type === "number") {
-    return (
-      <Input
-        type="number"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className={cn(hasError && "border-red-400")}
-      />
-    );
-  }
-
-  /* ---------------- DEFAULT TEXT ---------------- */
+  /* ---------------- DEFAULT TEXT & NUMBER ---------------- */
   return (
-    <Input
-      type="text"
-      value={value || ""}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={f.FormFieldName || ""}
-      disabled={disabled}
-      className={cn(hasError && "border-red-400")}
-    />
+    <motion.div variants={fade} initial="hidden" animate="show">
+      <Input
+        type={type}
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        placeholder={f.FormFieldName || ""}
+        className={cn(hasError && "border-red-400")}
+      />
+    </motion.div>
   );
 };
 
@@ -365,10 +243,12 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
           setLoading(false);
         }
       } else if (Array.isArray(f.Options)) {
-        setOptions(f.Options.map((o) => ({
-          label: typeof o === "object" ? o.label : o,
-          value: typeof o === "object" ? o.value : o
-        })));
+        setOptions(
+          f.Options.map((o) => ({
+            label: typeof o === "object" ? o.label : o,
+            value: typeof o === "object" ? o.value : o
+          }))
+        );
       }
     };
 
@@ -378,18 +258,20 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
   if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
 
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger className={cn(hasError && "border-red-400")}>
-        <SelectValue placeholder="Select" />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((opt, i) => (
-          <SelectItem key={i} value={opt.value}>
-            {opt.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <motion.div variants={fadeFast} initial="hidden" animate="show">
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger className={cn(hasError && "border-red-400")}>
+          <SelectValue placeholder="Select" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt, i) => (
+            <SelectItem key={i} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </motion.div>
   );
 };
 

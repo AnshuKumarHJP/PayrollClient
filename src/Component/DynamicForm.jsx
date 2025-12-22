@@ -12,17 +12,19 @@ import { templateService } from "../../api/services/templateService";
 import FormInputTypes from "./FormInputTypes";
 import useValidationRules from "../Hooks/useValidationRules";
 
-/**
- * DynamicForm
- * - templateId: id or API to get template (uses templateService.getById)
- * - editId, editData: optional for edit mode
- * - onSuccess({ isEdit, recordId, data }) => should return truthy on success
- * - onCancel: callback
- * - AddMore: allow multiple entries
- * - GroupData: whether backend expects grouped payload (by groupBackendKey)
- *
- * The validate hook returns { valid: boolean, errors: {field: message} }.
- */
+// ⭐ Framer Motion (ONLY UI – NO LOGIC CHANGE)
+import { motion, AnimatePresence } from "framer-motion";
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.96 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.22 } },
+};
+
 const groupFields = (fields = []) => {
   const grouped = {};
   for (const f of fields) {
@@ -54,8 +56,8 @@ const DynamicForm = ({
   GroupData = false,
 }) => {
   const [template, setTemplate] = useState(null);
-  const [forms, setForms] = useState([]); // array of flat form objects
-  const [errorsArr, setErrorsArr] = useState([]); // array of { field: message }
+  const [forms, setForms] = useState([]);
+  const [errorsArr, setErrorsArr] = useState([]);
   const [isGrouped, setIsGrouped] = useState(false);
   const [status, setStatus] = useState({
     loading: true,
@@ -64,11 +66,9 @@ const DynamicForm = ({
     error: null,
   });
 
-  // hook loads rules for template and returns validate(formData, context) -> { valid, errors }
   const { validate: validateForm, loading: rulesLoading } =
     useValidationRules(template);
 
-  // Load template & initialize forms
   useEffect(() => {
     let alive = true;
 
@@ -85,24 +85,23 @@ const DynamicForm = ({
             : null;
 
         if (!t) throw new Error("No active template found.");
-
         if (!alive) return;
+
         setTemplate(t);
 
         const fields = (t.fields || []).filter(
           (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
         );
 
-        // create defaults object
         const makeDefaults = () => {
           const init = {};
           for (const f of fields) {
-            init[f.name] = f.defaultValue ?? (f.type === "checkbox" ? false : "");
+            init[f.name] =
+              f.defaultValue ?? (f.type === "checkbox" ? false : "");
           }
           return init;
         };
 
-        // prefill from editData if present
         let newForms = [];
         let newErrors = [];
 
@@ -134,7 +133,6 @@ const DynamicForm = ({
         setForms(newForms);
         setErrorsArr(newErrors);
       } catch (err) {
-        console.error(err);
         setStatus((s) => ({ ...s, error: err.message }));
       } finally {
         if (alive) setStatus((s) => ({ ...s, loading: false }));
@@ -145,25 +143,23 @@ const DynamicForm = ({
     return () => (alive = false);
   }, [templateId, editId, editData]);
 
-  // derived lists
   const filteredFields = useMemo(() => {
-    return template?.fields?.filter(
-      (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
-    ) || [];
+    return (
+      template?.fields?.filter(
+        (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
+      ) || []
+    );
   }, [template]);
 
   const groups = useMemo(() => groupFields(filteredFields), [filteredFields]);
 
-  // handle per-field change with real-time validation for that field
   const handleValue = (index, fieldName, value) => {
-    // update forms state
     setForms((prev) => {
       const copy = prev.map((p) => ({ ...p }));
       copy[index] = { ...copy[index], [fieldName]: value };
       return copy;
     });
 
-    // run validation for whole form but only pick field error (engine returns object)
     const updated = { ...(forms[index] || {}), [fieldName]: value };
     const res = validateForm(updated, { template });
 
@@ -174,7 +170,6 @@ const DynamicForm = ({
     });
   };
 
-  // add / remove
   const addMore = () => {
     const init = {};
     filteredFields.forEach((f) => {
@@ -189,13 +184,11 @@ const DynamicForm = ({
     setErrorsArr((p) => p.filter((_, idx) => idx !== i));
   };
 
-  // validate all forms (returns true/false and sets errorsArr)
   const validateAll = () => {
     const allErrors = [];
     let ok = true;
 
     for (let i = 0; i < forms.length; i++) {
-      // provide context with existingRecords if needed (caller can extend)
       const res = validateForm(forms[i], {});
       allErrors[i] = res.errors || {};
       if (!res.valid) ok = false;
@@ -205,14 +198,14 @@ const DynamicForm = ({
     return ok;
   };
 
-  // build payload (grouped if GroupData true)
   const buildPayload = () => {
     if (!GroupData) return forms.map((f) => ({ ...f }));
 
     return forms.map((form) => {
       const grouped = {};
       for (const [gName, flds] of Object.entries(groups)) {
-        const backendKey = flds[0]?.groupBackendKey || gName.replace(/\s+/g, "");
+        const backendKey =
+          flds[0]?.groupBackendKey || gName.replace(/\s+/g, "");
         grouped[backendKey] = {};
         for (const fld of flds) {
           grouped[backendKey][fld.name] = form[fld.name];
@@ -222,7 +215,6 @@ const DynamicForm = ({
     });
   };
 
-  // submit
   const handleSubmit = async (e) => {
     e?.preventDefault();
     setStatus((s) => ({ ...s, submitting: true, apiSuccess: null }));
@@ -243,10 +235,8 @@ const DynamicForm = ({
         data: finalData,
       });
 
-      // result should be truthy if success
       setStatus((s) => ({ ...s, submitting: false, apiSuccess: !!result }));
-    } catch (err) {
-      console.error("onSuccess threw:", err);
+    } catch {
       setStatus((s) => ({ ...s, submitting: false, apiSuccess: false }));
     }
   };
@@ -266,13 +256,17 @@ const DynamicForm = ({
 
     return (
       <div>
-        {FormInputTypes(config, value, (val) => handleValue(idx, field.name, val), !!err)}
+        {FormInputTypes(
+          config,
+          value,
+          (val) => handleValue(idx, field.name, val),
+          !!err
+        )}
         {err && <p className="text-red-600 text-xs mt-1">{err}</p>}
       </div>
     );
   };
 
-  // UI states
   if (status.loading || rulesLoading)
     return (
       <div className="p-6 flex justify-center">
@@ -289,7 +283,12 @@ const DynamicForm = ({
     );
 
   return (
-    <div className="p-2">
+    <motion.div
+      className="p-2"
+      variants={fadeIn}
+      initial="hidden"
+      animate="show"
+    >
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           {template?.icon && <AppIcon name={template.icon} size={26} />}
@@ -309,97 +308,135 @@ const DynamicForm = ({
         </div>
       </div>
 
-      {status.apiSuccess === true && (
-        <Alert className="border-green-500 mb-4">
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>Saved successfully!</AlertDescription>
-        </Alert>
-      )}
+      <AnimatePresence>
+        {status.apiSuccess === true && (
+          <motion.div
+            variants={scaleIn}
+            initial="hidden"
+            animate="show"
+            exit="hidden"
+          >
+            <Alert className="border-green-500 mb-4">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>Saved successfully!</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      {status.apiSuccess === false && (
-        <Alert className="border-red-500 mb-4">
-          <XCircle className="h-4 w-4" />
-          <AlertDescription>Submission failed. Please check errors.</AlertDescription>
-        </Alert>
-      )}
+        {status.apiSuccess === false && (
+          <motion.div
+            variants={scaleIn}
+            initial="hidden"
+            animate="show"
+            exit="hidden"
+          >
+            <Alert className="border-red-500 mb-4">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>
+                Submission failed. Please check errors.
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <form onSubmit={handleSubmit}>
-        {forms.map((_, idx) => (
-          <Card
-            key={idx}
-            className="p-4 mb-4 border border-emerald-200 rounded-md"
-          >
-            {AddMore && forms.length > 1 && (
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-sm font-semibold">Entry #{idx + 1}</div>
-                <Button variant="destructive" size="sm" onClick={() => removeForm(idx)}>
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-
-            {isGrouped ? (
-              <Tabs defaultValue={Object.keys(groups)[0]} className="w-full">
-                <TabsList
-                  className="w-full grid bg-emerald-100/40 border border-emerald-200 p-0"
-                  style={{
-                    gridTemplateColumns: `repeat(${Object.keys(groups).length}, 1fr)`,
-                  }}
-                >
-                  {Object.keys(groups).map((g) => (
-                    <TabsTrigger
-                      key={g}
-                      value={g}
-                      className="text-sm font-medium text-emerald-700 data-[state=active]:bg-emerald-300 data-[state=active]:text-emerald-800"
-                    >
-                      {g}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
-                {Object.entries(groups).map(([gName, flds]) => (
-                  <TabsContent key={gName} value={gName} className="mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {flds.map((f) => (
-                        <div key={f.name}>
-                          <Label>{f.label}</Label>
-                          {renderField(idx, f)}
-                        </div>
-                      ))}
+        <AnimatePresence>
+          {forms.map((_, idx) => (
+            <motion.div
+              key={idx}
+              variants={fadeIn}
+              initial="hidden"
+              animate="show"
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Card className="p-4 mb-4 border border-emerald-200 rounded-md">
+                {AddMore && forms.length > 1 && (
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm font-semibold">
+                      Entry #{idx + 1}
                     </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredFields.map((f) => (
-                  <div key={f.name}>
-                    <Label>{f.label}</Label>
-                    {renderField(idx, f)}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeForm(idx)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        ))}
+                )}
+
+                {isGrouped ? (
+                  <Tabs
+                    defaultValue={Object.keys(groups)[0]}
+                    className="w-full"
+                  >
+                    <TabsList
+                      className="w-full grid bg-emerald-100/40 border border-emerald-200 p-0"
+                      style={{
+                        gridTemplateColumns: `repeat(${Object.keys(groups).length}, 1fr)`,
+                      }}
+                    >
+                      {Object.keys(groups).map((g) => (
+                        <TabsTrigger
+                          key={g}
+                          value={g}
+                          className="text-sm font-medium text-emerald-700 data-[state=active]:bg-emerald-300 data-[state=active]:text-emerald-800"
+                        >
+                          {g}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+
+                    {Object.entries(groups).map(([gName, flds]) => (
+                      <TabsContent key={gName} value={gName} className="mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {flds.map((f) => (
+                            <div key={f.name}>
+                              <Label>{f.label}</Label>
+                              {renderField(idx, f)}
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredFields.map((f) => (
+                      <div key={f.name}>
+                        <Label>{f.label}</Label>
+                        {renderField(idx, f)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         <div className="flex justify-end gap-3 mt-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          </motion.div>
 
-          <Button type="submit" disabled={status.submitting}>
-            {status.submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…
-              </>
-            ) : (
-              "Submit"
-            )}
-          </Button>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button type="submit" disabled={status.submitting}>
+              {status.submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </motion.div>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 

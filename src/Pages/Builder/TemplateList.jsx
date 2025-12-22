@@ -10,7 +10,7 @@ import { FileText, Plus, Search, Edit, Copy, Trash2, Eye, Loader2, Download, Upl
 import { templateService } from "../../../api/services/templateService";
 import { useToast } from "../../Lib/use-toast";
 
-const TemplateList = () => {
+const TemplateList = ({ onAddEditMode }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModule, setSelectedModule] = useState("all");
@@ -57,7 +57,13 @@ const TemplateList = () => {
   };
 
   const handleEdit = (templateId) => {
-    navigate(`/config/templates/edit/${templateId}`);
+    // Check if onAddEditMode prop exists (when used in Configuration.jsx)
+    if (onAddEditMode) {
+      onAddEditMode(true, { id: templateId, type: 'edit' });
+    } else {
+      // Default navigation for standalone usage
+      navigate(`/config/templates/edit/${templateId}`);
+    }
   };
 
   const handleDelete = async (templateId) => {
@@ -96,7 +102,13 @@ const TemplateList = () => {
   };
 
   const handleCreateNew = () => {
-    navigate(`/config/templates/edit`);
+    // Check if onAddEditMode prop exists (when used in Configuration.jsx)
+    if (onAddEditMode) {
+      onAddEditMode(true, { type: 'add' });
+    } else {
+      // Default navigation for standalone usage
+      navigate(`/config/templates/edit`);
+    }
   };
 
   const totalTemplates = templates.length;
@@ -142,10 +154,10 @@ const TemplateList = () => {
   }
   return (
     <div className="p-2">
-      <div className="flex items-center justify-between mb-6">
+      <div className="md:flex space-y-3 items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FileText size={24} />
-          <h1 className="text-xl font-bold">Template Management</h1>
+          <h1 className="text-sm md:text-xl font-bold">Template Management</h1>
         </div>
         <Button onClick={handleCreateNew}>
           <Plus size={16} className="mr-2" />

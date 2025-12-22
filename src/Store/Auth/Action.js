@@ -1,4 +1,4 @@
-import aesUtils from "../../services/aesUtils";
+import { decryptResponseByAES } from "../../services/aesUtils";
 import ClientApi from "../../services/ClientApi";
 import {
   GET_AUTH_REQUEST,
@@ -10,10 +10,9 @@ const getAuthRequest = () => ({ type: GET_AUTH_REQUEST });
 const getAuthSuccess = (data) => ({ type: GET_AUTH_SUCCESS, payload: data });
 const getAuthFailure = (error) => ({ type: GET_AUTH_FAILURE, payload: error });
 
-export const AuthenticateUser = () => async (dispatch) => {
+export const AuthenticateUser = (formData) => async (dispatch) => {
   dispatch(getAuthRequest());
 
-  // ✅ Renamed (NO MORE payload conflict)
   const apiPayload = {
     AuthConfiguration: {
       Id: 2,
@@ -39,8 +38,8 @@ export const AuthenticateUser = () => async (dispatch) => {
     SSOEmailId: "",
     UserType: 1,
     ClientId: 0,
-    UserName: "15172",
-    Password: "test",
+    UserName: formData?.UserName,
+    Password: formData?.password,
     Location: {
       Id: 0,
       Latitude: 0,
@@ -68,27 +67,37 @@ export const AuthenticateUser = () => async (dispatch) => {
   try {
     const res = await ClientApi(
       "/api/Security/AuthenticateUser",
-      apiPayload,  // ✅ Correct variable
+      apiPayload,
       "POST",
       ""
     );
 
     const encryptedResult = res?.data?.Result;
-console.log("encryptedResult",encryptedResult);
 
-    // FULL decrypt
-    const decrypted = aesUtils.decryptAES(encryptedResult);
-
+    // 🔥 Full Decrypt
+    const decrypted = decryptResponseByAES(encryptedResult);
     console.log("FINAL DECRYPTED =", decrypted);
-    // console.log("MfiLog =", decrypted.MfiLog);   // decrypted
-    // console.log("GfiLog =", decrypted.GfiLog);   // decrypted
-    // console.log("Token =", decrypted.Token);     // decrypted
 
-    // dispatch(getAuthSuccess({ apiRaw: res.data, decrypted }));
-
+    if (decrypted?.Token) {
+      sessionStorage.setItem("token", decrypted?.Token)
+    }
+    //  Extract only required fields
+    const extracted = {
+      UserDetails: decrypted?.UserDetails || null,
+      UIRoles: decrypted?.UIRoles || [],
+      Token: decrypted?.Token || null,
+      ClientList: decrypted?.ClientList || [],
+      ClientContractList: decrypted?.ClientContractList || [],
+      Key: decrypted?.Key || null,
+      Vector: decrypted?.Vector || null,
+      Company: decrypted?.Company || null,
+      UserSession: decrypted?.UserSession || null
+    };
+    // Push clean data to reducer
+    dispatch(getAuthSuccess(extracted));
 
   } catch (error) {
-    console.error("❌ AUTH FAILED", error);
+    console.error(" AUTH FAILED", error);
     dispatch(getAuthFailure(error?.response?.data || "Login failed"));
   }
 };

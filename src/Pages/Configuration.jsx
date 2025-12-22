@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
@@ -16,8 +16,30 @@ import {
   Building,
   RulerDimensionLine,
 } from "lucide-react";
+import AppIcon from "../Component/AppIcon";
+import DynamicLazyImport from "../Component/DynamicLazyImport";
+
+
+const configItemsNew = [
+  { key: "role", title: "Role", icon: "Users", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "menu-setting", title: "Menu Setting", icon: "Menu", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "templates-preview", title: "Template Preview", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "rule-types", title: "Validation Rule Types", icon: "ShieldCheck", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "mapping-inputs", title: "Mapping Payroll Inputs to Clients", icon: "ArrowRightLeft", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx" },
+  { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx" },
+];
 
 const Configuration = () => {
+
+  const [activeMenu, setActiveMenu] = useState(configItemsNew[0].key);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const activeItem = configItemsNew.find((x) => x.key === activeMenu);
+
+
   const configItems = [
     {
       title: "Role",
@@ -54,7 +76,7 @@ const Configuration = () => {
       path: "/config/rule-types",
       status: "Available",
     },
-    
+
     {
       title: "Mapping Payroll Inputs to Clients",
       description: "Map input configurations to clients",
@@ -87,68 +109,98 @@ const Configuration = () => {
     },
   ];
 
+  const MenuList = () => (
+    <div>
+      {configItemsNew.map((item) => (
+        <div
+          key={item.key}
+          onClick={() => {
+            setActiveMenu(item.key);
+            setMobileMenuOpen(false);
+          }}
+          className={`p-3 flex justify-between items-center border-b cursor-pointer transition-all
+            ${
+              activeMenu === item.key
+                ? "bg-emerald-100 border-l-4 border-l-emerald-600"
+                : "hover:bg-emerald-50"
+            }
+          `}
+        >
+          <div className="flex items-center gap-2">
+            <AppIcon size={15} name={item.icon} className="text-emerald-600" />
+            <p className="font-semibold text-xs md:text-sm">{item.title}</p>
+          </div>
+          <AppIcon name="MoveRight" size={16} />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Settings size={24} />
-        <h1 className="text-2xl font-bold">Configuration</h1>
+    <>
+     <div>
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Settings size={20} />
+          <h1 className="md:text-xl font-bold">Configuration</h1>
+        </div>
+
+        <button
+          className="md:hidden p-2 bg-emerald-600 text-white rounded-lg shadow"
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <AppIcon name="Menu" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {configItems.map((item, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                    {item.icon}
-                  </div>
-                  <CardTitle className="text-lg">{item.title}</CardTitle>
-                </div>
-                <span
-                  className={`px-2 py-1 text-xs rounded-full ${
-                    item.status === "Available"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {item.status}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">{item.description}</p>
-              {item.subItems && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">
-                    Includes:
-                  </p>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    {item.subItems.map((subItem, subIndex) => (
-                      <li key={subIndex} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                        {subItem}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {item.status === "Available" ? (
-                <Link to={item.path}>
-                  <Button className="w-full">
-                    Access Configuration
-                  </Button>
-                </Link>
-              ) : (
-                <Button variant="outline" className="w-full" disabled>
-                  Coming Soon
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+      {/* MOBILE OVERLAY */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+      )}
+
+      {/* MOBILE DRAWER */}
+      <div
+        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 p-1 
+          transform transition-transform duration-300 md:hidden
+          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        <button
+          className="absolute top-3 right-3 p-2 bg-gray-200 rounded-full"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <AppIcon name="X" />
+        </button>
+
+        <div className="mt-10 space-y-1"><MenuList /></div>
+      </div>
+
+      {/* DESKTOP LAYOUT */}
+      <div className="hidden md:grid grid-cols-[280px_1fr] gap-3">
+
+        {/* LEFT SIDEBAR */}
+        <div className="border shadow-md rounded-xl bg-white overflow-hidden max-h-[80vh] overflow-y-auto">
+          <MenuList />
+        </div>
+
+        {/* RIGHT CONTENT */}
+        <div className="bg-white shadow rounded-xl p-4 min-h-[250px] overflow-y-auto">
+          <DynamicLazyImport path={activeItem.PagePath} />
+        </div>
+      </div>
+
+      {/* MOBILE CONTENT */}
+      <div className="md:hidden mt-4 bg-white shadow rounded-xl p-4 min-h-[150px]">
+        <DynamicLazyImport path={activeItem.PagePath} />
       </div>
     </div>
+
+    </>
+
   );
 };
 

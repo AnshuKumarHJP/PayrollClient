@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
-import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
-import { Label } from "../Lib/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
-import { Textarea } from "../Lib/textarea";
-import { Switch } from "../Lib/switch";
-import { MultiSelect } from "../Lib/MultiSelect";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Button } from "../../Lib/button";
+import { Input } from "../../Lib/input";
+import { Label } from "../../Lib/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
+import { Textarea } from "../../Lib/textarea";
+import { Switch } from "../../Lib/switch";
+import { MultiSelect } from "../../Lib/MultiSelect";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Lib/table";
-import { Badge } from "../Lib/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Lib/table";
+import { Badge } from "../../Lib/badge";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../Lib/dialog";
-import { Alert, AlertDescription } from "../Lib/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../Lib/dialog";
+import { Alert, AlertDescription } from "../../Lib/alert";
 
 import {
   Plus,
@@ -27,14 +27,14 @@ import {
   Loader2,
 } from "lucide-react";
 
-import { templateService } from "../../api/services/templateService";
-import ruleTypesService from "../../api/services/ruleTypesService";
-import { useToast } from "../Lib/use-toast";
-import TemplatePreviewDialog from "./TemplatePreviewDialog";
+import { templateService } from "../../../api/services/templateService";
+import ruleTypesService from "../../../api/services/ruleTypesService";
+import { useToast } from "../../Lib/use-toast";
+import TemplatePreviewDialog from "../TemplatePreviewDialog";
 
 // Redux
 import { useSelector, useDispatch } from "react-redux";
-import { setSelectedClient } from "../Store/Slices/GlobalSaveSlice";
+import { setSelectedClient } from "../../Store/Slices/GlobalSaveSlice";
 
 const TemplateEdit = () => {
   const { id } = useParams();

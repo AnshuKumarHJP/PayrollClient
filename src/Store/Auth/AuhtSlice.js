@@ -5,7 +5,7 @@ import {
 } from "./ActionType";
 
 const initialState = {
-  Auth: { data: [], isLoading: false, error: null, Success: null },
+  LogResponce: { data: [], isLoading: false, error: null, Success: null },
 };
 
 export const FormBuilder_Reducer = (state = initialState, action) => {
@@ -13,14 +13,14 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
     case GET_AUTH_REQUEST:
       return {
         ...state,
-        Auth: { ...state.Auth, isLoading: true, error: null, Success: null },
+        LogResponce: { ...state.LogResponce, isLoading: true, error: null, Success: null },
       };
 
     case GET_AUTH_SUCCESS:
       return {
         ...state,
-        Auth: {
-          ...state.Auth,
+        LogResponce: {
+          ...state.LogResponce,
           isLoading: false,
           data: action.payload,
           error: null,
@@ -31,14 +31,15 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
     case GET_AUTH_FAILURE:
       return {
         ...state,
-        Auth: {
-          ...state.Auth,
+        LogResponce: {
+          ...state.LogResponce,
           isLoading: false,
           error: action.payload,
           Success: false,
         },
       };
-
+    case "RESET_AUTH":
+        return initialState;
     default:
       return state;
   }

@@ -1,5 +1,4 @@
 // src/layout/LayoutContent.jsx
-import useSidebar from "../Hooks/useSidebar";
 import { Outlet } from "react-router";
 import { Toaster } from "@/Lib/toaster";
 import { Toaster as Sonner } from "@/Lib/sonner";
@@ -14,20 +13,11 @@ import { setSelectedClient } from "../Store/Slices/GlobalSaveSlice";
 
 import Header from "./StickyHeader";
 
-import { menuData } from "./StickyHeader"; // shared menu
-import { AuthenticateUser } from "../Store/Auth/Action";
-import { useEffect } from "react";
-
-
 const LayoutContent = () => {
-  const { isMobileOpen } = useSidebar();
   const dispatch = useDispatch();
-  const { GlobalSaveStore, GlobalStore } = useSelector((state) => state);
+  const { GlobalStore } = useSelector((state) => state);
 
-
-    useEffect(()=>{
-    dispatch(AuthenticateUser())
-  }, [])
+  // console.log(LogResponce);
 
   return (
     <TooltipProvider>
@@ -60,7 +50,7 @@ const LayoutContent = () => {
             {/* Client */}
             <div className="w-full sm:w-[300px]">
               <ClientDropdown
-                value={GlobalSaveStore?.SelectedClient}
+                value={sessionStorage.getItem("activeClient") || ""}
                 onChange={(c) => dispatch(setSelectedClient(c))}
                 placeholder="Select Client"
                 className="w-full"
@@ -68,6 +58,7 @@ const LayoutContent = () => {
                 FstindexSelected={true}
               />
             </div>
+
           </div>
 
           {/* PAGE CONTENT */}

@@ -5,7 +5,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../Lib/select";
+} from "../Lib/select"; // your Select component
 
 import { fetchClients } from "../../api/services/clientServices";
 import { useSelector } from "react-redux";
@@ -17,78 +17,85 @@ const ClientDropdown = ({
   className = "w-full",
   disabled = false,
   FstindexSelected = false,
-  UserClient = false, // if true → load from store, else from API
+  UserClient = false,
 }) => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { GlobalStore } = useSelector((state) => state);
-  const clientListFromStore = GlobalStore?.ClientList || [];
+  const LogResponce = useSelector((state) => state.Auth?.LogResponce?.data);
+  const clientListFromStore = LogResponce?.ClientList || [];
 
+  // ============================
+  // LOAD CLIENTS (store or API)
+  // ============================
   useEffect(() => {
     const loadClients = async () => {
       setLoading(true);
       try {
-        // ---------------------------
-        // OPTION 1 → Use Redux Store
-        // ---------------------------
-        if (UserClient === true) {
+        if (UserClient) {
           setClients(clientListFromStore);
-          return;
+        } else {
+          const apiClients = await fetchClients();
+          setClients(apiClients);
         }
-
-        // ---------------------------
-        // OPTION 2 → Fetch from API
-        // ---------------------------
-        const apiClients = await fetchClients();
-        setClients(apiClients);
-      } catch (error) {
-        console.error("Error loading clients:", error);
+      } catch (err) {
+        console.error("Client load error:", err);
       } finally {
         setLoading(false);
       }
     };
-
     loadClients();
   }, [UserClient, clientListFromStore]);
 
-  // -------------------------------
-  // AUTO SELECT FIRST CLIENT (index 0)
-  // -------------------------------
+  // ============================
+  // LOAD ActiveClient FROM SESSION
+  // ============================
   useEffect(() => {
-    if (!loading && clients.length > 0 && !value) {
-      if (FstindexSelected) {
-        onChange(clients[0].clientCode); // Auto-select first
+    const savedClient = sessionStorage.getItem("activeClient");
+
+    if (!loading && clients.length > 0) {
+      if (savedClient) {
+        onChange(savedClient);
+      } else if (FstindexSelected && clients.length > 0) {
+        const first = clients[0]?.Code;
+        onChange(first);
+        sessionStorage.setItem("activeClient", first);
       }
     }
-  }, [loading, clients, value, onChange]);
+  }, [loading, clients]);
+
+  // ============================
+  // SAVE TO SESSION STORAGE
+  // ============================
+  const handleSelectChange = (val) => {
+    sessionStorage.setItem("activeClient", val);
+    onChange(val);
+  };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
-      <Select
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled || loading}
-      >
-        <SelectTrigger className={className}>
-          <SelectValue placeholder={loading ? "Loading..." : placeholder} />
-        </SelectTrigger>
+    <Select
+      value={value || sessionStorage.getItem("activeClient") || ""}
+      onValueChange={handleSelectChange}
+      disabled={disabled || loading}
+    >
+      <SelectTrigger className={className}>
+        <SelectValue placeholder={loading ? "Loading..." : placeholder} />
+      </SelectTrigger>
 
-        <SelectContent>
-          {!loading && clients.length === 0 && (
-            <div className="text-center text-gray-400 py-2 text-sm">
-              No clients found
-            </div>
-          )}
+      <SelectContent>
+        {!loading && clients.length === 0 && (
+          <div className="text-center text-gray-400 py-2 text-sm">
+            No clients found
+          </div>
+        )}
 
-          {clients.map((client) => (
-            <SelectItem key={client.clientCode} value={client.clientCode}>
-              {client.clientName} ({client.clientCode})
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+        {clients.map((client) => (
+          <SelectItem key={client.Code} value={client.Code}>
+            {client.Name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 

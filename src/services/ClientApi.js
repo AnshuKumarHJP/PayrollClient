@@ -23,14 +23,16 @@ export function checkStatus(response) {
   }
 }
 
+
 export default function ClientApi(url, payload, httpMethod, accessToken) {
 
   const Baseurl = `https://stfqc.integrumapps.com/security.api${url}`;
+  let token = sessionStorage.getItem("token")
 
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
-    token: accessToken || "",
+    token: accessToken || token || "",   //  token used
   };
 
   switch (httpMethod) {

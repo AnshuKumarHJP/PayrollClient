@@ -4,9 +4,9 @@ import { useSelector } from 'react-redux';
 
 const ProtectedRoute = ({ children }) => {
   const location = useLocation();
-  const isAuthenticated = useSelector((state) => state.GlobalSaveStore.UserCode);
+  const authData = useSelector((state) => state.Auth?.LogResponce?.data);
 
-  if (!isAuthenticated) {
+  if (!authData || authData.length === 0) {
     // Redirect to login page with return url
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

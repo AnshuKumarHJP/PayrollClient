@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "../../Lib/dropdown-menu";
+} from "../Lib/dropdown-menu";
 
 import { Bell } from "lucide-react";
 

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
-import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
-import { Badge } from "../Lib/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Lib/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Button } from "../../Lib/button";
+import { Input } from "../../Lib/input";
+import { Badge } from "../../Lib/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Lib/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
 import { FileText, Plus, Search, Edit, Copy, Trash2, Eye, Loader2, Download, Upload } from "lucide-react";
-import { templateService } from "../../api/services/templateService";
-import { useToast } from "../Lib/use-toast";
+import { templateService } from "../../../api/services/templateService";
+import { useToast } from "../../Lib/use-toast";
 
 const TemplateList = () => {
   const navigate = useNavigate();
@@ -241,8 +241,8 @@ const TemplateList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTemplates.map((template) => (
-                  <TableRow key={template.id}>
+                {filteredTemplates.map((template,index) => (
+                  <TableRow key={index}>
                     <TableCell className="font-medium">{template.name}</TableCell>
                     <TableCell>{template.version}</TableCell>
                     <TableCell>{getStatusBadge(template.status)}</TableCell>

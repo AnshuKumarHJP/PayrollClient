@@ -3,7 +3,6 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   SelectedMonth: "",
-  CurrentUser : null,
   ClientList : [],
   isMenuOpen: false,
 };
@@ -15,9 +14,6 @@ const GlobalSlice = createSlice({
     setSelectedMonth: (state, action) => {
       state.SelectedMonth = action.payload;
     },
-    setCurrentUser: (state, action) => {
-      state.CurrentUser = action.payload;
-    },
     setClientList: (state, action) => {
       state.ClientList = action.payload;
     },
@@ -28,5 +24,5 @@ const GlobalSlice = createSlice({
   },
 });
 
-export const { setSelectedMonth,setCurrentUser,setClientList,resetGlobalStore,setISMenuOpen } = GlobalSlice.actions;
+export const { setSelectedMonth,setClientList,resetGlobalStore,setISMenuOpen } = GlobalSlice.actions;
 export default GlobalSlice.reducer;

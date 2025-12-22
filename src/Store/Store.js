@@ -4,26 +4,35 @@ import {
   persistReducer,
   persistStore,
   createTransform,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+
+import storageSession from "redux-persist/lib/storage/session"; // ✅ FIXED
 import CryptoJS from "crypto-js";
 
-// Slice imports
-import sidebarReducer from "./Slices/sidebarSlice";
+// Slices
 import GlobalReducer from "./Slices/GlobalSlice";
 import GlobalSaveReducer from "./Slices/GlobalSaveSlice";
+import { FormBuilder_Reducer } from "./Auth/AuhtSlice";
 
-// =======================================================================
-// 🔐 ENCRYPTION + DECRYPTION TRANSFORM
-// =======================================================================
+// =============================================================
+// ENCRYPTION TRANSFORM
+// =============================================================
 
 const secretKey = "MY_SECRET_KEY_123";
 
 const encryptDecryptTransform = createTransform(
   (inboundState) => {
     try {
-      const stringified = JSON.stringify(inboundState);
-      return CryptoJS.AES.encrypt(stringified, secretKey).toString();
+      return CryptoJS.AES.encrypt(
+        JSON.stringify(inboundState),
+        secretKey
+      ).toString();
     } catch (e) {
       console.error("Encryption error:", e);
       return inboundState;
@@ -32,6 +41,7 @@ const encryptDecryptTransform = createTransform(
   (outboundState) => {
     try {
       if (typeof outboundState !== "string") return outboundState;
+
       const bytes = CryptoJS.AES.decrypt(outboundState, secretKey);
       return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     } catch (e) {
@@ -41,36 +51,47 @@ const encryptDecryptTransform = createTransform(
   }
 );
 
-// =======================================================================
-// 📌 ONLY PERSIST THIS ONE SLICE → GlobalSaveStore
-// =======================================================================
+// =============================================================
+// PERSIST CONFIGS (Session Storage)
+// =============================================================
 
 const globalSavePersistConfig = {
   key: "GlobalSaveStore",
-  storage,
-  whitelist: ["SelectedClient","UserCode"], // persist only this field
+  storage: storageSession,       // ✅ FIXED
+  whitelist: ["SelectedClient", "UserCode"],
   transforms: [encryptDecryptTransform],
 };
 
-// Wrap only the slice reducer
+const authPersistConfig = {
+  key: "AuthStore",
+  storage: storageSession,       // ✅ FIXED
+  whitelist: ["LogResponce"],
+  transforms: [encryptDecryptTransform],
+};
+
 const persistedGlobalSaveReducer = persistReducer(
   globalSavePersistConfig,
   GlobalSaveReducer
 );
 
-// =======================================================================
-// 🧩 ROOT REDUCER (NO PERSIST ON ROOT)
-// =======================================================================
+const persistedAuthReducer = persistReducer(
+  authPersistConfig,
+  FormBuilder_Reducer
+);
+
+// =============================================================
+// ROOT REDUCER
+// =============================================================
 
 const rootReducer = combineReducers({
-  sidebar: sidebarReducer,
   GlobalStore: GlobalReducer,
-  GlobalSaveStore: persistedGlobalSaveReducer, // persisted slice
+  // GlobalSaveStore: persistedGlobalSaveReducer,  // Enable if needed
+  Auth: persistedAuthReducer,
 });
 
-// =======================================================================
-// 🏪 STORE CONFIG
-// =======================================================================
+// =============================================================
+// STORE CONFIG
+// =============================================================
 
 export const store = configureStore({
   reducer: rootReducer,
@@ -78,13 +99,20 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+        ],
       },
     }),
 });
 
-// =======================================================================
-// 💾 PERSISTOR
-// =======================================================================
+// =============================================================
+// PERSISTOR
+// =============================================================
 
 export const persistor = persistStore(store);

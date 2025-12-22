@@ -5,82 +5,136 @@ import { setISMenuOpen } from "../Store/Slices/GlobalSlice";
 import FullLogo from "../Image/hfactor-logo-dark.png";
 import Logo from "../Image/HFLogo.png";
 import AppIcon from "../Component/AppIcon";
-import UserDropdown from "../Component/header/UserDropdown";
+import UserDropdown from "../Component/UserDropdown";
 
 import DesktopMenu from "./DesktopMenu";
 import MobileMenu from "./MobileMenu";
 import useScreen from "../Hooks/useScreen";
-import { useEffect } from "react";
-import { AuthenticateUser } from "../Store/Auth/Action";
+import { useState, useEffect } from "react";
 
+// 🔥 Menu dictionary to map API menu codes → actual UI menu
 export const menuData = [
-  {
-    id: 1,
-    label: "Dashboard",
-    icon: "LayoutGrid",
-    link: "/",
-  },
+  { id: 1, code: "dashboard", label: "Dashboard", icon: "LayoutGrid", link: "/" },
+
   {
     id: 2,
+    code: "payroll-inputs",
     label: "Payroll Inputs",
     icon: "Users",
     children: [
-      { id: 21, label: "Input Module", link: "/inputs" },
-      { id: 23, label: "Import History", link: "/inputs/history" },
+      { id: 21, code: "input-module", label: "Input Module", link: "/inputs" },
+      { id: 23, code: "input-history", label: "Import History", link: "/inputs/history" },
     ],
   },
-  {
-    id: 3,
-    label: "Employees",
-    link: "/employee",
-    icon: "IdCardLanyard",
-  },
-  {
-    id: 4,
-    label: "Configuration",
-    link: "/config",
-    icon: "Settings",
-  },
+
+  { id: 3, code: "employees", label: "Employees", link: "/employee", icon: "IdCardLanyard" },
+
+  { id: 4, code: "configuration", label: "Configuration", link: "/config", icon: "Settings" },
+
   {
     id: 5,
+    code: "verification",
     label: "Verification",
     icon: "Workflow",
     children: [
-      { id: 41, label: "Workflow Dashboard", link: "/workflow" },
-      { id: 42, label: "Task List", link: "/workflow/tasks" },
-      { id: 43, label: "Audit Logs", link: "/workflow/audit" },
+      { id: 41, code: "workflow-dashboard", label: "Workflow Dashboard", link: "/workflow" },
+      { id: 42, code: "task-list", label: "Task List", link: "/workflow/tasks" },
+      { id: 43, code: "audit-logs", label: "Audit Logs", link: "/workflow/audit" },
     ],
   },
+
   {
     id: 6,
+    code: "team-operations",
     label: "Team Operations",
     icon: "Users2",
     children: [
-      { id: 51, label: "Operations Dashboard", link: "/ops/dashboard" },
-      { id: 52, label: "Unclaimed Tasks", link: "/ops/unclaimed" },
-      { id: 53, label: "Actions", link: "/ops/action" },
-      { id: 54, label: "Performance", link: "/ops/performance" },
+      { id: 51, code: "ops-dashboard", label: "Operations Dashboard", link: "/ops/dashboard" },
+      { id: 52, code: "unclaimed", label: "Unclaimed Tasks", link: "/ops/unclaimed" },
+      { id: 53, code: "actions", label: "Actions", link: "/ops/action" },
+      { id: 54, code: "performance", label: "Performance", link: "/ops/performance" },
     ],
   },
+
   {
     id: 7,
+    code: "payroll-processing",
     label: "Payroll Processing",
     icon: "ClipboardList",
     children: [
-      { id: 61, label: "Run Payroll", link: "/processing/run" },
-      { id: 62, label: "Salary Register", link: "/processing/register" },
-      { id: 63, label: "Payslips", link: "/processing/payslips" },
+      { id: 61, code: "run-payroll", label: "Run Payroll", link: "/processing/run" },
+      { id: 62, code: "salary-register", label: "Salary Register", link: "/processing/register" },
+      { id: 63, code: "payslips", label: "Payslips", link: "/processing/payslips" },
     ],
   },
 ];
+
+
 function StickyHeader() {
   const dispatch = useDispatch();
   const { GlobalStore } = useSelector((state) => state);
   const { isMenuOpen } = GlobalStore;
+  const LogResponce = useSelector((state) => state.Auth?.LogResponce?.data);
+  const CurrentUserRole = LogResponce?.UIRoles || [];
+  const activeRole = sessionStorage.getItem("activeRole");
+  const [filteredMenu, setFilteredMenu] = useState([]);
+  const { isMobile } = useScreen();
+  const ModuleCode = "APPI";
 
-  const { isMobile } = useScreen(); // 👈 AUTO DETECT SCREEN SIZE
 
 
+  // 🔥 FILTER MENUS BASED ON ROLE WEBMENUITEMLIST
+   // ----------------------------------------------------
+  // 🔥 BUILD MENU FROM BACKEND (NO STATIC menuData)
+  // ----------------------------------------------------
+  useEffect(() => {
+    if (!CurrentUserRole || CurrentUserRole.length === 0) return;
+
+    // 1️⃣ Get the active role
+    const roleObj = CurrentUserRole.find(
+      (r) => r?.Role?.Code === activeRole
+    );
+
+    if (!roleObj) {
+      setFilteredMenu([]);
+      return;
+    }
+
+    console.log("roleObj", roleObj);
+
+    // 2️⃣ Filter module menus
+    const moduleMenus = (roleObj.WebMenuItemList || [])
+      .filter((m) => m.ModuleCode === ModuleCode && m.IsVisible === true)
+      .sort((a, b) => a.DisplayOrder - b.DisplayOrder);
+
+    // 3️⃣ Build menu tree: Parent → Children
+    const menuTree = moduleMenus
+      .filter((m) => !m.ParentMenuId) // top-level
+      .map((parent) => {
+        const children = moduleMenus.filter(
+          (child) => child.ParentMenuId === parent.MenuId
+        );
+
+        return {
+          id: parent.MenuId,
+          label: parent.MenuName,
+          icon: parent.Icon || "",
+          link: parent.Route || "#",
+          children: children.map((c) => ({
+            id: c.MenuId,
+            label: c.MenuName,
+            link: c.Route,
+            icon: c.Icon,
+          })),
+        };
+      });
+
+    setFilteredMenu(menuTree);
+  }, [CurrentUserRole, activeRole]);
+
+
+
+  console.log("filteredMenu",filteredMenu);
 
 
   return (
@@ -88,7 +142,9 @@ function StickyHeader() {
       <div className="
         backdrop-blur-lg bg-emerald-100/10 
         border-2 border-emerald-500 rounded-3xl md:rounded-full 
-        shadow-sm px-4 py-2 flex items-center justify-between">
+        shadow-sm px-4 py-2 flex items-center justify-between
+      ">
+
         <div className="flex items-center gap-4">
           {isMobile && (
             <AppIcon
@@ -97,29 +153,26 @@ function StickyHeader() {
               onClick={() => dispatch(setISMenuOpen(true))}
             />
           )}
+
           {/* LOGO */}
           <Link to="/" className="flex items-center">
             <img src={FullLogo} className="hidden md:block h-8" />
             <img src={Logo} className="md:hidden h-8" />
           </Link>
-
         </div>
+
         {/* DESKTOP MENU */}
         <div className="hidden lg:flex">
           <DesktopMenu menu={menuData} />
         </div>
 
-        {/* RIGHT SIDE  */}
         <div className="flex items-center gap-3">
           <AppIcon name="Bell" className="text-emerald-700" />
-          {/* MOBILE MENU TRIGGER */}
-
-
           <UserDropdown />
         </div>
       </div>
 
-      {/* MOBILE MENU DRAWER */}
+      {/* MOBILE MENU */}
       {isMobile && isMenuOpen && (
         <MobileMenu menu={menuData} />
       )}

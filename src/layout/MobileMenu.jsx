@@ -16,15 +16,15 @@ const MobileMenu = ({ menu }) => {
   const closeMenu = () => dispatch(setISMenuOpen(false));
 
   const handleMenuClick = (item) => {
-    if (item.children) {
-      setOpenMenu(openMenu === item.id ? null : item.id);
+    if (item.children && item.children.length > 0) {
+      setOpenMenu(openMenu === item.label ? null : item.label);
     } else if (item.link) {
       navigate(item.link);
       closeMenu();
     }
   };
 
-  // ⭐ Submenu Animation (accordion slide)
+  // ⭐ Submenu Animation (accordion)
   const submenuVariants = {
     hidden: { opacity: 0, height: 0 },
     show: {
@@ -48,19 +48,20 @@ const MobileMenu = ({ menu }) => {
       className="bg-emerald-200 rounded-3xl shadow-sm p-4 mt-2"
     >
       {/* Header */}
-      <div className="flex justify-between">
-        <img src={FullLogo} className="h-8" />
+      <div className="flex justify-between items-center">
+        <img src={FullLogo} className="h-8" alt="logo" />
         <AppIcon name="X" onClick={closeMenu} className="cursor-pointer" />
       </div>
 
       {/* Menu List */}
       <div className="mt-3">
         {menu.map((item) => {
-          const isOpen = openMenu === item.id;
+          const isOpen = openMenu === item.label;
+          const hasChildren = item.children && item.children.length > 0;
 
           return (
-            <div key={item.id} className="mb-2">
-              {/* MAIN BUTTON */}
+            <div key={item.label} className="mb-2">
+              {/* MAIN MENU BUTTON */}
               <button
                 onClick={() => handleMenuClick(item)}
                 className="flex w-full justify-between p-2 rounded-lg hover:bg-emerald-300 transition-all"
@@ -70,7 +71,7 @@ const MobileMenu = ({ menu }) => {
                   {item.label}
                 </div>
 
-                {item.children && (
+                {hasChildren && (
                   <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
@@ -80,9 +81,9 @@ const MobileMenu = ({ menu }) => {
                 )}
               </button>
 
-              {/* SUBMENU WITH ANIMATION */}
+              {/* SUBMENU */}
               <AnimatePresence>
-                {isOpen && (
+                {isOpen && hasChildren && (
                   <motion.div
                     variants={submenuVariants}
                     initial="hidden"
@@ -92,7 +93,7 @@ const MobileMenu = ({ menu }) => {
                   >
                     {item.children.map((sub) => (
                       <motion.div
-                        key={sub.id}
+                        key={sub.label}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.2 }}

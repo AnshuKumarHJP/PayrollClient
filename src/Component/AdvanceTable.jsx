@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "../Lib/table";
 import PaginationAdvance from "../Lib/PaginationAdvance";
-
+import { motion } from "framer-motion";  // ⭐ ADDED
 
 // ⭐ UNIVERSAL NESTED VALUE READER
 const getValue = (obj, path) => {
@@ -26,19 +26,18 @@ const formatValue = (value, type) => {
     const d = new Date(value);
     return isNaN(d) ? value : d.toLocaleString();
   }
-
   if (type === "boolean") return value ? "Yes" : "No";
-
   if (type === "number") return value ?? 0;
-
   if (Array.isArray(value)) return value.length ? value.join(", ") : "-";
-
   if (typeof value === "object" && value !== null)
     return JSON.stringify(value);
-
   return value ?? "-";
 };
 
+const rowAnim = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.15 } },
+};
 
 const AdvanceTable = ({
   title,
@@ -88,105 +87,140 @@ const AdvanceTable = ({
   if (!filteredData.length) return null;
 
   return (
-    <Card className="mt-5 border-t-4 border-emerald-300 shadow-md space-y-1">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-2 px-6">
-        {/* TITLE (Render ONLY if exists) */}
-        {title ? (
-          <div className="flex items-center gap-2">
-            {icon && <div className="text-blue-600">{icon}</div>}
-            <CardTitle className="text-base font-semibold">{title}</CardTitle>
-          </div>
-        ) : (
-          <div /> /* keeps spacing consistent */
-        )}
-        {/* SEARCH ALWAYS LEFT SIDE */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-full"
-            />
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Card className="mt-5 border-t-4 border-emerald-300 shadow-md space-y-1">
 
-          {onBack && (
-            <Button variant="outline" onClick={onBack}>
-              ↩ Back
-            </Button>
+        {/* HEADER */}
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-2 px-6">
+
+          {/* TITLE */}
+          {title ? (
+            <motion.div
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2"
+            >
+              {icon && <div className="text-blue-600">{icon}</div>}
+              <CardTitle className="text-base font-semibold">{title}</CardTitle>
+            </motion.div>
+          ) : (
+            <div />
           )}
-        </div>
 
-      </CardHeader>
+          {/* SEARCH BAR */}
+          <motion.div
+            initial={{ opacity: 0, x: 6 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto"
+          >
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 w-full"
+              />
+            </div>
 
+            {onBack && (
+              <Button variant="outline" onClick={onBack}>
+                ↩ Back
+              </Button>
+            )}
+          </motion.div>
 
-      <CardContent className="space-y-4 overflow-x-auto">
-        <div className="border rounded-md">
-          <Table className="text-sm">
-            <TableHeader>
-              <TableRow>
-                {showIndex && <TableHead>#</TableHead>}
-                {columns.map((col) => (
-                  <TableHead key={col.key}>{col.label}</TableHead>
-                ))}
-                {renderActions && <TableHead>Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
+        </CardHeader>
 
-            <TableBody>
-              {currentRecords.map((row, i) => {
-                const rowKey =
-                  row.id ||
-                  row.empCode ||
-                  row._id ||
-                  `row-${(currentPage - 1) * rowsPerPage + i}`;
+        <CardContent className="space-y-4 overflow-x-auto">
 
-                return (
-                  <TableRow key={rowKey}>
-                    {showIndex && (
-                      <TableCell className="font-medium text-gray-600">
-                        {(currentPage - 1) * rowsPerPage + i + 1}
-                      </TableCell>
-                    )}
+          {/* TABLE */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="border rounded-md"
+          >
+            <Table className="text-sm">
+              <TableHeader>
+                <TableRow>
+                  {showIndex && <TableHead>#</TableHead>}
+                  {columns.map((col) => (
+                    <TableHead key={col.key}>{col.label}</TableHead>
+                  ))}
+                  {renderActions && <TableHead>Actions</TableHead>}
+                </TableRow>
+              </TableHeader>
 
-                    {/* ⭐ Render Each Column */}
-                    {columns.map((col) => {
-                      const rawValue = getValue(row, col.key);
-                      const cellValue = col.render
-                        ? col.render(rawValue, row)
-                        : formatValue(rawValue, col.type);
+              <TableBody>
+                {currentRecords.map((row, i) => {
+                  const rowKey =
+                    row.id ||
+                    row.empCode ||
+                    row._id ||
+                    `row-${(currentPage - 1) * rowsPerPage + i}`;
 
-                      return (
-                        <TableCell key={`${rowKey}-${col.key}`}>
-                          {cellValue}
+                  return (
+                    <motion.tr
+                      key={rowKey}
+                      variants={rowAnim}
+                      initial="hidden"
+                      animate="show"
+                      className="border-b"
+                    >
+                      {showIndex && (
+                        <TableCell className="font-medium text-gray-600">
+                          {(currentPage - 1) * rowsPerPage + i + 1}
                         </TableCell>
-                      );
-                    })}
+                      )}
 
-                    {renderActions && (
-                      <TableCell key={`${rowKey}-actions`}>
-                        {renderActions(row)}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                      {columns.map((col) => {
+                        const rawValue = getValue(row, col.key);
+                        const cellValue = col.render
+                          ? col.render(rawValue, row)
+                          : formatValue(rawValue, col.type);
 
-        {totalPages > 1 && (
-          <PaginationAdvance
-            count={totalPages}
-            page={currentPage}
-            rowsPerPage={rowsPerPage}
-            onChangePage={setCurrentPage}
-            onChangePageSize={setRowsPerPage}
-          />
-        )}
-      </CardContent>
-    </Card>
+                        return (
+                          <TableCell key={`${rowKey}-${col.key}`}>
+                            {cellValue}
+                          </TableCell>
+                        );
+                      })}
+
+                      {renderActions && (
+                        <TableCell key={`${rowKey}-actions`}>
+                          {renderActions(row)}
+                        </TableCell>
+                      )}
+                    </motion.tr>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </motion.div>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <PaginationAdvance
+                count={totalPages}
+                page={currentPage}
+                rowsPerPage={rowsPerPage}
+                onChangePage={setCurrentPage}
+                onChangePageSize={setRowsPerPage}
+              />
+            </motion.div>
+          )}
+
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

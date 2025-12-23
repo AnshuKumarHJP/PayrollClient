@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // Pages / Layout
 import AppLayout from "./layout/AppLayout";
@@ -14,7 +14,6 @@ import ApproveRejectScreen from "./Pages/ApproveRejectScreen";
 import AuditLogView from "./Pages/AuditLogView";
 import ModeSelection from "./Pages/ModeSelection";
 import ColumnMappingUI from "./Pages/ColumnMappingUI";
-import MappingReviewScreen from "./Pages/MappingReviewScreen";
 import MappedTemplatePreview from "./Pages/MappedTemplatePreview";
 import OpsDashboard from "./Pages/OpsDashboard";
 import UnclaimedTasksView from "./Pages/UnclaimedTasksView";
@@ -28,11 +27,13 @@ import RunPayroll from "./Pages/RunPayroll";
 import Payslips from "./Pages/Payslips";
 import RuleTypesManagement from "./Pages/RuleTypesManagement";
 import PayrollInputMapping from "./Pages/PayrollInputMapping";
-import ProtectedRoute from "./Component/ProtectedRoute";
+import ProtectedRoute from "./Routes/ProtectedRoute";
 import Form from "./Pages/Builder/Form";
 import Employee from "./Pages/Employee/Employee";
 import SessionStorageTest from "./components/SessionStorageTest";
 import InputModule from "./Pages/InputModule";
+import Loading from "./Component/Loading";
+import UnknownPage from "./Routes/UnknownPage";
 
 
 
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
 
+  },
+  {
+    path:"*",
+    element:<UnknownPage/>
   },
   {
     path: "/",
@@ -98,10 +103,6 @@ const router = createBrowserRouter([
       {
         path: "modes/mapping",
         element: <ColumnMappingUI />,
-      },
-      {
-        path: "modes/review",
-        element: <MappingReviewScreen />,
       },
       {
         path: "modes/preview",
@@ -163,7 +164,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <Suspense fallback={<Loading />}>
+      <RouterProvider router={router} />
+    </Suspense>
+  );
 };
 
 export default App;

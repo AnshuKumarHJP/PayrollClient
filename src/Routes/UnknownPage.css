@@ -1,0 +1,163 @@
+
+
+@keyframes moveYAndRotate {
+  from {
+    transform: translateY(0) rotate(0);
+  }
+  to {
+    transform: translateY(0.5px) rotate(1deg);
+  }
+}
+
+#craterSmall {
+  animation-name: moveX;
+  animation-duration: 1s;
+}
+
+#craterBig {
+  animation-name: moveXReverse;
+  animation-duration: 1s;
+}
+
+@keyframes moveX {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes moveXReverse {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(3px);
+  }
+}
+
+#planet {
+  animation-name: rotatePlanet;
+  animation-duration: 1s;
+}
+
+@keyframes rotatePlanet {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-2deg);
+  }
+}
+
+#starsBig g {
+  animation-name: rotateStars;
+  animation-duration: 1s;
+}
+
+@keyframes rotateStars {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(calc(random(-30deg, 30deg)));
+  }
+}
+
+#starsSmall g {
+  animation: scaleUpDown 1s ease-in-out infinite alternate;
+}
+
+@keyframes scaleUpDown {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+#circlesSmall circle {
+  animation: moveYSmall 1s ease-in-out infinite alternate;
+}
+
+@keyframes moveYSmall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+#circlesBig circle {
+  animation: moveYBig 1s ease-in-out infinite alternate;
+}
+
+@keyframes moveYBig {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+#glassShine {
+  animation: moveGlassShine 2s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes moveGlassShine {
+  from {
+    transform: translateX(-68px);
+  }
+  to {
+    transform: translateX(80px) rotate(-30deg);
+  }
+}
+
+
+
+
+.green {
+    border: 4px solid #334667;
+    color: #0e0620;
+    z-index: 1;
+    overflow: hidden;
+    background: transparent;
+    position: relative;
+    padding: 8px 50px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1em;
+    letter-spacing: 2px;
+    transition: 0.2s ease;
+    font-weight: bold;
+    margin: 5px 0px;
+}
+
+.green::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0%;
+    height: 100%;
+    background: #334667;
+    z-index: -1;
+    transition: 0.2s ease;
+    border-radius: 30px;
+}
+
+.green:hover {
+    color: #fff;
+    background: #334667;
+    transition: 0.2s ease;
+    border-radius: 30px;
+}
+
+.green:hover::before {
+    width: 100%;
+}

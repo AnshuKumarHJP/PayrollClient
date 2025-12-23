@@ -3,14 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
 import { Alert, AlertDescription } from "../Lib/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Lib/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Lib/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
+import { Input } from "../Lib/input";
 import { Label } from "../Lib/label";
 import { Eye, Download, CheckCircle, AlertTriangle, FileSpreadsheet, Loader2, Info } from "lucide-react";
 import { templateService } from "../../api/services/templateService";
+import { columnMappingService } from "../../api/services/columnMappingService";
 import { downloadExcelTemplate, downloadCSV } from "../services/excelUtils";
 import { useToast } from "../Lib/use-toast";
-import TemplatePreviewDialog from "./Builder/TemplatePreviewDialog";
 
 const ExcelTemplatePreview = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -18,7 +20,6 @@ const ExcelTemplatePreview = () => {
   const [previewData, setPreviewData] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
-  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -234,10 +235,6 @@ const ExcelTemplatePreview = () => {
               <Button onClick={generatePreview} disabled={isGenerating}>
                 {isGenerating ? "Generating..." : "Generate Preview"}
               </Button>
-              <Button variant="outline" onClick={() => setIsPreviewDialogOpen(true)}>
-                <Eye size={16} className="mr-2" />
-                Live Form Preview
-              </Button>
               <Button variant="outline" onClick={downloadTemplate}>
                 <Download size={16} className="mr-2" />
                 Download Excel
@@ -408,37 +405,6 @@ const ExcelTemplatePreview = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Template Preview Dialog */}
-      <TemplatePreviewDialog
-        isOpen={isPreviewDialogOpen}
-        onOpenChange={setIsPreviewDialogOpen}
-        templateName={templates.find(t => t.id === selectedTemplate)?.name}
-        templateDescription={templates.find(t => t.id === selectedTemplate)?.description}
-        isActive={templates.find(t => t.id === selectedTemplate)?.isActive}
-        version={templates.find(t => t.id === selectedTemplate)?.version}
-        fields={previewData?.template.fields || []}
-        formatValidationDisplay={(validation) => {
-          switch (validation) {
-            case "email":
-              return "Email format";
-            case "alphabetic":
-              return "Alphabetic only";
-            case "alphanumeric":
-              return "Alphanumeric";
-            case "numeric":
-              return "Numeric only";
-            case "date":
-              return "Valid date";
-            case "phone":
-              return "Phone number";
-            case "required":
-              return "Required";
-            default:
-              return validation;
-          }
-        }}
-      />
     </div>
   );
 };

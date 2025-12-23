@@ -80,60 +80,67 @@ function StickyHeader() {
   const activeRole = sessionStorage.getItem("activeRole");
   const [filteredMenu, setFilteredMenu] = useState([]);
   const { isMobile } = useScreen();
-  const ModuleCode = "APPI";
+  const ModuleCode = "APPI_PAYROLL";
 
 
 
-  // 🔥 FILTER MENUS BASED ON ROLE WEBMENUITEMLIST
-   // ----------------------------------------------------
-  // 🔥 BUILD MENU FROM BACKEND (NO STATIC menuData)
-  // ----------------------------------------------------
-  useEffect(() => {
-    if (!CurrentUserRole || CurrentUserRole.length === 0) return;
+  /* ----------------------------------------------------
+🔥 BUILD MENU FROM BACKEND (FILTER + SORT + CHILDREN)
+---------------------------------------------------- */
+useEffect(() => {
+  if (!CurrentUserRole || CurrentUserRole.length === 0) return;
+  // 1️⃣ Get Active Role Obj
+  const roleObj = CurrentUserRole.find(
+    (r) => r?.Role?.Code === activeRole
+  );
 
-    // 1️⃣ Get the active role
-    const roleObj = CurrentUserRole.find(
-      (r) => r?.Role?.Code === activeRole
-    );
+  if (!roleObj) {
+    setFilteredMenu([]);
+    return;
+  }
 
-    if (!roleObj) {
-      setFilteredMenu([]);
-      return;
-    }
+  // 2️⃣ Filter backend menu based on:
+  // - ModuleCode
+  // - IsVisible = true
+  // - Order by DisplayOrder
+  const moduleMenus = (roleObj.WebMenuItemList || [])
+    .filter(
+      (m) =>
+        m.ModuleCode === ModuleCode &&
+        m.IsVisible === true
+    )
+    .sort((a, b) => a.DisplayOrder - b.DisplayOrder);
 
-    console.log("roleObj", roleObj);
+  // 3️⃣ Build Menu Tree (Parents + Children)
+  const menuTree = moduleMenus
+    .filter((m) => !m.ParentMenuId) // only root menus
+    .map((parent) => {
+      
+      // 🔥 Filter and order children
+      const childItems = (parent.ChildMenuItems || [])
+        .filter((cm) => cm.IsVisible === true)
+        .sort((a, b) => a.DisplayOrder - b.DisplayOrder)
+        .map((child) => ({
+          label: child.MenuName,
+          link: child.Route || "#",
+          icon: child.Icon || "",
+          displayOrder: child.DisplayOrder,
+          module: child.ModuleCode,
+        }));
 
-    // 2️⃣ Filter module menus
-    const moduleMenus = (roleObj.WebMenuItemList || [])
-      .filter((m) => m.ModuleCode === ModuleCode && m.IsVisible === true)
-      .sort((a, b) => a.DisplayOrder - b.DisplayOrder);
+      return {
+        label: parent.MenuName,
+        icon: parent.Icon || "",
+        link: parent.Route || "#",
+        displayOrder: parent.DisplayOrder,
+        module: parent.ModuleCode,
+        children: childItems,
+      };
+    });
 
-    // 3️⃣ Build menu tree: Parent → Children
-    const menuTree = moduleMenus
-      .filter((m) => !m.ParentMenuId) // top-level
-      .map((parent) => {
-        const children = moduleMenus.filter(
-          (child) => child.ParentMenuId === parent.MenuId
-        );
+  setFilteredMenu(menuTree);
 
-        return {
-          id: parent.MenuId,
-          label: parent.MenuName,
-          icon: parent.Icon || "",
-          link: parent.Route || "#",
-          children: children.map((c) => ({
-            id: c.MenuId,
-            label: c.MenuName,
-            link: c.Route,
-            icon: c.Icon,
-          })),
-        };
-      });
-
-    setFilteredMenu(menuTree);
-  }, [CurrentUserRole, activeRole]);
-
-
+}, [CurrentUserRole, activeRole]);
 
   console.log("filteredMenu",filteredMenu);
 
@@ -164,7 +171,7 @@ function StickyHeader() {
 
         {/* DESKTOP MENU */}
         <div className="hidden lg:flex">
-          <DesktopMenu menu={menuData} />
+          <DesktopMenu menu={filteredMenu} />
         </div>
 
         <div className="flex items-center gap-3">
@@ -175,7 +182,7 @@ function StickyHeader() {
 
       {/* MOBILE MENU */}
       {isMobile && isMenuOpen && (
-        <MobileMenu menu={menuData} />
+        <MobileMenu menu={filteredMenu} />
       )}
     </header>
   );

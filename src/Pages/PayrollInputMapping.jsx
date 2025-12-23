@@ -1,9 +1,21 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../Lib/select";
 import { Badge } from "../Lib/badge";
-import { CheckCircle, XCircle, Users, FileText, Link, Unlink } from "lucide-react";
+import {
+  CheckCircle,
+  Users,
+  FileText,
+  Link,
+  Unlink,
+} from "lucide-react";
 import { templateService } from "../../api/services/templateService";
 
 const PayrollInputMapping = () => {
@@ -15,23 +27,25 @@ const PayrollInputMapping = () => {
   const [loading, setLoading] = useState(true);
   const [mapping, setMapping] = useState({});
 
-  // Load clients and templates
+  // Safe match helper
+  const isMatch = (a, b) => String(a || "").trim() === String(b || "").trim();
+
+  // Load clients + templates
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
 
-        // Load clients from db.json
-        const clientsResponse = await fetch('/api/db.json');
+        // Load clients
+        const clientsResponse = await fetch("/api/db.json");
         const dbData = await clientsResponse.json();
         setClients(dbData.clients || []);
 
         // Load templates
-        const templatesData = await templateService.getAll();
-        setTemplates(templatesData || []);
-
+        const templateList = await templateService.getAll();
+        setTemplates(templateList || []);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error("Failed to load data:", error);
       } finally {
         setLoading(false);
       }
@@ -42,69 +56,75 @@ const PayrollInputMapping = () => {
 
   // Update mappings when client changes
   useEffect(() => {
-    if (selectedClient && templates.length > 0) {
-      const clientMappedTemplates = templates.filter(template =>
-        template.clientCode === selectedClient.clientCode
-      );
-      setClientTemplates(clientMappedTemplates);
+    if (!selectedClient || templates.length === 0) return;
 
-      // Available templates include: common templates + templates not mapped to any client + templates mapped to other clients
-      const available = templates.filter(template =>
-        template.isCommon === true ||
-        template.clientCode === null ||
-        template.clientCode !== selectedClient.clientCode
-      );
-      setAvailableTemplates(available);
+    console.log("Selected Client:", selectedClient);
+    console.log("Loaded Templates:", templates);
 
-      // Initialize mapping state
-      const initialMapping = {};
-      templates.forEach(template => {
-        initialMapping[template.id] = template.clientCode === selectedClient.clientCode;
-      });
-      setMapping(initialMapping);
-    }
+    // CURRENT MAPPED
+    const currentMapped = templates.filter((t) =>
+      isMatch(t.clientCode, selectedClient.clientCode)
+    );
+    setClientTemplates(currentMapped);
+
+    // AVAILABLE (not mapped OR common)
+    const available = templates.filter(
+      (t) =>
+        t.isCommon === true ||
+        t.clientCode === null ||
+        !isMatch(t.clientCode, selectedClient.clientCode)
+    );
+    setAvailableTemplates(available);
+
+    // INITIAL MAPPING STATE
+    const mapState = {};
+    templates.forEach((t) => {
+      mapState[t.id] = isMatch(t.clientCode, selectedClient.clientCode);
+    });
+    setMapping(mapState);
+
+    console.log("Mapped Templates:", currentMapped);
+    console.log("Available Templates:", available);
   }, [selectedClient, templates]);
 
   const handleClientChange = (clientCode) => {
-    const client = clients.find(c => c.clientCode === clientCode);
+    const client = clients.find((c) => isMatch(c.clientCode, clientCode));
     setSelectedClient(client);
   };
 
   const handleTemplateMapping = async (templateId, shouldMap) => {
     try {
-      const template = templates.find(t => t.id === templateId);
+      const template = templates.find((t) => t.id === templateId);
       if (!template) return;
 
       const updatedTemplate = {
         ...template,
-        clientCode: shouldMap ? selectedClient.clientCode : null
+        clientCode: shouldMap ? selectedClient.clientCode : null,
       };
 
-      // Update template via service
       await templateService.update(templateId, updatedTemplate);
 
-      // Update local state
-      setMapping(prev => ({
+      // Update mapping state
+      setMapping((prev) => ({
         ...prev,
-        [templateId]: shouldMap
+        [templateId]: shouldMap,
       }));
 
-      // Refresh template lists
-      const updatedTemplates = templates.map(t =>
+      // Update template list
+      const newList = templates.map((t) =>
         t.id === templateId ? updatedTemplate : t
       );
-      setTemplates(updatedTemplates);
-
+      setTemplates(newList);
     } catch (error) {
-      console.error('Failed to update template mapping:', error);
+      console.error("Mapping update failed:", error);
     }
   };
 
   const getTemplateStats = (clientCode) => {
-    const clientMapped = templates.filter(t => t.clientCode === clientCode);
+    const filtered = templates.filter((t) => isMatch(t.clientCode, clientCode));
     return {
-      total: clientMapped.length,
-      active: clientMapped.filter(t => t.status === 'active').length
+      total: filtered.length,
+      active: filtered.filter((t) => t.status === "active").length,
     };
   };
 
@@ -119,7 +139,7 @@ const PayrollInputMapping = () => {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Header */}
+      {/* HEADER */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Payroll Input Mapping</h1>
         <p className="text-gray-600 text-sm">
@@ -127,7 +147,7 @@ const PayrollInputMapping = () => {
         </p>
       </div>
 
-      {/* Client Selection */}
+      {/* CLIENT SELECTION */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -135,6 +155,7 @@ const PayrollInputMapping = () => {
             Select Client
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           <div className="max-w-md">
             <Select onValueChange={handleClientChange}>
@@ -161,9 +182,10 @@ const PayrollInputMapping = () => {
         </CardContent>
       </Card>
 
+      {/* AFTER CLIENT SELECTED */}
       {selectedClient && (
         <>
-          {/* Current Mappings */}
+          {/* CURRENT MAPPINGS */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -171,6 +193,7 @@ const PayrollInputMapping = () => {
                 Current Template Mappings for {selectedClient.clientName}
               </CardTitle>
             </CardHeader>
+
             <CardContent>
               {clientTemplates.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">
@@ -184,22 +207,28 @@ const PayrollInputMapping = () => {
                       className="border rounded-lg p-4 bg-green-50 border-green-200"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-green-800">{template.name}</h4>
+                        <h4 className="font-medium text-green-800">
+                          {template.name}
+                        </h4>
                         <Badge className="bg-green-100 text-green-800">
                           <CheckCircle size={12} className="mr-1" />
                           Mapped
                         </Badge>
                       </div>
-                      <p className="text-sm text-green-600 mb-3">{template.description}</p>
+
+                      <p className="text-sm text-green-600 mb-3">
+                        {template.description}
+                      </p>
+
                       <div className="flex items-center justify-between">
                         <Badge variant="outline" className="text-xs">
                           {template.module}
                         </Badge>
+
                         <Button
                           size="sm"
-                          variant=""
+                          variant="destructive"
                           onClick={() => handleTemplateMapping(template.id, false)}
-                          className="text-red-600 hover:text-red-700"
                         >
                           <Unlink size={14} className="mr-1" />
                           Unmap
@@ -212,7 +241,7 @@ const PayrollInputMapping = () => {
             </CardContent>
           </Card>
 
-          {/* Available Templates */}
+          {/* AVAILABLE TEMPLATES */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -220,6 +249,7 @@ const PayrollInputMapping = () => {
                 Available Templates to Map
               </CardTitle>
             </CardHeader>
+
             <CardContent>
               {availableTemplates.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">
@@ -234,15 +264,18 @@ const PayrollInputMapping = () => {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium text-gray-800">{template.name}</h4>
-                        <Badge variant="outline">
-                          {template.status}
-                        </Badge>
+                        <Badge variant="success">{template.status}</Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+
+                      <p className="text-sm text-gray-600 mb-3">
+                        {template.description}
+                      </p>
+
                       <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="success" className="text-xs">
                           {template.module}
                         </Badge>
+
                         <Button
                           size="sm"
                           onClick={() => handleTemplateMapping(template.id, true)}
@@ -259,11 +292,12 @@ const PayrollInputMapping = () => {
             </CardContent>
           </Card>
 
-          {/* Summary Stats */}
+          {/* SUMMARY */}
           <Card>
             <CardHeader>
               <CardTitle>Mapping Summary</CardTitle>
             </CardHeader>
+
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
@@ -272,15 +306,17 @@ const PayrollInputMapping = () => {
                   </div>
                   <div className="text-sm text-gray-600">Templates Mapped</div>
                 </div>
+
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">
                     {availableTemplates.length}
                   </div>
                   <div className="text-sm text-gray-600">Available Templates</div>
                 </div>
+
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600">
-                    {clientTemplates.filter(t => t.status === 'active').length}
+                    {clientTemplates.filter((t) => t.status === "active").length}
                   </div>
                   <div className="text-sm text-gray-600">Active Templates</div>
                 </div>

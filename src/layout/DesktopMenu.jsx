@@ -60,7 +60,7 @@ const DesktopMenu = ({ menu }) => {
                 <>
                   {/* ARROW TOP */}
                   <motion.span
-                    key="submenu"
+                    key="submenu1"
                     initial="hidden"
                     animate="show"
                     exit="exit"

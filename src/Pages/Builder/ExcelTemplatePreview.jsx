@@ -206,8 +206,8 @@ const ExcelTemplatePreview = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {templates.map(template => (
-                    <SelectItem key={template.id} value={template.id}>
+                  {templates.map((template, index) => (
+                    <SelectItem key={index} value={template.id.toString()}>
                       {template.name}
                     </SelectItem>
                   ))}

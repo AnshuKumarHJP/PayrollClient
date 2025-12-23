@@ -1,39 +1,37 @@
 // src/Hooks/useValidationRules.js
-// Hook that loads validation rules applicable to the provided template
-// and exposes a validate(formData, context) → { valid: boolean, errors: { field: message } }
-
 import { useEffect, useState } from "react";
-import validationEngine from "../services/ValidationEngine";
+import ValidationEngine from "../services/ValidationEngine";
+import ruleTypesService from "../../api/services/ruleTypesService";
 
 export default function useValidationRules(template) {
   const [loading, setLoading] = useState(true);
+  const [ruleTypes, setRuleTypes] = useState([]);
 
   useEffect(() => {
-    // Since validation rules are now built-in to ValidationEngine,
-    // we can immediately set loading to false
-    setLoading(false);
-  }, []);
+    const load = async () => {
+      try {
+        const data = await ruleTypesService.getAllRuleTypes(); // async load
+        if (data) setRuleTypes(data);
+      } catch (err) {
+        console.error("Failed to load rule types:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // validate(formData, context)
-  // - template and rules are captured from closure
-  // - context can contain: existingRecords (array), customValidators: { name: fn }, debug, etc.
+    load();
+  }, []);
 
   const validate = (formData = {}, context = {}) => {
     try {
-      const result = validationEngine.validate({
+      return ValidationEngine.validate({
         template,
         formData,
         context,
+        ruleTypes // ⭐ pass ruleTypes to engine
       });
-
-      // standardize return to { valid: boolean, errors: {} }
-      return {
-        valid: !!result.valid,
-        errors: result.errors || {},
-      };
     } catch (err) {
-      console.error("Validation engine error:", err);
-      // safe fallback — treat as valid with no errors
+      console.error("Validation engine crashed:", err);
       return { valid: true, errors: {} };
     }
   };

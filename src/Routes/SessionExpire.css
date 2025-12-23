@@ -1,0 +1,72 @@
+/* For the container content */
+.Session-containt {
+    margin-top: -150px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  /* For the image */
+  .timeout-img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .green {
+    border: 4px solid #334667;
+    color: #0e0620;
+    z-index: 1;
+    overflow: hidden;
+    background: transparent;
+    position: relative;
+    padding: 8px 50px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1em;
+    letter-spacing: 2px;
+    transition: 0.2s ease;
+    font-weight: bold;
+    margin: 5px 0px;
+}
+
+.green::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0%;
+    height: 100%;
+    background: #334667;
+    z-index: -1;
+    transition: 0.2s ease;
+    border-radius: 30px;
+}
+
+.green:hover {
+    color: #fff;
+    background: #334667;
+    transition: 0.2s ease;
+    border-radius: 30px;
+}
+
+.green:hover::before {
+    width: 100%;
+}
+
+
+
+  /* Responsive adjustments for medium screens */
+  @media (max-width: 768px) {
+    .Session-containt {
+      margin-top: -80px;
+      margin-bottom: 50px;
+    }
+  }
+  
+  /* Responsive adjustments for small screens */
+  @media (max-width: 568px) {
+    .Session-containt {
+      margin-top: -40px;
+      margin-bottom: 40px;
+    }
+  }
+  

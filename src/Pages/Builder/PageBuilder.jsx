@@ -194,7 +194,7 @@ const PageBuilder = ({
               setIsEditing(false);
               setEditRecord(null);
             }}
-            className={`pb-2 px-4 text-sm font-medium ${
+            className={`pb-2 px-4 text-xs md:text-sm font-medium ${
               activeTab === tab
                 ? "border-b-2 border-emerald-500 text-emerald-600"
                 : "text-gray-500"

@@ -12,6 +12,7 @@ import { setSelectedMonth } from "../Store/Slices/GlobalSlice";
 import { setSelectedClient } from "../Store/Slices/GlobalSaveSlice";
 
 import Header from "./StickyHeader";
+import NavigatorBinder from "../Component/NavigatorBinder";
 
 const LayoutContent = () => {
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ const LayoutContent = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
+       <NavigatorBinder />
 
       <div className="min-h-screen bg-emerald-50 w-full overflow-x-hidden">
 
@@ -62,7 +64,7 @@ const LayoutContent = () => {
           </div>
 
           {/* PAGE CONTENT */}
-          <div className="p-4 min-h-[calc(100vh-200px)]">
+          <div className="px-4 py-2 min-h-[calc(100vh-200px)]">
             <Outlet />
           </div>
         </div>

@@ -1,56 +1,80 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter,
-  DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "../Lib/dialog";
+
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
 import { Label } from "../Lib/label";
 import { Textarea } from "../Lib/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../Lib/select";
+
 import { Badge } from "../Lib/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../Lib/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../Lib/dropdown-menu";
+
 import { Plus, Edit, Trash2, MoreHorizontal, Play } from "lucide-react";
 import { useToast } from "../Lib/use-toast";
+
 import ruleTypesService from "../../api/services/ruleTypesService";
 import AdvanceTable from "../Component/AdvanceTable";
 import ValidationEngine from "../services/ValidationEngine";
 
-/* -------------------------------------------------------
-   FORM FIELDS COMPONENT (REUSED FOR CREATE & EDIT)
-------------------------------------------------------- */
-const FormFields = ({ data, setData, isEdit = false }) => {
+/* ============================================================
+   FORM FIELDS COMPONENT
+============================================================ */
+const FormFields = ({ data, setData, availableTypes }) => {
   const field = (name) => ({
-    id: (isEdit ? "edit-" : "") + name,
+    id: name,
     value: data[name] ?? "",
     onChange: (e) => setData({ ...data, [name]: e.target.value }),
   });
 
   return (
-    <div className="grid grid-cols-2 gap-4 py-4">
-
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
       {/* VALUE */}
       <div>
-        <Label htmlFor={field("value").id}>Value *</Label>
-        <Input {...field("value")} placeholder="Enter rule value" />
+        <Label>
+          Value <span className="text-red-500">*</span>
+        </Label>
+        <Input {...field("value")} placeholder="e.g., salary-range" />
       </div>
 
       {/* LABEL */}
       <div>
-        <Label htmlFor={field("label").id}>Label *</Label>
-        <Input {...field("label")} placeholder="Enter rule label" />
+        <Label>
+          Label <span className="text-red-500">*</span>
+        </Label>
+        <Input {...field("label")} placeholder="Readable label" />
       </div>
 
       {/* DESCRIPTION */}
-      <div className="col-span-2">
-        <Label htmlFor={field("description").id}>Description</Label>
-        <Textarea {...field("description")} placeholder="Enter rule description" />
+      <div className="md:col-span-2">
+        <Label>Description</Label>
+        <Textarea {...field("description")} placeholder="Explain rule logic" />
       </div>
 
       {/* CATEGORY */}
       <div>
-        <Label htmlFor={field("category").id}>Category</Label>
-        <Input {...field("category")} placeholder="Enter category" />
+        <Label>Category</Label>
+        <Input {...field("category")} placeholder="Validation, HR, Finance…" />
       </div>
 
       {/* SEVERITY */}
@@ -58,97 +82,97 @@ const FormFields = ({ data, setData, isEdit = false }) => {
         <Label>Severity</Label>
         <Select
           value={data.severity}
-          onValueChange={(value) => setData({ ...data, severity: value })}
+          onValueChange={(v) => setData({ ...data, severity: v })}
         >
-          <SelectTrigger><SelectValue placeholder="Select severity" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Select severity" />
+          </SelectTrigger>
           <SelectContent>
-            {["low", "medium", "high"].map((s) => (
-              <SelectItem key={s} value={s}>{s}</SelectItem>
-            ))}
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* TYPE */}
+      {/* HANDLER TYPE */}
       <div>
-        <Label htmlFor={field("type").id}>Type</Label>
-        <Input {...field("type")} placeholder="Enter rule type (regex, number...)" />
+        <Label>Validation Type</Label>
+        <Select
+          value={data.type}
+          onValueChange={(v) => setData({ ...data, type: v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select handler type" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {availableTypes.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* MANUAL CUSTOM TYPE */}
+        <Input
+          className="mt-2"
+          value={data.type}
+          onChange={(e) => setData({ ...data, type: e.target.value })}
+          placeholder="OR type custom handler"
+        />
       </div>
 
       {/* CONDITION */}
       <div>
-        <Label htmlFor={field("condition").id}>Condition</Label>
-        <Input {...field("condition")} placeholder="Enter condition (^test$)" />
+        <Label>Condition</Label>
+        <Input {...field("condition")} placeholder="Regex, min-max, list…" />
       </div>
-
     </div>
   );
 };
 
-/* -------------------------------------------------------
-   MAIN MODULE
-------------------------------------------------------- */
+/* ============================================================
+   MAIN COMPONENT
+============================================================ */
 const RuleTypesManagement = () => {
   const { toast } = useToast();
 
   const [ruleTypes, setRuleTypes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [dialogMode, setDialogMode] = useState(null); // null | "create" | "edit" | "test"
+  const [dialogMode, setDialogMode] = useState(null);
   const [selectedRule, setSelectedRule] = useState(null);
+
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [testInput, setTestInput] = useState("");
   const [testResult, setTestResult] = useState(null);
 
-  const emptyForm = useMemo(
-    () => ({
-      value: "",
-      label: "",
-      description: "",
-      category: "",
-      severity: "medium",
-      type: "",
-      condition: "",
-    }),
-    []
-  );
+  const emptyForm = {
+    value: "",
+    label: "",
+    description: "",
+    category: "",
+    severity: "medium",
+    type: "",
+    condition: "",
+  };
 
   const [formData, setFormData] = useState(emptyForm);
 
-  /* -------------------------------------------------------
-      TABLE COLUMNS
-  ------------------------------------------------------- */
-  const columns = useMemo(
-    () => [
-      { key: "label", label: "Label" },
-      { key: "value", label: "Value" },
-      { key: "type", label: "Type" },
-      { key: "category", label: "Category" },
-      { key: "condition", label: "Condition" },
-      { key: "description", label: "Description" },
-      {
-        key: "severity",
-        label: "Severity",
-        render: (v) => (
-          <Badge className={getSeverityColor(v)}>{v}</Badge>
-        ),
-      },
-    ],
-    []
-  );
-
-  /* -------------------------------------------------------
-      LOAD RULE TYPES
-  ------------------------------------------------------- */
+  /* ============================================================
+      FETCH RULE TYPES
+  ============================================================ */
   const fetchRuleTypes = useCallback(async () => {
     try {
       setLoading(true);
       const data = await ruleTypesService.getAllRuleTypes();
-      setRuleTypes(data);
-    } catch {
+      setRuleTypes(data || []);
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to fetch rule types.",
+        description: "Failed to load rule types.",
         variant: "destructive",
       });
     } finally {
@@ -160,91 +184,19 @@ const RuleTypesManagement = () => {
     fetchRuleTypes();
   }, []);
 
-  /* -------------------------------------------------------
-      VALIDATOR
-  ------------------------------------------------------- */
-  const validateForm = () => {
-    if (!formData.value.trim() || !formData.label.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Value and Label are required fields.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    return true;
-  };
-
-  /* -------------------------------------------------------
-      CREATE RULE TYPE
-  ------------------------------------------------------- */
-  const handleCreate = async () => {
-    if (!validateForm()) return;
-
-    try {
-      await ruleTypesService.createRuleType(formData);
-
-      toast({ title: "Success", description: "Rule type created." });
-
-      closeDialog();
-      fetchRuleTypes();
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to create rule type.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  /* -------------------------------------------------------
-      EDIT RULE TYPE
-  ------------------------------------------------------- */
-  const handleEdit = async () => {
-    if (!validateForm()) return;
-
-    try {
-      await ruleTypesService.updateRuleType(selectedRule.id, formData);
-
-      toast({ title: "Success", description: "Rule type updated." });
-
-      closeDialog();
-      fetchRuleTypes();
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to update rule type.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  /* -------------------------------------------------------
-      DELETE RULE TYPE
-  ------------------------------------------------------- */
-  const handleDelete = async (id) => {
-    try {
-      await ruleTypesService.deleteRuleType(id);
-
-      toast({ title: "Success", description: "Rule type deleted." });
-
-      fetchRuleTypes();
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to delete rule type.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  /* -------------------------------------------------------
-      OPEN / CLOSE DIALOG HELPERS
-  ------------------------------------------------------- */
+  /* ============================================================
+      OPEN / CLOSE DIALOG
+  ============================================================ */
   const openDialog = (mode, rule = null) => {
+    const availableTypes = [
+      ...new Set(ruleTypes.map((r) => r.type).filter(Boolean)),
+    ];
+
     setDialogMode(mode);
     setSelectedRule(rule);
+
     setFormData(rule ? { ...rule } : emptyForm);
+    setFormData((prev) => ({ ...prev, availableTypes }));
   };
 
   const closeDialog = () => {
@@ -253,19 +205,87 @@ const RuleTypesManagement = () => {
     setFormData(emptyForm);
   };
 
-  /* -------------------------------------------------------
-      SEVERITY COLOR
-  ------------------------------------------------------- */
-  const getSeverityColor = (sev) =>
-    ({
-      low: "bg-green-100 text-green-800",
-      medium: "bg-yellow-100 text-yellow-800",
-      high: "bg-red-100 text-red-800",
-    }[sev] || "bg-gray-100 text-gray-800");
+  /* ============================================================
+      VALIDATE FORM
+  ============================================================ */
+  const validateForm = () => {
+    if (!formData.value.trim() || !formData.label.trim()) {
+      toast({
+        title: "Required",
+        description: "Value and Label are required.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
 
-  /* -------------------------------------------------------
-      TEST RULE FUNCTION
-  ------------------------------------------------------- */
+  /* ============================================================
+      CREATE RULE
+  ============================================================ */
+  const handleCreate = async () => {
+    if (!validateForm()) return;
+
+    const payload = { ...formData };
+    delete payload.availableTypes;
+
+    try {
+      await ruleTypesService.createRuleType(payload);
+      toast({ title: "Success", description: "Rule created." });
+      closeDialog();
+      fetchRuleTypes();
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to create rule.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  /* ============================================================
+      EDIT RULE
+  ============================================================ */
+  const handleEdit = async () => {
+    if (!validateForm()) return;
+
+    const payload = { ...formData };
+    delete payload.availableTypes;
+
+    try {
+      await ruleTypesService.updateRuleType(selectedRule.id, payload);
+      toast({ title: "Success", description: "Rule updated." });
+      closeDialog();
+      fetchRuleTypes();
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to update rule.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  /* ============================================================
+      DELETE
+  ============================================================ */
+  const handleDelete = async (id) => {
+    try {
+      await ruleTypesService.deleteRuleType(id);
+      toast({ title: "Deleted", description: "Rule removed." });
+      fetchRuleTypes();
+    } catch {
+      toast({
+        title: "Error",
+        description: "Delete failed.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  /* ============================================================
+      TEST RULE
+  ============================================================ */
   const handleTestRule = (rule) => {
     setSelectedRule(rule);
     setTestInput("");
@@ -274,50 +294,67 @@ const RuleTypesManagement = () => {
   };
 
   const runTest = () => {
-    if (!selectedRule) return;
     if (!testInput) {
       toast({
-        title: "Input Required",
-        description: "Please enter a test input value.",
+        title: "Error",
+        description: "Enter a value to test.",
         variant: "destructive",
       });
       return;
     }
-    try {
-      // Create a mock template with a single field using this rule
-      const mockTemplate = {
-        fields: [{
+
+    const mockTemplate = {
+      fields: [
+        {
           name: "testField",
           label: "Test Field",
           applicable: ["form"],
           validation: {
-            type: selectedRule.type || selectedRule.value,
-            condition: selectedRule.condition
-          }
-        }]
-      };
+            type: selectedRule.type,
+            condition: selectedRule.condition,
+          },
+        },
+      ],
+    };
 
-      const mockFormData = { testField: testInput };
+    const result = ValidationEngine.validate({
+      template: mockTemplate,
+      formData: { testField: testInput },
+      ruleTypes,
+    });
 
-      const result = ValidationEngine.validate({ template: mockTemplate, formData: mockFormData });
-
-      setTestResult({
-        valid: result.valid,
-        errors: result.errors,
-        input: testInput
-      });
-    } catch (error) {
-      setTestResult({
-        valid: false,
-        errors: { testField: "Test execution failed: " + error.message },
-        input: testInput
-      });
-    }
+    setTestResult(result);
   };
 
-  /* -------------------------------------------------------
-      ROW ACTIONS
-  ------------------------------------------------------- */
+  /* ============================================================
+      TABLE COLUMNS
+  ============================================================ */
+  const columns = [
+    { key: "label", label: "Label" },
+    { key: "value", label: "Key" },
+    { key: "type", label: "Type" },
+    { key: "category", label: "Category" },
+    { key: "condition", label: "Condition" },
+    { key: "description", label: "Description" },
+    {
+      key: "severity",
+      label: "Severity",
+      render: (v) => (
+        <Badge
+          className={
+            v === "high"
+              ? "bg-red-100 text-red-800"
+              : v === "medium"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-green-100 text-green-800"
+          }
+        >
+          {v}
+        </Badge>
+      ),
+    },
+  ];
+
   const renderActions = (row) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -328,37 +365,32 @@ const RuleTypesManagement = () => {
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => handleTestRule(row)}>
-          <Play className="mr-2 h-4 w-4" />
-          Test Rule
+          <Play className="mr-2 h-4 w-4" /> Test
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={() => openDialog("edit", row)}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
+          <Edit className="mr-2 h-4 w-4" /> Edit
         </DropdownMenuItem>
 
         <DropdownMenuItem
           onClick={() => handleDelete(row.id)}
           className="text-red-600"
         >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
+          <Trash2 className="mr-2 h-4 w-4" /> Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 
-  /* -------------------------------------------------------
+  /* ============================================================
       MAIN UI
-  ------------------------------------------------------- */
+  ============================================================ */
   return (
     <div className="p-4">
-
-      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Rule Types Management</h1>
-          <p className="text-muted-foreground">Manage validation rule types for the system</p>
+          <p className="text-muted-foreground">Manage validation rules</p>
         </div>
 
         <Button onClick={() => openDialog("create")}>
@@ -366,7 +398,6 @@ const RuleTypesManagement = () => {
         </Button>
       </div>
 
-      {/* TABLE */}
       {loading ? (
         <div className="text-center py-4">Loading...</div>
       ) : (
@@ -380,90 +411,114 @@ const RuleTypesManagement = () => {
 
       {/* CREATE / EDIT DIALOG */}
       <Dialog open={!!dialogMode} onOpenChange={closeDialog}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>
-              {dialogMode === "create" ? "Create Rule Type" : "Edit Rule Type"}
-            </DialogTitle>
-            <DialogDescription>
-              {dialogMode === "create"
-                ? "Add a new validation rule type."
-                : "Modify the selected rule type."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <FormFields
-            data={formData}
-            setData={setFormData}
-            isEdit={dialogMode === "edit"}
-          />
-
-          <DialogFooter>
-            <Button onClick={dialogMode === "create" ? handleCreate : handleEdit}>
-              {dialogMode === "create" ? "Create" : "Update"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+        <DialogContent
+          className="max-w-3xl"
+          header={
+            <DialogHeader>
+              <DialogTitle>
+                {dialogMode === "create"
+                  ? "Create Rule Type"
+                  : "Edit Rule Type"}
+              </DialogTitle>
+              <DialogDescription>
+                {dialogMode === "create"
+                  ? "Add new rule definition"
+                  : "Update rule definition"}
+              </DialogDescription>
+            </DialogHeader>
+          }
+          body={
+            <FormFields
+              data={formData}
+              setData={setFormData}
+              availableTypes={[
+                ...new Set(ruleTypes.map((r) => r.type).filter(Boolean)),
+              ]}
+            />
+          }
+          footer={
+            <DialogFooter>
+              <Button variant="outline" onClick={closeDialog}>
+                Cancel
+              </Button>
+              <Button
+                onClick={
+                  dialogMode === "create" ? handleCreate : handleEdit
+                }
+              >
+                {dialogMode === "create" ? "Create" : "Update"}
+              </Button>
+            </DialogFooter>
+          }
+        />
       </Dialog>
 
-      {/* TEST RULE DIALOG */}
+      {/* TEST DIALOG */}
       <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Test Rule: {selectedRule?.label}</DialogTitle>
-            <DialogDescription>
-              Enter test data to validate against the rule "{selectedRule?.value}".
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent
+          className="max-w-md"
+          header={
+            <DialogHeader>
+              <DialogTitle>Test Rule</DialogTitle>
+              <DialogDescription>
+                Testing rule: {selectedRule?.label}
+              </DialogDescription>
+            </DialogHeader>
+          }
+          body={
+            <div className="space-y-4">
+              <div>
+                <Label>Test Input</Label>
+                <Input
+                  value={testInput}
+                  onChange={(e) => setTestInput(e.target.value)}
+                  placeholder="Enter value"
+                />
+              </div>
 
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="test-input">Test Input</Label>
-              <Input
-                id="test-input"
-                value={testInput}
-                onChange={(e) => setTestInput(e.target.value)}
-                placeholder="Enter value to test..."
-              />
-            </div>
+              <Button className="w-full" onClick={runTest}>
+                <Play className="h-4 w-4 mr-2" />
+                Run Test
+              </Button>
 
-            <Button onClick={runTest} className="w-full">
-              <Play className="mr-2 h-4 w-4" />
-              Run Test
-            </Button>
-
-            {testResult && (
-              <div className="border rounded-lg p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Badge className={testResult.valid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+              {testResult && (
+                <div className="border rounded p-4">
+                  <Badge
+                    className={
+                      testResult.valid
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
                     {testResult.valid ? "PASS" : "FAIL"}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    Input: "{testResult.input}"
-                  </span>
+
+                  {!testResult.valid && (
+                    <p className="text-red-600 mt-2 text-sm">
+                      {testResult.errors?.testField}
+                    </p>
+                  )}
+
+                  {testResult.valid && (
+                    <p className="text-green-600 mt-2 text-sm">
+                      ✓ Validation passed
+                    </p>
+                  )}
                 </div>
-
-                {!testResult.valid && testResult.errors?.testField && (
-                  <div className="text-sm text-red-600">
-                    Error: {testResult.errors.testField}
-                  </div>
-                )}
-
-                {testResult.valid && (
-                  <div className="text-sm text-green-600">
-                    ✓ Validation passed successfully
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTestDialogOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+              )}
+            </div>
+          }
+          footer={
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setTestDialogOpen(false)}
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          }
+        />
       </Dialog>
     </div>
   );

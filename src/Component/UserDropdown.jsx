@@ -65,29 +65,34 @@ const UserDropdown = () => {
     });
   };
 
-  const handleLogout = async () => {
-    try {
-      dispatch({ type: "RESET_AUTH" });
-      dispatch(resetGlobalStore());
-      dispatch(resetGlobalSaveStore());
-
-      localStorage.clear();
-      sessionStorage.clear();
-
-      await persistor.flush();
-      await persistor.purge();
-
-      navigate("/login");
-
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-
-    } catch (error) {
-      console.error("Logout error:", error);
+const handleLogout = async () => {
+  try {
+    // 1️⃣ Clear all Redux slices
+    dispatch({ type: "RESET_AUTH" });
+    dispatch(resetGlobalStore());
+    dispatch(resetGlobalSaveStore());
+    // 2️⃣ Clear browser storage
+    sessionStorage.clear();
+    localStorage.clear();
+    // 3️⃣ Clear redux-persist storage
+    if (persistor) {
+      await persistor.flush();   // ensures pending state is written
+      await persistor.purge();   // clears persisted data
     }
-  };
+    // 4️⃣ Navigate to Login
+    navigate("/login");
+
+    // 5️⃣ Toast
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+};
+
 
   if (authLoading) {
     return (

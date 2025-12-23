@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import {
   Settings,
@@ -127,16 +126,16 @@ const Configuration = () => {
 
       {/* MOBILE DRAWER */}
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 p-1 
+        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 
           transform transition-transform duration-300 md:hidden
           ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
         <button
-          className="absolute top-3 right-3 p-2 bg-gray-200 rounded-full"
+          className="absolute top-2 right-3 p-1 bg-gray-200 rounded-full"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <AppIcon name="X" />
+          <AppIcon name="X" size={15}/>
         </button>
 
         <div className="mt-10 space-y-1"><MenuList /></div>
@@ -146,7 +145,7 @@ const Configuration = () => {
       <div className="hidden md:grid grid-cols-[280px_1fr] gap-3">
 
         {/* LEFT SIDEBAR */}
-        <div className="border shadow-sm rounded-xl bg-white overflow-hidden max-h-[80vh] overflow-y-auto">
+        <div className="border shadow-sm rounded-xl bg-white overflow-hidden min-h-fit max-h-[80vh] overflow-y-auto">
           <MenuList />
         </div>
 

@@ -83,6 +83,7 @@ function StickyHeader() {
   const ModuleCode = "APPI_PAYROLL";
 
 
+// console.log(LogResponce);
 
   /* ----------------------------------------------------
 🔥 BUILD MENU FROM BACKEND (FILTER + SORT + CHILDREN)
@@ -142,7 +143,7 @@ useEffect(() => {
 
 }, [CurrentUserRole, activeRole]);
 
-  console.log("filteredMenu",filteredMenu);
+  // console.log("filteredMenu",filteredMenu);
 
 
   return (

@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, useNavigate } from "react-router-dom";
 // Pages / Layout
 import AppLayout from "./layout/AppLayout";
 import Login from "./Pages/Login";
@@ -34,6 +34,7 @@ import SessionStorageTest from "./components/SessionStorageTest";
 import InputModule from "./Pages/InputModule";
 import Loading from "./Component/Loading";
 import UnknownPage from "./Routes/UnknownPage";
+import SessionExpire from "./Routes/SessionExpire";
 
 
 
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
   {
     path:"*",
     element:<UnknownPage/>
+  },
+  {
+    path:"/session-expired",
+    element:<SessionExpire/>
   },
   {
     path: "/",

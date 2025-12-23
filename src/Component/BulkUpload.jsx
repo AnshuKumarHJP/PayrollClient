@@ -223,10 +223,10 @@ export default function BulkUpload({
         transition={{ delay: 0.05 }}
       >
         <Card className="mb-4 p-4 bg-emerald-50/40 border-l-4 border-emerald-400">
-          <h3 className="font-semibold text-lg mb-2">
+          <h3 className="font-semibold text-md md:text-lg mb-2">
             Instructions for Bulk Upload
           </h3>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <ul className="list-disc list-inside space-y-1 text-[10px] md:text-sm text-gray-700">
             <li>Download the Excel template and fill employee details.</li>
             <li>Ensure all mandatory fields are completed.</li>
             <li>Upload Excel or show manually view.</li>
@@ -243,7 +243,7 @@ export default function BulkUpload({
       >
         <Card className="shadow-lg border border-emerald-200 rounded-md bg-emerald-50/40 backdrop-blur-md">
           <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-0">
-            <CardTitle className="flex items-center gap-2 text-xl font-semibold text-emerald-900">
+            <CardTitle className="flex items-center gap-2 text-xs md:text-lg font-semibold text-emerald-900">
               <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
               Bulk Upload • {template?.name}
             </CardTitle>

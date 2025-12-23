@@ -4,13 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Users } from "lucide-react";
 import { templateService } from "../../api/services/templateService";
+import Loading from '../Component/Loading'
 
 // 🟢 Framer Motion
 import { motion } from "framer-motion";
+import useCrypto from "../Security/useCrypto";
 
 const InputModule = () => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { encrypt } = useCrypto();
 
   // ----------------------------------------------------
   // LOAD MODULES
@@ -23,16 +26,19 @@ const InputModule = () => {
         const activeTemplates = await templateService.getByStatus("active");
 
         // Map templates to UI model
-        const mapped = activeTemplates.map((template) => ({
-          title: template.name,
-          description:
-            template.description ||
-            `Manage ${template.module} related data.`,
-          path: `/inputs/${template.id}`,
-          icon: <Users size={26} />,
-        }));
+        const mapped = activeTemplates.map((template) => {
+          const encryptedId = encrypt(template.id.toString()); // 🔥 encrypt ID
+          return {
+            title: template.name,
+            description: template.description || `Manage ${template.module} related data.`,
+            path: `/inputs/${encryptedId}`, // 🔥 send encrypted ID
+            icon: <Users size={26} />,
+          };
+        });
+
 
         setModules(mapped);
+
       } catch (err) {
         console.error("Failed to load templates:", err);
         setModules([]);
@@ -45,12 +51,7 @@ const InputModule = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="p-6 animate-pulse">
-        <h1 className="text-2xl font-semibold mb-2">Payroll Input Module</h1>
-        <p className="text-gray-600">Loading modules…</p>
-      </div>
-    );
+    return <Loading />
   }
 
   // ----------------------------------------------------

@@ -63,7 +63,7 @@ const globalSavePersistConfig = {
 };
 
 const authPersistConfig = {
-  key: "AuthStore",
+  key: "loginResponce",
   storage: storageSession,       // ✅ FIXED
   whitelist: ["LogResponce"],
   transforms: [encryptDecryptTransform],

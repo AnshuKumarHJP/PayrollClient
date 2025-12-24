@@ -162,13 +162,6 @@ const TemplatePreviewDialog = ({
             </Card>
           </div>
         }
-        footer={
-          <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Close Preview
-            </Button>
-          </DialogFooter>
-        }
       />
     </Dialog>
   );

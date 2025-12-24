@@ -2,31 +2,39 @@ import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 
+/* -----------------------------------------
+   ROOT
+----------------------------------------- */
 const Tabs = TabsPrimitive.Root;
 
 /* -----------------------------------------
-   TABS LIST
+   TABS LIST (Scrollable + Memoized)
 ----------------------------------------- */
-const TabsList = React.forwardRef(({ className, ...props }, ref) => (
+const TabsListBase = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "flex items-center justify-center rounded-md bg-muted text-muted-foreground p-1",
-      "w-full",               // always full width
+      "flex items-center gap-1",
+      "w-full overflow-x-auto scrollbar-none",       // ⭐ scrollable if too many tabs
+      "rounded-md bg-muted text-muted-foreground p-1",
       className
     )}
     {...props}
   />
 ));
-TabsList.displayName = "TabsList";
+TabsListBase.displayName = "TabsList";
 
+export const TabsList = React.memo(TabsListBase);
 
-const TabsTrigger = React.forwardRef(({ className, ...props }, ref) => (
+/* -----------------------------------------
+   TABS TRIGGER (Memoized)
+----------------------------------------- */
+const TabsTriggerBase = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex-1",               // stretch equally
-      "text-center",
+      "flex-1 min-w-[100px]",                       // ⭐ always equal width
+      "text-center select-none",
       "inline-flex items-center justify-center whitespace-nowrap",
       "rounded-sm px-3 py-1.5 text-sm font-medium transition-all",
       "ring-offset-background",
@@ -38,23 +46,31 @@ const TabsTrigger = React.forwardRef(({ className, ...props }, ref) => (
     {...props}
   />
 ));
-TabsTrigger.displayName = "TabsTrigger";
+TabsTriggerBase.displayName = "TabsTrigger";
 
+export const TabsTrigger = React.memo(TabsTriggerBase);
 
 /* -----------------------------------------
-   TABS CONTENT
+   TABS CONTENT (forceMount + Memoized)
 ----------------------------------------- */
-const TabsContent = React.forwardRef(({ className, ...props }, ref) => (
+const TabsContentBase = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
+    forceMount                                      // ⭐ content stays mounted
     className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none",
+      "mt-2",
+      "ring-offset-background focus-visible:outline-none",
       "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       className
     )}
     {...props}
   />
 ));
-TabsContent.displayName = "TabsContent";
+TabsContentBase.displayName = "TabsContent";
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export const TabsContent = React.memo(TabsContentBase);
+
+/* -----------------------------------------
+   EXPORT ROOT
+----------------------------------------- */
+export { Tabs };

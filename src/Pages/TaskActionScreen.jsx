@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
@@ -60,7 +60,7 @@ const TaskActionScreen = () => {
     "Other (specify in comments)"
   ];
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!action) {
       alert("Please select an action");
       return;
@@ -102,7 +102,7 @@ const TaskActionScreen = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [action, comments, sendBackReason, task, toast]);
 
   const getValidationStatusColor = (status) => {
     switch (status) {
@@ -359,4 +359,4 @@ const TaskActionScreen = () => {
   );
 };
 
-export default TaskActionScreen;
+export default React.memo(TaskActionScreen);

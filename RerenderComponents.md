@@ -1,4 +1,3 @@
-# Components with Potential Rerender Issues
 
 This document lists components in the project that are likely rerendering multiple times, causing performance issues. The analysis is based on code review, focusing on lack of memoization, unstable references, and frequent state updates.
 
@@ -47,9 +46,11 @@ This document lists components in the project that are likely rerendering multip
 
 ### 7. TeamDashboard.jsx
 - **Location**: src/Pages/TeamDashboard.jsx
-- **Issues**:
-  - Multiple state variables for tabs, data, loading.
-  - Likely rerenders multiple times during data loading.
+- **Status**: ✅ Optimized
+- **Changes Made**:
+  - Wrapped component with React.memo to prevent unnecessary rerenders.
+  - Added useMemo for summary statistics calculations (activeMembers, totalTasks, completedTasks, pendingTasks).
+  - Memoized computations only recalculate when teamMembers or teamTasks change.
 
 ### 8. TaskDetailView.jsx
 - **Location**: src/Pages/TaskDetailView.jsx

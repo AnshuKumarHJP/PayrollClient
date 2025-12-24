@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
@@ -59,21 +60,23 @@ const WorkflowTasks = () => {
     low: { color: "bg-green-100 text-green-800", label: "Low" }
   };
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    const matchesTab = activeTab === "all" || task.status === activeTab;
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => {
+      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           task.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || task.status === statusFilter;
+      const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+      const matchesTab = activeTab === "all" || task.status === activeTab;
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesTab;
-  });
+      return matchesSearch && matchesStatus && matchesPriority && matchesTab;
+    });
+  }, [tasks, searchTerm, statusFilter, priorityFilter, activeTab]);
 
-  const getTasksByStatus = (status) => {
+  const getTasksByStatus = useCallback((status) => {
     return tasks.filter(task => task.status === status).length;
-  };
+  }, [tasks]);
 
-  const handleTaskAction = async (taskId, action) => {
+  const handleTaskAction = useCallback(async (taskId, action) => {
     if (action === "view") {
       navigate(`/workflow/tasks/${taskId}`);
     } else if (action === "approve") {
@@ -93,7 +96,7 @@ const WorkflowTasks = () => {
         });
       }
     }
-  };
+  }, [navigate, toast]);
 
   return (
     <div className="p-2">

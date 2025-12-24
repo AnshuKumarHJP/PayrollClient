@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React,{ useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
@@ -69,16 +69,30 @@ const UnclaimedTasksView = () => {
     High: { color: "bg-red-100 text-red-800" }
   };
 
-  const filteredTasks = unclaimedTasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.requester.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+  const filteredTasks = useMemo(() => {
+    return unclaimedTasks.filter(task => {
+      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           task.requester.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
 
-    return matchesSearch && matchesPriority;
-  });
+      return matchesSearch && matchesPriority;
+    });
+  }, [unclaimedTasks, searchTerm, priorityFilter]);
 
-  const handleSelfClaim = async (taskId) => {
+  const highPriorityCount = useMemo(() => {
+    return unclaimedTasks.filter(t => t.priority === 'high').length;
+  }, [unclaimedTasks]);
+
+  const dueSoonCount = useMemo(() => {
+    return unclaimedTasks.filter(t => getDaysUntilDue(t.dueDate) <= 2).length;
+  }, [unclaimedTasks]);
+
+  const totalHours = useMemo(() => {
+    return unclaimedTasks.reduce((sum, t) => sum + t.estimatedHours, 0);
+  }, [unclaimedTasks]);
+
+  const handleSelfClaim = useCallback(async (taskId) => {
     try {
       await unclaimedTasksService.claimTask(taskId);
       toast({
@@ -94,9 +108,9 @@ const UnclaimedTasksView = () => {
         variant: 'destructive',
       });
     }
-  };
+  }, [toast]);
 
-  const handleAssignToUser = async (taskId, userId) => {
+  const handleAssignToUser = useCallback(async (taskId, userId) => {
     try {
       await unclaimedTasksService.assignTask(taskId, userId);
       toast({
@@ -114,23 +128,23 @@ const UnclaimedTasksView = () => {
         variant: 'destructive',
       });
     }
-  };
+  }, [toast]);
 
-  const getDaysUntilDue = (dueDate) => {
+  const getDaysUntilDue = useCallback((dueDate) => {
     const today = new Date();
     const due = new Date(dueDate);
     const diffTime = due - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
-  };
+  }, []);
 
-  const getUrgencyColor = (dueDate) => {
+  const getUrgencyColor = useCallback((dueDate) => {
     const days = getDaysUntilDue(dueDate);
     if (days < 0) return "text-red-600";
     if (days <= 2) return "text-orange-600";
     if (days <= 5) return "text-yellow-600";
     return "text-green-600";
-  };
+  }, [getDaysUntilDue]);
 
   return (
     <div className="p-2">
@@ -161,7 +175,7 @@ const UnclaimedTasksView = () => {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-red-600">
-                {unclaimedTasks.filter(t => t.priority === 'high').length}
+                {highPriorityCount}
               </p>
               <p className="text-sm text-gray-600">High Priority</p>
             </div>
@@ -171,7 +185,7 @@ const UnclaimedTasksView = () => {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-orange-600">
-                {unclaimedTasks.filter(t => getDaysUntilDue(t.dueDate) <= 2).length}
+                {dueSoonCount}
               </p>
               <p className="text-sm text-gray-600">Due Soon</p>
             </div>
@@ -181,7 +195,7 @@ const UnclaimedTasksView = () => {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-purple-600">
-                {unclaimedTasks.reduce((sum, t) => sum + t.estimatedHours, 0)}
+                {totalHours}
               </p>
               <p className="text-sm text-gray-600">Total Hours</p>
             </div>
@@ -429,4 +443,4 @@ const UnclaimedTasksView = () => {
   );
 };
 
-export default UnclaimedTasksView;
+export default React.memo(UnclaimedTasksView);

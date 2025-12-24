@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Label } from "../Lib/label";
@@ -160,7 +160,7 @@ const DynamicForm = ({
   /* --------------------------------------------------
      HANDLE CHANGE
   -------------------------------------------------- */
-  const handleValue = (i, fieldName, value) => {
+  const handleValue = useCallback((i, fieldName, value) => {
     setForms((old) => {
       const copy = [...old];
       copy[i] = { ...copy[i], [fieldName]: value };
@@ -175,7 +175,7 @@ const DynamicForm = ({
       c[i] = { ...c[i], [fieldName]: result.errors[fieldName] || null };
       return c;
     });
-  };
+  }, [forms, validateForm]);
 
   /* --------------------------------------------------
      ADD / REMOVE FORM
@@ -265,7 +265,7 @@ const DynamicForm = ({
   /* --------------------------------------------------
      RENDER FIELD
   -------------------------------------------------- */
-  const renderField = (i, field) => {
+  const renderField = useCallback((i, field) => {
     const val = forms[i]?.[field.name];
     const err = errorsArr[i]?.[field.name];
 
@@ -281,11 +281,16 @@ const DynamicForm = ({
 
     return (
       <div>
-        {FormInputTypes(config, val, (v) => handleValue(i, field.name, v), !!err)}
+        <FormInputTypes
+          f={config}
+          value={val}
+          onChange={(v) => handleValue(i, field.name, v)}
+          hasError={!!err}
+        />
         {err && <p className="text-red-600 text-xs mt-1">{err}</p>}
       </div>
     );
-  };
+  }, [forms, errorsArr, handleValue]);
 
   /* --------------------------------------------------
      LOADING / ERROR STATES

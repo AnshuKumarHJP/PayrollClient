@@ -18,7 +18,7 @@ import CryptoJS from "crypto-js";
 // Slices
 import GlobalReducer from "./Slices/GlobalSlice";
 import GlobalSaveReducer from "./Slices/GlobalSaveSlice";
-import { FormBuilder_Reducer } from "./Auth/AuhtSlice";
+import { Auth_Reducer } from "./Auth/AuhtSlice";
 
 // =============================================================
 // ENCRYPTION TRANSFORM
@@ -76,7 +76,7 @@ const persistedGlobalSaveReducer = persistReducer(
 
 const persistedAuthReducer = persistReducer(
   authPersistConfig,
-  FormBuilder_Reducer
+  Auth_Reducer
 );
 
 // =============================================================

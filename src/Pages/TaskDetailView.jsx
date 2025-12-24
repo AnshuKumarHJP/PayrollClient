@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
@@ -26,7 +26,7 @@ const TaskDetailView = () => {
     }
   }, [id]);
 
-  const fetchTaskDetails = async () => {
+  const fetchTaskDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -42,7 +42,7 @@ const TaskDetailView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, toast]);
 
   const statusConfig = {
     pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: "Pending" },
@@ -58,11 +58,11 @@ const TaskDetailView = () => {
     low: { color: "bg-green-100 text-green-800", label: "Low" }
   };
 
-  const handleAction = (actionType) => {
+  const handleAction = useCallback((actionType) => {
     setAction(actionType);
     // In a real app, this would submit the action
     alert(`Task ${actionType} action would be processed with comments: ${comments}`);
-  };
+  }, [comments]);
 
   if (loading) {
     return (
@@ -98,9 +98,18 @@ const TaskDetailView = () => {
     );
   }
 
-  const statusInfo = statusConfig[task.status];
-  const priorityInfo = priorityConfig[task.priority];
-  const StatusIcon = statusInfo.icon;
+  const taskInfo = useMemo(() => {
+    if (!task) return null;
+    const statusInfo = statusConfig[task.status];
+    const priorityInfo = priorityConfig[task.priority];
+    const validationPercentage = Math.round((task.validationResults.checks.filter(check => check.status === 'valid').length / task.validationResults.checks.length) * 100);
+    return {
+      statusInfo,
+      priorityInfo,
+      StatusIcon: statusInfo.icon,
+      validationPercentage
+    };
+  }, [task]);
 
   return (
     <div className="p-2">
@@ -122,12 +131,12 @@ const TaskDetailView = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">{task.title}</CardTitle>
             <div className="flex gap-2">
-              <Badge className={priorityInfo.color}>
-                {priorityInfo.label} Priority
+              <Badge className={taskInfo.priorityInfo.color}>
+                {taskInfo.priorityInfo.label} Priority
               </Badge>
-              <Badge className={statusInfo.color}>
-                <StatusIcon size={12} className="mr-1" />
-                {statusInfo.label}
+              <Badge className={taskInfo.statusInfo.color}>
+                <taskInfo.StatusIcon size={12} className="mr-1" />
+                {taskInfo.statusInfo.label}
               </Badge>
             </div>
           </div>
@@ -152,10 +161,10 @@ const TaskDetailView = () => {
                 <div className="w-20 bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${Math.round((task.validationResults.checks.filter(check => check.status === 'valid').length / task.validationResults.checks.length) * 100)}%` }}
+                    style={{ width: `${taskInfo.validationPercentage}%` }}
                   ></div>
                 </div>
-                <span className="text-sm">{Math.round((task.validationResults.checks.filter(check => check.status === 'valid').length / task.validationResults.checks.length) * 100)}%</span>
+                <span className="text-sm">{taskInfo.validationPercentage}%</span>
               </div>
             </div>
           </div>
@@ -310,4 +319,4 @@ const TaskDetailView = () => {
   );
 };
 
-export default TaskDetailView;
+export default React.memo(TaskDetailView);

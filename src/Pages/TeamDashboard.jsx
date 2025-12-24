@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React,{ useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
@@ -90,10 +90,12 @@ const TeamDashboard = () => {
     );
   };
 
-  const activeMembers = teamMembers.filter(member => member.status === "active");
-  const totalTasks = teamTasks.length;
-  const completedTasks = teamTasks.filter(task => task.status === "completed").length;
-  const pendingTasks = teamTasks.filter(task => task.status === "pending").length;
+  const summaryStats = useMemo(() => ({
+    activeMembers: teamMembers.filter(member => member.status === "active"),
+    totalTasks: teamTasks.length,
+    completedTasks: teamTasks.filter(task => task.status === "completed").length,
+    pendingTasks: teamTasks.filter(task => task.status === "pending").length
+  }), [teamMembers, teamTasks]);
 
   if (loading) {
     return (
@@ -139,7 +141,7 @@ const TeamDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Members</p>
-                <p className="text-2xl font-bold">{activeMembers.length}</p>
+                <p className="text-2xl font-bold">{summaryStats.activeMembers.length}</p>
               </div>
               <Users className="h-8 w-8 text-blue-500" />
             </div>
@@ -150,7 +152,7 @@ const TeamDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Tasks</p>
-                <p className="text-2xl font-bold">{totalTasks}</p>
+                <p className="text-2xl font-bold">{summaryStats.totalTasks}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
@@ -161,7 +163,7 @@ const TeamDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedTasks}</p>
+                <p className="text-2xl font-bold text-green-600">{summaryStats.completedTasks}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
@@ -172,7 +174,7 @@ const TeamDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">{pendingTasks}</p>
+                <p className="text-2xl font-bold text-yellow-600">{summaryStats.pendingTasks}</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-500" />
             </div>
@@ -321,4 +323,4 @@ const TeamDashboard = () => {
   );
 };
 
-export default TeamDashboard;
+export default React.memo(TeamDashboard);

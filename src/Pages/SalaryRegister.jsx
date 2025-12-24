@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
@@ -57,10 +57,12 @@ const SalaryRegister = () => {
     }
   };
 
-  const filteredData = salaryData.filter(employee =>
-    employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = useMemo(() => {
+    return salaryData.filter(employee =>
+      employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [salaryData, searchTerm]);
 
   const getStatusBadge = (status) => {
     return (
@@ -70,7 +72,7 @@ const SalaryRegister = () => {
     );
   };
 
-  const exportToExcel = async () => {
+  const exportToExcel = useCallback(async () => {
     try {
       const blob = await salaryRegisterService.exportToExcel(selectedPeriod, selectedDepartment);
       const url = window.URL.createObjectURL(blob);
@@ -94,9 +96,9 @@ const SalaryRegister = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [selectedPeriod, selectedDepartment, toast]);
 
-  const exportToPDF = async () => {
+  const exportToPDF = useCallback(async () => {
     try {
       const blob = await salaryRegisterService.exportToPDF(selectedPeriod, selectedDepartment);
       const url = window.URL.createObjectURL(blob);
@@ -120,12 +122,17 @@ const SalaryRegister = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [selectedPeriod, selectedDepartment, toast]);
 
-  const totalEmployees = salaryData.length;
-  const totalGross = salaryData.reduce((sum, emp) => sum + emp.totalEarnings, 0);
-  const totalDeductions = salaryData.reduce((sum, emp) => sum + emp.totalDeductions, 0);
-  const totalNet = salaryData.reduce((sum, emp) => sum + emp.netSalary, 0);
+  const summaryData = useMemo(() => {
+    const totalEmployees = salaryData.length;
+    const totalGross = salaryData.reduce((sum, emp) => sum + emp.totalEarnings, 0);
+    const totalDeductions = salaryData.reduce((sum, emp) => sum + emp.totalDeductions, 0);
+    const totalNet = salaryData.reduce((sum, emp) => sum + emp.netSalary, 0);
+    return { totalEmployees, totalGross, totalDeductions, totalNet };
+  }, [salaryData]);
+
+  const { totalEmployees, totalGross, totalDeductions, totalNet } = summaryData;
 
   return (
     <div className="p-4">
@@ -331,4 +338,4 @@ const SalaryRegister = () => {
   );
 };
 
-export default SalaryRegister;
+export default React.memo(SalaryRegister);

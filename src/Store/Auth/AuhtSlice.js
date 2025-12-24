@@ -8,7 +8,7 @@ const initialState = {
   LogResponce: { data: [], isLoading: false, error: null, Success: null },
 };
 
-export const FormBuilder_Reducer = (state = initialState, action) => {
+export const Auth_Reducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_AUTH_REQUEST:
       return {

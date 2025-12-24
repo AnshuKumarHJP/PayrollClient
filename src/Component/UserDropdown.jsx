@@ -157,8 +157,8 @@ const handleLogout = async () => {
 
             <p className="text-xs leading-none text-muted-foreground">
               Logged in at:{" "}
-              {CurrentUserSession?.LastCheckedOn
-                ? new Date(CurrentUserSession.LastCheckedOn).toLocaleString(
+              {CurrentUserSession?.hfLastLogin
+                ? new Date(CurrentUserSession.hfLastLogin).toLocaleString(
                     "en-IN",
                     {
                       year: "numeric",

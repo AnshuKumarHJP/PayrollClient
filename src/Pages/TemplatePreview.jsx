@@ -329,4 +329,4 @@ const TemplatePreview = () => {
   );
 };
 
-export default TemplatePreview;
+export default React.memo(TemplatePreview);

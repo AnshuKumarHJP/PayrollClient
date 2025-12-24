@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../Lib/select";
 import { Switch } from "../Lib/switch";
 import { Input } from "../Lib/input";
@@ -225,6 +225,16 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const staticOptions = useMemo(() => {
+    if (Array.isArray(f.Options)) {
+      return f.Options.map((o) => ({
+        label: typeof o === "object" ? o.label : o,
+        value: typeof o === "object" ? o.value : o
+      }));
+    }
+    return [];
+  }, [f.Options]);
+
   useEffect(() => {
     const load = async () => {
       if (f.apiUrl) {
@@ -244,18 +254,13 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
         } finally {
           setLoading(false);
         }
-      } else if (Array.isArray(f.Options)) {
-        setOptions(
-          f.Options.map((o) => ({
-            label: typeof o === "object" ? o.label : o,
-            value: typeof o === "object" ? o.value : o
-          }))
-        );
+      } else {
+        setOptions(staticOptions);
       }
     };
 
     load();
-  }, [f.apiUrl, f.Options]);
+  }, [f.apiUrl, staticOptions]);
 
   if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
 
@@ -282,4 +287,4 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
   );
 };
 
-export default FormInputTypes;
+export default React.memo(FormInputTypes);

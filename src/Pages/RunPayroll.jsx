@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React,{ useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
@@ -38,13 +38,15 @@ const RunPayroll = () => {
   const [cycles, setCycles] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dialog states
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showBulkDialog, setShowBulkDialog] = useState(false);
-  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
+  // Consolidated dialog state
+  const [dialogState, setDialogState] = useState({
+    create: false,
+    bulk: false,
+    settings: false,
+    edit: false,
+    delete: false,
+    view: false
+  });
 
   // Selected / editing state
   const [selectedCycle, setSelectedCycle] = useState(null);
@@ -148,7 +150,7 @@ const RunPayroll = () => {
     try {
       await payrollService.createCycle(formCycle);
       toast({ title: "Success", description: "Payroll cycle created successfully." });
-      setShowCreateDialog(false);
+      setDialogState(prev => ({ ...prev, create: false }));
       setFormCycle({ name: "", startDate: "", endDate: "", payDate: "", description: "" });
       fetchPayrollCycles();
     } catch (err) {
@@ -166,7 +168,7 @@ const RunPayroll = () => {
       payDate: cycle.payDate ?? "",
       description: cycle.description ?? ""
     });
-    setShowEditDialog(true);
+    setDialogState(prev => ({ ...prev, edit: true }));
   };
 
   const handleUpdateCycle = async () => {
@@ -177,7 +179,7 @@ const RunPayroll = () => {
     try {
       await payrollService.updateCycle(editingCycle.id, formCycle);
       toast({ title: "Success", description: "Payroll cycle updated successfully." });
-      setShowEditDialog(false);
+      setDialogState(prev => ({ ...prev, edit: false }));
       setEditingCycle(null);
       setFormCycle({ name: "", startDate: "", endDate: "", payDate: "", description: "" });
       fetchPayrollCycles();
@@ -189,7 +191,7 @@ const RunPayroll = () => {
 
   const handleDeleteCycle = (cycle) => {
     setCycleToDelete(cycle);
-    setShowDeleteDialog(true);
+    setDialogState(prev => ({ ...prev, delete: true }));
   };
 
   const confirmDeleteCycle = async () => {
@@ -197,7 +199,7 @@ const RunPayroll = () => {
     try {
       await payrollService.deleteCycle(cycleToDelete.id);
       toast({ title: "Success", description: "Payroll cycle deleted successfully." });
-      setShowDeleteDialog(false);
+      setDialogState(prev => ({ ...prev, delete: false }));
       setCycleToDelete(null);
       fetchPayrollCycles();
     } catch (err) {
@@ -267,7 +269,7 @@ const RunPayroll = () => {
       }
       toast({ title: "Success", description: `Payroll calculated for ${selectedCycles.length} cycles.` });
       setSelectedCycles([]);
-      setShowBulkDialog(false);
+      setDialogState(prev => ({ ...prev, bulk: false }));
       fetchPayrollCycles();
     } catch (err) {
       console.error(err);
@@ -282,7 +284,7 @@ const RunPayroll = () => {
       }
       toast({ title: "Success", description: `${selectedCycles.length} cycles locked.` });
       setSelectedCycles([]);
-      setShowBulkDialog(false);
+      setDialogState(prev => ({ ...prev, bulk: false }));
       fetchPayrollCycles();
     } catch (err) {
       console.error(err);
@@ -317,13 +319,13 @@ const RunPayroll = () => {
 
   const handleViewCycle = (cycle) => {
     setSelectedCycle(cycle);
-    setShowViewDialog(true);
+    setDialogState(prev => ({ ...prev, view: true }));
   };
 
   const saveCalculationSettings = () => {
     localStorage.setItem("payrollCalculationSettings", JSON.stringify(calculationSettings));
     toast({ title: "Saved", description: "Calculation settings saved." });
-    setShowSettingsDialog(false);
+    setDialogState(prev => ({ ...prev, settings: false }));
   };
 
   // -----------------------
@@ -368,7 +370,7 @@ const RunPayroll = () => {
 
       {/* Actions */}
       <div className="flex items-center gap-2 mb-4">
-        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <Dialog open={dialogState.settings} onOpenChange={(open) => setDialogState(prev => ({ ...prev, settings: open }))}>
           <DialogTrigger asChild>
             <Button variant="outline">
               <Settings size={16} className="mr-2" /> Settings
@@ -416,13 +418,13 @@ const RunPayroll = () => {
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogState(prev => ({ ...prev, settings: false }))}>Cancel</Button>
               <Button onClick={saveCalculationSettings}>Save Settings</Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
+        <Dialog open={dialogState.bulk} onOpenChange={(open) => setDialogState(prev => ({ ...prev, bulk: open }))}>
           <DialogTrigger asChild>
             <Button variant="outline"><Upload size={16} className="mr-2" /> Bulk Operations</Button>
           </DialogTrigger>
@@ -446,7 +448,7 @@ const RunPayroll = () => {
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowBulkDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogState(prev => ({ ...prev, bulk: false }))}>Cancel</Button>
               <Button onClick={handleBulkCalculate} disabled={selectedCycles.length === 0}>Calculate Selected ({selectedCycles.length})</Button>
               <Button onClick={handleBulkLock} disabled={selectedCycles.length === 0}>Lock Selected ({selectedCycles.length})</Button>
             </div>
@@ -455,7 +457,7 @@ const RunPayroll = () => {
 
         <Button variant="outline" onClick={handleExportCycles}><Download size={16} className="mr-2" /> Export</Button>
 
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <Dialog open={dialogState.create} onOpenChange={(open) => setDialogState(prev => ({ ...prev, create: open }))}>
           <DialogTrigger asChild>
             <Button><Plus size={16} className="mr-2" /> Create Cycle</Button>
           </DialogTrigger>
@@ -487,7 +489,7 @@ const RunPayroll = () => {
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogState(prev => ({ ...prev, create: false }))}>Cancel</Button>
               <Button onClick={handleCreateCycle}>Create Cycle</Button>
             </div>
           </DialogContent>
@@ -594,7 +596,7 @@ const RunPayroll = () => {
       </Card>
 
       {/* --- VIEW DIALOG (Missing previously) --- */}
-      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+      <Dialog open={dialogState.view} onOpenChange={(open) => setDialogState(prev => ({ ...prev, view: open }))}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Payroll Cycle Details</DialogTitle></DialogHeader>
 
@@ -645,7 +647,7 @@ const RunPayroll = () => {
               )}
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowViewDialog(false)}>Close</Button>
+                <Button variant="outline" onClick={() => setDialogState(prev => ({ ...prev, view: false }))}>Close</Button>
               </div>
             </div>
           ) : (
@@ -655,7 +657,7 @@ const RunPayroll = () => {
       </Dialog>
 
       {/* --- EDIT DIALOG (reused formCycle) --- */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+      <Dialog open={dialogState.edit} onOpenChange={(open) => setDialogState(prev => ({ ...prev, edit: open }))}>
         <DialogContent>
           <DialogHeader><DialogTitle>Edit Payroll Cycle</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4">
@@ -683,14 +685,14 @@ const RunPayroll = () => {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogState(prev => ({ ...prev, edit: false }))}>Cancel</Button>
             <Button onClick={handleUpdateCycle}>Update Cycle</Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* --- DELETE CONFIRM --- */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <Dialog open={dialogState.delete} onOpenChange={(open) => setDialogState(prev => ({ ...prev, delete: open }))}>
         <DialogContent>
           <DialogHeader><DialogTitle>Delete Payroll Cycle</DialogTitle></DialogHeader>
           <div className="py-4">
@@ -700,7 +702,7 @@ const RunPayroll = () => {
             <p className="text-xs text-red-600 mt-2">This action cannot be undone.</p>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogState(prev => ({ ...prev, delete: false }))}>Cancel</Button>
             <Button onClick={confirmDeleteCycle} className="bg-red-600 hover:bg-red-700">Delete</Button>
           </div>
         </DialogContent>
@@ -709,4 +711,4 @@ const RunPayroll = () => {
   );
 };
 
-export default RunPayroll;
+export default React.memo(RunPayroll);

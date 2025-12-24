@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
@@ -262,4 +263,4 @@ const WorkflowDashboard = () => {
   );
 };
 
-export default WorkflowDashboard;
+export default React.memo(WorkflowDashboard);

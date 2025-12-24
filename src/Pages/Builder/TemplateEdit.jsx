@@ -57,6 +57,7 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
   const [updateApi, setUpdateApi] = useState("");
   const [getApi, setGetApi] = useState("");
   const [bulkApi, setBulkApi] = useState("");
+  const [Icon, setIcon] = useState("");
   const [groupSave, setGroupSave] = useState(false);
   const [fields, setFields] = useState([]);
   const [ruleTypes, setRuleTypes] = useState([]);
@@ -122,6 +123,7 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
       setUpdateApi(template.updateApi || "");
       setGetApi(template.getApi || "");
       setBulkApi(template.bulkApi || "");
+      setIcon(template.Icon || "");
       setGroupSave(template.groupSave || false);
 
       setFields(
@@ -253,6 +255,7 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
         getApi,
         bulkApi,
         groupSave,
+        Icon,
         fields,
         createdBy: "currentUser",
       };
@@ -325,8 +328,8 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
           </Button>
 
           <Button
-          variant="success"
-          className="bg-green-600/90 text-white"
+            variant="success"
+            className="bg-green-600/90 text-white"
             disabled={(!isCommon && !clientCode) || saveStatus === "saving"}
             onClick={handleSaveTemplate}
           >
@@ -346,6 +349,7 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
         </CardHeader>
 
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
           <div>
             <Label>Template Name <span className="text-red-500">*</span></Label>
             <Input
@@ -357,22 +361,47 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
 
           <div>
             <Label>Add Api <span className="text-red-500">*</span></Label>
-            <Input value={addApi} onChange={(e) => setAddApi(e.target.value)} />
+            <Input
+              value={addApi}
+              onChange={(e) => setAddApi(e.target.value)}
+              placeholder="Enter add API URL"
+            />
           </div>
 
           <div>
             <Label>Update Api *</Label>
-            <Input value={updateApi} onChange={(e) => setUpdateApi(e.target.value)} />
+            <Input
+              value={updateApi}
+              onChange={(e) => setUpdateApi(e.target.value)}
+              placeholder="Enter update API URL"
+            />
           </div>
 
           <div>
             <Label>Get Api *</Label>
-            <Input value={getApi} onChange={(e) => setGetApi(e.target.value)} />
+            <Input
+              value={getApi}
+              onChange={(e) => setGetApi(e.target.value)}
+              placeholder="Enter get API URL"
+            />
           </div>
 
           <div>
             <Label>Bulk Api <span className="text-red-500">*</span></Label>
-            <Input value={bulkApi} onChange={(e) => setBulkApi(e.target.value)} />
+            <Input
+              value={bulkApi}
+              onChange={(e) => setBulkApi(e.target.value)}
+              placeholder="Enter bulk API URL"
+            />
+          </div>
+
+          <div>
+            <Label>Template Icon <span className="text-red-500">*</span></Label>
+            <Input
+              value={Icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="Enter icon class or URL"
+            />
           </div>
 
           <div className="md:col-span-2">
@@ -381,6 +410,7 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
               rows={2}
               value={templateDescription}
               onChange={(e) => setTemplateDescription(e.target.value)}
+              placeholder="Enter description"
             />
           </div>
 
@@ -400,12 +430,18 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
               <Label>Group Save</Label>
             </div>
           </div>
-
           <div>
             <Label>Client Code</Label>
-            <Input value={clientCode || ""} disabled className="bg-gray-100" />
+            <Input
+              value={clientCode || ""}
+              disabled
+              className="bg-gray-100"
+              placeholder="Auto-filled"
+            />
           </div>
+
         </CardContent>
+
       </Card>
 
       {/* FIELDS TABLE */}
@@ -482,218 +518,218 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
         )}
       />
 
-  {/* FIELD DIALOG */}
-<Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
-  <DialogContent
-    className="max-w-4xl"
-    header={
-      <DialogHeader>
-        <DialogTitle>{editingField ? "Edit Field" : "Add Field"}</DialogTitle>
-      </DialogHeader>
-    }
-    body={
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+      {/* FIELD DIALOG */}
+      <Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
+        <DialogContent
+          className="max-w-4xl"
+          header={
+            <DialogHeader>
+              <DialogTitle>{editingField ? "Edit Field" : "Add Field"}</DialogTitle>
+            </DialogHeader>
+          }
+          body={
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
 
-        {/* NAME */}
-        <div>
-          <Label>Name <span className="text-red-500">*</span></Label>
-          <Input
-            placeholder="Enter field key (e.g., employeeCode)"
-            value={fieldForm.name}
-            onChange={(e) => setFieldForm({ ...fieldForm, name: e.target.value })}
-          />
-        </div>
+              {/* NAME */}
+              <div>
+                <Label>Name <span className="text-red-500">*</span></Label>
+                <Input
+                  placeholder="Enter field key (e.g., employeeCode)"
+                  value={fieldForm.name}
+                  onChange={(e) => setFieldForm({ ...fieldForm, name: e.target.value })}
+                />
+              </div>
 
-        {/* LABEL */}
-        <div>
-          <Label>Label <span className="text-red-500">*</span></Label>
-          <Input
-            placeholder="Display label (e.g., Employee Code)"
-            value={fieldForm.label}
-            onChange={(e) => setFieldForm({ ...fieldForm, label: e.target.value })}
-          />
-        </div>
+              {/* LABEL */}
+              <div>
+                <Label>Label <span className="text-red-500">*</span></Label>
+                <Input
+                  placeholder="Display label (e.g., Employee Code)"
+                  value={fieldForm.label}
+                  onChange={(e) => setFieldForm({ ...fieldForm, label: e.target.value })}
+                />
+              </div>
 
-        {/* TYPE */}
-        <div>
-          <Label>Type <span className="text-red-500">*</span></Label>
-          <Select
-            value={fieldForm.type}
-            onValueChange={(v) => setFieldForm({ ...fieldForm, type: v })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Choose field type" />
-            </SelectTrigger>
-            <SelectContent className="max-h-64 overflow-y-auto">
-              {[
-                "text", "textarea", "number", "email", "password", "tel", "url",
-                "select", "multi-select", "radio", "checkbox", "checkbox-group", "switch",
-                "date", "datetime", "time", "month", "year",
-                "file", "image", "document", "signature",
-                "autocomplete", "api-select", "api-multi-select", "richtext",
-                "color", "range", "rating", "currency", "percentage", "tags",
-              ].map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+              {/* TYPE */}
+              <div>
+                <Label>Type <span className="text-red-500">*</span></Label>
+                <Select
+                  value={fieldForm.type}
+                  onValueChange={(v) => setFieldForm({ ...fieldForm, type: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose field type" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    {[
+                      "text", "textarea", "number", "email", "password", "tel", "url",
+                      "select", "multi-select", "radio", "checkbox", "checkbox-group", "switch",
+                      "date", "datetime", "time", "month", "year",
+                      "file", "image", "document", "signature",
+                      "autocomplete", "api-select", "api-multi-select", "richtext",
+                      "color", "range", "rating", "currency", "percentage", "tags",
+                    ].map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-        {/* VALIDATION */}
-        <div>
-          <Label>Validation <span className="text-red-500">*</span></Label>
-          <Select
-            value={fieldForm.validation}
-            onValueChange={(v) => setFieldForm({ ...fieldForm, validation: v })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select validation rule" />
-            </SelectTrigger>
+              {/* VALIDATION */}
+              <div>
+                <Label>Validation <span className="text-red-500">*</span></Label>
+                <Select
+                  value={fieldForm.validation}
+                  onValueChange={(v) => setFieldForm({ ...fieldForm, validation: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select validation rule" />
+                  </SelectTrigger>
 
-            <SelectContent className="max-h-64 overflow-y-auto">
-              {ruleTypes.map((r) => (
-                <SelectItem key={r.id || r.value} value={r.value}>
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                  <SelectContent className="max-h-64 overflow-y-auto">
+                    {ruleTypes.map((r) => (
+                      <SelectItem key={r.id || r.value} value={r.value}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-        {/* MAX LENGTH */}
-        <div>
-          <Label>Max Length</Label>
-          <Input
-            type="number"
-            placeholder="Maximum allowed characters"
-            value={fieldForm.maxLength}
-            onChange={(e) => setFieldForm({ ...fieldForm, maxLength: e.target.value })}
-          />
-        </div>
+              {/* MAX LENGTH */}
+              <div>
+                <Label>Max Length</Label>
+                <Input
+                  type="number"
+                  placeholder="Maximum allowed characters"
+                  value={fieldForm.maxLength}
+                  onChange={(e) => setFieldForm({ ...fieldForm, maxLength: e.target.value })}
+                />
+              </div>
 
-        {/* PLACEHOLDER */}
-        <div>
-          <Label>Placeholder <span className="text-red-500">*</span></Label>
-          <Input
-            placeholder="Input hint text (e.g., Enter employee code)"
-            value={fieldForm.placeholder}
-            onChange={(e) => setFieldForm({ ...fieldForm, placeholder: e.target.value })}
-          />
-        </div>
+              {/* PLACEHOLDER */}
+              <div>
+                <Label>Placeholder <span className="text-red-500">*</span></Label>
+                <Input
+                  placeholder="Input hint text (e.g., Enter employee code)"
+                  value={fieldForm.placeholder}
+                  onChange={(e) => setFieldForm({ ...fieldForm, placeholder: e.target.value })}
+                />
+              </div>
 
-        {/* GROUP */}
-        <div>
-          <Label>Group</Label>
-          <Input
-            placeholder="UI Group (e.g., Basic Details)"
-            value={fieldForm.group}
-            onChange={(e) => setFieldForm({ ...fieldForm, group: e.target.value })}
-          />
-        </div>
+              {/* GROUP */}
+              <div>
+                <Label>Group</Label>
+                <Input
+                  placeholder="UI Group (e.g., Basic Details)"
+                  value={fieldForm.group}
+                  onChange={(e) => setFieldForm({ ...fieldForm, group: e.target.value })}
+                />
+              </div>
 
-        {/* GROUP BACKEND KEY */}
-        <div>
-          <Label>Group Backend Key</Label>
-          <Input
-            placeholder="Backend key (e.g., basicInfo)"
-            value={fieldForm.groupBackendKey}
-            onChange={(e) => setFieldForm({ ...fieldForm, groupBackendKey: e.target.value })}
-          />
-        </div>
+              {/* GROUP BACKEND KEY */}
+              <div>
+                <Label>Group Backend Key</Label>
+                <Input
+                  placeholder="Backend key (e.g., basicInfo)"
+                  value={fieldForm.groupBackendKey}
+                  onChange={(e) => setFieldForm({ ...fieldForm, groupBackendKey: e.target.value })}
+                />
+              </div>
 
-        {/* SELECT EXTRA OPTIONS */}
-        {fieldForm.type === "select" && (
-          <>
-            <div className="md:col-span-2">
-              <Label>Options <span className="text-red-500">*</span></Label>
-              <Input
-                placeholder='Comma separated (e.g., "Male,Female,Other")'
-                value={fieldForm.options}
-                onChange={(e) => setFieldForm({ ...fieldForm, options: e.target.value })}
-              />
+              {/* SELECT EXTRA OPTIONS */}
+              {fieldForm.type === "select" && (
+                <>
+                  <div className="md:col-span-2">
+                    <Label>Options <span className="text-red-500">*</span></Label>
+                    <Input
+                      placeholder='Comma separated (e.g., "Male,Female,Other")'
+                      value={fieldForm.options}
+                      onChange={(e) => setFieldForm({ ...fieldForm, options: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label>API URL</Label>
+                    <Input
+                      placeholder="https://api.example.com/users"
+                      value={fieldForm.apiUrl}
+                      onChange={(e) => setFieldForm({ ...fieldForm, apiUrl: e.target.value })}
+                    />
+                  </div>
+
+                  {fieldForm.apiUrl && (
+                    <>
+                      <div>
+                        <Label>Value Key <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="e.g., id"
+                          value={fieldForm.valueKey}
+                          onChange={(e) => setFieldForm({ ...fieldForm, valueKey: e.target.value })}
+                        />
+                      </div>
+
+                      <div>
+                        <Label>Label Key <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="e.g., name"
+                          value={fieldForm.labelKey}
+                          onChange={(e) => setFieldForm({ ...fieldForm, labelKey: e.target.value })}
+                        />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* DEFAULT VALUE */}
+              <div className="md:col-span-2">
+                <Label>Default Value</Label>
+                <Input
+                  placeholder="Pre-filled default value"
+                  value={fieldForm.defaultValue}
+                  onChange={(e) => setFieldForm({ ...fieldForm, defaultValue: e.target.value })}
+                />
+              </div>
+
+              {/* APPLICABLE */}
+              <div className="md:col-span-2">
+                <Label>Applicable <span className="text-red-500">*</span></Label>
+                <MultiSelect
+                  options={[
+                    { value: "form", label: "Form" },
+                    { value: "upload", label: "Upload" },
+                  ]}
+                  placeholder="Where this field is used"
+                  value={fieldForm.applicable}
+                  onChange={(v) => setFieldForm({ ...fieldForm, applicable: v })}
+                />
+              </div>
+
+              {/* REQUIRED */}
+              <div className="flex gap-2 items-center md:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={fieldForm.required}
+                  onChange={(e) => setFieldForm({ ...fieldForm, required: e.target.checked })}
+                />
+                <Label>Required</Label>
+              </div>
             </div>
+          }
+          footer={
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsFieldDialogOpen(false)}>
+                Cancel
+              </Button>
 
-            <div className="md:col-span-2">
-              <Label>API URL</Label>
-              <Input
-                placeholder="https://api.example.com/users"
-                value={fieldForm.apiUrl}
-                onChange={(e) => setFieldForm({ ...fieldForm, apiUrl: e.target.value })}
-              />
+              <Button onClick={handleSaveField}>
+                {editingField ? "Update" : "Add"}
+              </Button>
             </div>
-
-            {fieldForm.apiUrl && (
-              <>
-                <div>
-                  <Label>Value Key <span className="text-red-500">*</span></Label>
-                  <Input
-                    placeholder="e.g., id"
-                    value={fieldForm.valueKey}
-                    onChange={(e) => setFieldForm({ ...fieldForm, valueKey: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label>Label Key <span className="text-red-500">*</span></Label>
-                  <Input
-                    placeholder="e.g., name"
-                    value={fieldForm.labelKey}
-                    onChange={(e) => setFieldForm({ ...fieldForm, labelKey: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
-          </>
-        )}
-
-        {/* DEFAULT VALUE */}
-        <div className="md:col-span-2">
-          <Label>Default Value</Label>
-          <Input
-            placeholder="Pre-filled default value"
-            value={fieldForm.defaultValue}
-            onChange={(e) => setFieldForm({ ...fieldForm, defaultValue: e.target.value })}
-          />
-        </div>
-
-        {/* APPLICABLE */}
-        <div className="md:col-span-2">
-          <Label>Applicable <span className="text-red-500">*</span></Label>
-          <MultiSelect
-            options={[
-              { value: "form", label: "Form" },
-              { value: "upload", label: "Upload" },
-            ]}
-            placeholder="Where this field is used"
-            value={fieldForm.applicable}
-            onChange={(v) => setFieldForm({ ...fieldForm, applicable: v })}
-          />
-        </div>
-
-        {/* REQUIRED */}
-        <div className="flex gap-2 items-center md:col-span-2">
-          <input
-            type="checkbox"
-            checked={fieldForm.required}
-            onChange={(e) => setFieldForm({ ...fieldForm, required: e.target.checked })}
-          />
-          <Label>Required</Label>
-        </div>
-      </div>
-    }
-    footer={
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={() => setIsFieldDialogOpen(false)}>
-          Cancel
-        </Button>
-
-        <Button onClick={handleSaveField}>
-          {editingField ? "Update" : "Add"}
-        </Button>
-      </div>
-    }
-  />
-</Dialog>
+          }
+        />
+      </Dialog>
 
 
       {/* Preview */}

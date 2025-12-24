@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
-import { Users } from "lucide-react";
 import { templateService } from "../../api/services/templateService";
 import Loading from '../Component/Loading'
 
 // 🟢 Framer Motion
 import { motion } from "framer-motion";
 import useCrypto from "../Security/useCrypto";
+import AppIcon from "../Component/AppIcon";
 
 const InputModule = () => {
   const [modules, setModules] = useState([]);
@@ -32,7 +32,7 @@ const InputModule = () => {
             title: template.name,
             description: template.description || `Manage ${template.module} related data.`,
             path: `/inputs/${encryptedId}`, // 🔥 send encrypted ID
-            icon: <Users size={26} />,
+            icon: template?.Icon,
           };
         });
 
@@ -141,7 +141,7 @@ const InputModule = () => {
                       group-hover:border-emerald-600
                     "
                   >
-                    {m.icon}
+                   <AppIcon name= {m.icon}/>
                   </div>
                 </motion.div>
 

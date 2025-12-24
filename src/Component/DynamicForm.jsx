@@ -273,6 +273,7 @@ const DynamicForm = ({
       InputType: field.type,
       DataType: field.type,
       FormFieldName: field.label,
+      Placeholder:field?.placeholder,
       Options: field.options ?? [],
       DefaultDisable: field.disabled ?? false,
       Accept: field.accept,
@@ -302,11 +303,12 @@ const DynamicForm = ({
   /* --------------------------------------------------
      MAIN UI
   -------------------------------------------------- */
+  
   return (
     <motion.div className="p-2" variants={fadeIn} initial="hidden" animate="show">
       <div className="md:flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          {template?.icon && <AppIcon name={template.icon} size={26} />}
+          {template?.Icon && <AppIcon name={template.Icon} size={26} />}
           <h1 className="text-xl font-bold">{template?.name}</h1>
         </div>
 

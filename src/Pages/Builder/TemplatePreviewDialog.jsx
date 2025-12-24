@@ -119,11 +119,15 @@ const TemplatePreviewDialog = ({
                             {(Array.isArray(field.options)
                               ? field.options
                               : field.options?.split(",")
-                            )?.map((option, i) => (
-                              <SelectItem key={i} value={option.trim()}>
-                                {option.trim()}
-                              </SelectItem>
-                            ))}
+                            )?.map((option, i) => {
+                              const value = typeof option === "object" ? option.value : option.trim();
+                              const label = typeof option === "object" ? option.label : option.trim();
+                              return (
+                                <SelectItem key={i} value={value}>
+                                  {label}
+                                </SelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                       )}

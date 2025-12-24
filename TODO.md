@@ -1,8 +1,9 @@
-- [ ] Convert configItemsNew to state using useState
-- [ ] Add state for editingItem (null or object)
-- [ ] Add "Add New" button in header
-- [ ] Add edit button in MenuList for each item
-- [ ] Add form in right content for editing/adding item
-- [ ] Implement save logic (add or update item)
-- [ ] Implement cancel logic
-- [ ] Update activeMenu when items change
+# Update Select Fields in db.json Templates
+
+## Tasks to Complete:
+- [ ] Update Leave Management template (id: "4") - leaveType field: convert string options to objects and add present
+- [ ] Update Leave Management template (id: "4") - status field: convert string options to objects and add present  
+- [ ] Update Leave template (id: "3") - leaveType field: convert string options to objects and add present
+- [ ] Update Loan template (id: "4") - loanType field: convert string options to objects and add present
+- [ ] Update Reimbursement template (id: "5") - category field: convert string options to objects and add present
+- [ ] Verify all changes are applied correctly

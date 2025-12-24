@@ -203,6 +203,7 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
   }
 
   /* ---------------- DEFAULT TEXT & NUMBER ---------------- */
+  
   return (
     <motion.div variants={fade} initial="hidden" animate="show">
       <Input
@@ -210,12 +211,13 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        placeholder={f.FormFieldName || ""}
+        placeholder={f.Placeholder || f.FormFieldName || ""}
         className={cn(hasError && "border-red-400")}
       />
     </motion.div>
   );
 };
+
 
 /* ================= SELECT COMPONENT ================= */
 
@@ -263,13 +265,18 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
         <SelectTrigger className={cn(hasError && "border-red-400")}>
           <SelectValue placeholder="Select" />
         </SelectTrigger>
+
         <SelectContent>
           {options.map((opt, i) => (
-            <SelectItem key={i} value={opt.value}>
-              {opt.label}
+            <SelectItem
+              key={i}
+              value={opt.value}
+            >
+              <span className="text-sm">{opt.label}</span>
             </SelectItem>
           ))}
         </SelectContent>
+
       </Select>
     </motion.div>
   );

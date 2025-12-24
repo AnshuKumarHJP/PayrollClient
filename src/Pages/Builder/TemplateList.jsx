@@ -247,6 +247,7 @@ const TemplateList = ({ onAddEditMode }) => {
                   <TableHead>Version</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Fields</TableHead>
+                  <TableHead>Icon</TableHead>
                   <TableHead>Last Modified</TableHead>
                   <TableHead>Created By</TableHead>
                   <TableHead>Actions</TableHead>
@@ -259,6 +260,7 @@ const TemplateList = ({ onAddEditMode }) => {
                     <TableCell>{template.version}</TableCell>
                     <TableCell>{getStatusBadge(template.status)}</TableCell>
                     <TableCell>{Array.isArray(template.fields) ? template.fields.length : (typeof template.fields === 'number' && !isNaN(template.fields) ? template.fields : 0)}</TableCell>
+                    <TableCell>{template.Icon}</TableCell>
                     <TableCell>
                       {template.lastModified
                         ? new Date(template.lastModified).toLocaleString("en-IN", {

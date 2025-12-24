@@ -1116,6 +1116,7 @@
       "getApi": "http://localhost:3001/onboarding",
       "bulkApi": "http://localhost:3001/onboarding",
       "groupSave": false,
+      "Icon": "Rose",
       "fields": [
         {
           "id": 1764755310221,
@@ -1206,7 +1207,7 @@
           "required": true,
           "validation": "required",
           "maxLength": null,
-          "placeholder": "",
+          "placeholder": "Enter your Mobile ",
           "options": "",
           "apiUrl": "",
           "valueKey": "",
@@ -1259,21 +1260,22 @@
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-23T10:17:45.522Z"
+      "lastModified": "2025-12-23T12:42:02.149Z"
     },
     {
       "id": "2",
-      "clientCode": "CLI002",
-      "isCommon": true,
+      "clientCode": null,
       "name": "Attendance",
       "description": "Standard monthly attendance tracking template used across all clients",
       "status": "active",
+      "isCommon": true,
       "version": "1.0",
       "addApi": "http://localhost:3001/attendance",
       "updateApi": "http://localhost:3001/attendance",
       "getApi": "http://localhost:3001/attendance",
       "bulkApi": "http://localhost:3001/attendance",
       "groupSave": false,
+      "Icon": "Rose",
       "fields": [
         {
           "id": 1765000002001,
@@ -1369,10 +1371,26 @@
           "type": "select",
           "required": true,
           "options": [
-            "present",
-            "absent",
-            "late",
-            "half-day"
+            {
+              "value": "present",
+              "label": "Present"
+            },
+            {
+              "value": "absent",
+              "label": "Absent"
+            },
+            {
+              "value": "late",
+              "label": "Late"
+            },
+            {
+              "value": "half-day",
+              "label": "Half day"
+            },
+            {
+              "value": "present",
+              "label": "Present"
+            }
           ],
           "applicable": [
             "form",
@@ -1394,21 +1412,22 @@
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-15T06:56:26.734Z"
+      "lastModified": "2025-12-23T12:25:48.052Z"
     },
     {
       "id": "4",
       "clientCode": null,
-      "isCommon": true,
       "name": "Leave Management",
       "description": "Standard leave request and tracking template used across all clients",
       "status": "active",
+      "isCommon": true,
       "version": "1.0",
       "addApi": "http://localhost:3001/leave",
       "updateApi": "http://localhost:3001/leave",
       "getApi": "http://localhost:3001/leave",
       "bulkApi": "http://localhost:3001/leave",
       "groupSave": false,
+      "Icon": "Rose",
       "fields": [
         {
           "id": 1765000003001,
@@ -1438,11 +1457,30 @@
           "type": "select",
           "required": true,
           "options": [
-            "annual",
-            "sick",
-            "maternity",
-            "paternity",
-            "emergency"
+            {
+              "value": "annual",
+              "label": "Annual"
+            },
+            {
+              "value": "sick",
+              "label": "Sick"
+            },
+            {
+              "value": "maternity",
+              "label": "Maternity"
+            },
+            {
+              "value": "paternity",
+              "label": "Paternity"
+            },
+            {
+              "value": "emergency",
+              "label": "Emergency"
+            },
+            {
+              "value": "present",
+              "label": "Present"
+            }
           ],
           "applicable": [
             "form",
@@ -1505,9 +1543,22 @@
           "type": "select",
           "required": true,
           "options": [
-            "pending",
-            "approved",
-            "rejected"
+            {
+              "value": "pending",
+              "label": "Pending"
+            },
+            {
+              "value": "approved",
+              "label": "Approved"
+            },
+            {
+              "value": "rejected",
+              "label": "Rejected"
+            },
+            {
+              "value": "present",
+              "label": "Present"
+            }
           ],
           "applicable": [
             "form",
@@ -1517,7 +1568,7 @@
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-15T06:56:51.247Z"
+      "lastModified": "2025-12-23T12:27:44.730Z"
     },
     {
       "id": "3",
@@ -1525,7 +1576,14 @@
       "name": "Leave",
       "description": "All leave requests for the cycle must be processed.",
       "status": "active",
+      "isCommon": true,
       "version": "1.0",
+      "addApi": "http://localhost:5173/config",
+      "updateApi": "http://localhost:5173/config",
+      "getApi": "http://localhost:5173/config",
+      "bulkApi": "http://localhost:5173/config",
+      "groupSave": false,
+      "Icon": "Rose",
       "fields": [
         {
           "id": 1765000003001,
@@ -1536,7 +1594,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000003002,
@@ -1545,15 +1604,32 @@
           "type": "select",
           "required": true,
           "options": [
-            "CL",
-            "SL",
-            "EL",
-            "LOP"
+            {
+              "value": "CL",
+              "label": "CL"
+            },
+            {
+              "value": "SL",
+              "label": "SL"
+            },
+            {
+              "value": "EL",
+              "label": "EL"
+            },
+            {
+              "value": "LOP",
+              "label": "LOP"
+            },
+            {
+              "value": "present",
+              "label": "Present"
+            }
           ],
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000003003,
@@ -1564,7 +1640,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000003004,
@@ -1574,11 +1651,12 @@
           "required": false,
           "applicable": [
             "form"
-          ]
+          ],
+          "validation": "none"
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-15T06:56:24.140Z"
+      "lastModified": "2025-12-23T12:26:44.542Z"
     },
     {
       "id": "4",
@@ -1586,6 +1664,7 @@
       "name": "Loan",
       "description": "EMI and outstanding balances must be updated.",
       "status": "active",
+      "Icon": "Rose",
       "version": "1.0",
       "fields": [
         {
@@ -1605,9 +1684,22 @@
           "label": "Loan Type",
           "type": "select",
           "options": [
-            "salaryAdvance",
-            "personalLoan",
-            "travelLoan"
+            {
+              "value": "salaryAdvance",
+              "label": "Salary Advance"
+            },
+            {
+              "value": "personalLoan",
+              "label": "Personal Loan"
+            },
+            {
+              "value": "travelLoan",
+              "label": "Travel Loan"
+            },
+            {
+              "value": "present",
+              "label": "Present"
+            }
           ],
           "required": true,
           "applicable": [
@@ -1647,7 +1739,14 @@
       "name": "Reimbursement",
       "description": "Claims should be approved before payroll.",
       "status": "active",
+      "isCommon": true,
       "version": "1.0",
+      "addApi": "",
+      "updateApi": "",
+      "getApi": "",
+      "bulkApi": "http://localhost:5173/config",
+      "groupSave": false,
+      "Icon": "Rose",
       "fields": [
         {
           "id": 1765000005001,
@@ -1658,7 +1757,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000005002,
@@ -1667,15 +1767,32 @@
           "type": "select",
           "required": true,
           "options": [
-            "travel",
-            "medical",
-            "supplies",
-            "telephone"
+            {
+              "value": "travel",
+              "label": "Travel"
+            },
+            {
+              "value": "medical",
+              "label": "Medical"
+            },
+            {
+              "value": "supplies",
+              "label": "Supplies"
+            },
+            {
+              "value": "telephone",
+              "label": "Telephone"
+            },
+            {
+              "value": "present",
+              "label": "Present"
+            }
           ],
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000005003,
@@ -1686,7 +1803,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000005004,
@@ -1697,7 +1815,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000005005,
@@ -1707,19 +1826,27 @@
           "required": false,
           "applicable": [
             "form"
-          ]
+          ],
+          "validation": "none"
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-09T07:37:11.717Z"
+      "lastModified": "2025-12-23T12:27:19.690Z"
     },
     {
       "id": "6",
-      "clientCode": "CLI001",
+      "clientCode": null,
       "name": "Final Settlement",
       "description": "Exit employees must be processed.",
       "status": "active",
+      "isCommon": true,
       "version": "1.0",
+      "addApi": "",
+      "updateApi": "",
+      "getApi": "",
+      "bulkApi": "http://localhost:5173/config",
+      "groupSave": false,
+      "Icon": "Rose",
       "fields": [
         {
           "id": 1765000006001,
@@ -1730,7 +1857,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000006002,
@@ -1741,7 +1869,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000006003,
@@ -1752,7 +1881,8 @@
           "applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1765000006004,
@@ -1762,11 +1892,12 @@
           "required": false,
           "applicable": [
             "form"
-          ]
+          ],
+          "validation": "none"
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-04T12:07:18.947Z"
+      "lastModified": "2025-12-23T12:27:34.020Z"
     }
   ],
   "ruleTypes": [

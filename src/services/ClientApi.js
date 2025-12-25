@@ -37,31 +37,53 @@ async function handleUnauthorized() {
 /* ----------------------------------------------------
    RESPONSE CHECKER
 ---------------------------------------------------- */
-export async function checkStatus(response) {
+export async function checkStatus(res) {
+  // -----------------------------------------
   // SUCCESS (2xx)
-  if (response.status >= 200 && response.status < 300) {
-    return response;
+  // -----------------------------------------
+  if (res?.status >= 200 && res?.status < 300) {
+
+    const data = res?.data;
+
+    // BACKEND — UNAUTHORIZED but sent inside JSON (fake 200)
+    const backendUnauthorized =
+      data?.Message === "Unauthorized action" ||
+      data?.Message === "Token expired" ||
+      data?.Message === "Session expired" ||
+      data?.Status === false && typeof data?.Result === "undefined";
+
+    if (backendUnauthorized) {
+      await handleUnauthorized();
+    }
+
+    // VALID SUCCESS
+    return res;
   }
 
-  const err = response?.response || response;
+  // -----------------------------------------
+  // AXIOS ERROR (occurs in catch)
+  // -----------------------------------------
+  const err = res?.response || res;
 
-  // UNAUTHORIZED (401)
-  if (err.status === 401) {
+  const httpStatus = err?.status;
+
+  // ----------- 401 (REAL HTTP UNAUTHORIZED) -----------
+  if (httpStatus === 401) {
     await handleUnauthorized();
-    return err;
   }
 
-  // CLIENT ERRORS (400–499)
-  if (err.status >= 400 && err.status < 500) {
-    return err;
+  // ----------- CLIENT ERRORS (400–499) -----------
+  if (httpStatus >= 400 && httpStatus < 500) {
+    throw err?.data || err;
   }
 
-  // SERVER ERRORS (500–599)
-  if (err.status >= 500 && err.status < 600) {
-    return err;
+  // ----------- SERVER ERRORS (500–599) -----------
+  if (httpStatus >= 500) {
+    throw err?.data || err;
   }
 
-  return err;
+  // fallback
+  throw err;
 }
 
 /* ----------------------------------------------------

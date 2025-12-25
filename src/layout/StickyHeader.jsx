@@ -77,7 +77,7 @@ function StickyHeader() {
   const { isMenuOpen } = GlobalStore;
   const LogResponce = useSelector((state) => state.Auth?.LogResponce?.data);
   const CurrentUserRole = LogResponce?.UIRoles || [];
-  const activeRole = sessionStorage.getItem("activeRole");
+  const activeRole = sessionStorage.getItem("activeRole") || (CurrentUserRole.length > 0 ? CurrentUserRole[0].Role.Code : null);
   const [filteredMenu, setFilteredMenu] = useState([]);
   const { isMobile } = useScreen();
   const ModuleCode = "APPI_PAYROLL";
@@ -175,12 +175,8 @@ useEffect(() => {
           <DesktopMenu menu={filteredMenu} />
         </div>
 
-        {/* RIGHT SIDE  */}
         <div className="flex items-center gap-3">
-          <AppIcon name="Bell" className="text-emerald-700" />
-          {/* MOBILE MENU TRIGGER */}
-
-
+          <NotificationDropdown />
           <UserDropdown />
         </div>
       </div>

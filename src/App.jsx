@@ -30,7 +30,6 @@ import PayrollInputMapping from "./Pages/PayrollInputMapping";
 import ProtectedRoute from "./Routes/ProtectedRoute";
 import Form from "./Pages/Builder/Form";
 import Employee from "./Pages/Employee/Employee";
-import SessionStorageTest from "./components/SessionStorageTest";
 import InputModule from "./Pages/InputModule";
 import Loading from "./Component/Loading";
 import UnknownPage from "./Routes/UnknownPage";
@@ -159,12 +158,8 @@ const router = createBrowserRouter([
       { path: "processing/register", element: <SalaryRegister /> },
       {
         path: "processing/payslips", element: <Payslips />
-      },
-      {
-        path: "test/session-storage",
-        element: <SessionStorageTest />
       }
-    ],
+        ],
   },
 ]);
 

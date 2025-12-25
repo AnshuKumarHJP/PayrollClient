@@ -76,7 +76,7 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
 
     // 🔥 Full Decrypt
     const decrypted = decryptResponseByAES(encryptedResult);
-    console.log("FINAL DECRYPTED =", decrypted);
+    // console.log("FINAL DECRYPTED =", decrypted);
 
     if (decrypted?.Token) {
       sessionStorage.setItem("token", decrypted?.Token)
@@ -95,6 +95,14 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
     };
     // Push clean data to reducer
     dispatch(getAuthSuccess(extracted));
+
+    // Set default active role if not already set
+    if (extracted.UIRoles && extracted.UIRoles.length > 0) {
+      const firstRoleCode = extracted.UIRoles[0].Role.Code;
+      if (!sessionStorage.getItem("activeRole")) {
+        sessionStorage.setItem("activeRole", firstRoleCode);
+      }
+    }
 
   } catch (error) {
     console.error(" AUTH FAILED", error);

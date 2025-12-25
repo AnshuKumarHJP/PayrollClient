@@ -1,4 +1,3 @@
-// src/services/navigationService.js
 let navigatorRef = null;
 
 export const setNavigator = (nav) => {

@@ -1,10 +1,13 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const Card = React.forwardRef(( { className, ...props }, ref) => (
+const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("rounded-lg border border-slate-200 bg-white/60 text-card-foreground shadow-sm", className)}
+    className={cn(
+      "rounded-lg border border-slate-200 bg-white/60 text-card-foreground shadow-sm min-w-0",
+      className
+    )}
     {...props}
   />
 ));
@@ -13,7 +16,10 @@ Card.displayName = "Card";
 const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn(
+      "flex flex-col space-y-1.5 p-4 min-w-0",
+      className
+    )}
     {...props}
   />
 ));
@@ -22,7 +28,7 @@ CardHeader.displayName = "CardHeader";
 const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("text-2xl font-semibold leading-none tracking-tight", className)}
+    className={cn("text-xl font-semibold leading-none tracking-tight", className)}
     {...props}
   />
 ));
@@ -40,7 +46,10 @@ CardDescription.displayName = "CardDescription";
 const CardContent = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("p-6 pt-0", className)}
+    className={cn(
+      "px-4 pb-4 pt-2 min-w-0 overflow-x-visible",
+      className
+    )}
     {...props}
   />
 ));
@@ -49,7 +58,7 @@ CardContent.displayName = "CardContent";
 const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn("flex items-center p-4 min-w-0", className)}
     {...props}
   />
 ));

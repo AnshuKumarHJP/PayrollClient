@@ -6,14 +6,38 @@
 All colors MUST be HSL.
 */
 
-/* ================= SCROLLBAR ================= */
-::-webkit-scrollbar { width: 5px; }
-:hover::-webkit-scrollbar-thumb { background-color: gray; }
-::-webkit-scrollbar-track { background-color: transparent; }
-::-webkit-scrollbar-thumb { background-color: transparent; cursor: pointer; border-radius: 10px; height: 10px; }
 
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-.scrollbar-hide::-webkit-scrollbar { display: none; }
+/* Vertical scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Horizontal scrollbar FIX */
+::-webkit-scrollbar:horizontal {
+  height: 3px;
+}
+
+::-webkit-scrollbar-track { 
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+}
+:hover::-webkit-scrollbar-thumb {
+  background-color: gray;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
 
 @layer base {
   :root {
@@ -129,6 +153,24 @@ All colors MUST be HSL.
     --gradient-muted: linear-gradient(180deg,
         hsl(222 47% 11%) 0%,
         hsl(217 33% 17%) 100%);
+  }
+}
+
+@layer utilities {
+  .tw-sticky {
+    @apply sticky bg-white z-50;
+  }
+
+  .tw-sticky-left {
+    @apply left-0;
+  }
+
+  .tw-sticky-right {
+    @apply right-0;
+  }
+
+  .tw-col-min {
+    @apply min-w-[140px] sm:min-w-[160px];
   }
 }
 

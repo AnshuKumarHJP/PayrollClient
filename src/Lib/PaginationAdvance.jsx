@@ -12,8 +12,8 @@ const PaginationAdvance = ({
   const handlePrev = () => page > 1 && onChangePage(page - 1);
   const handleNext = () => page < count && onChangePage(page + 1);
 
-  const handlePageSize = (e) => {
-    onChangePageSize(Number(e.target.value));
+  const handlePageSize = (value) => {
+    onChangePageSize(Number(value));
     onChangePage(1); // reset to first page when size changes
   };
 

@@ -44,12 +44,12 @@ const router = createBrowserRouter([
 
   },
   {
-    path:"*",
-    element:<UnknownPage/>
+    path: "*",
+    element: <UnknownPage />
   },
   {
-    path:"/session-expired",
-    element:<SessionExpire/>
+    path: "/session-expired",
+    element: <SessionExpire />
   },
   {
     path: "/",
@@ -73,33 +73,11 @@ const router = createBrowserRouter([
         element: <ImportHistory />,
       },
       // Configuration Hub
-      {
-        path: "config",
-        element: <Configuration />,
-      },
+      {path: "config/:tab", element: <Configuration /> },
+      // {path: "config", element: <Configuration /> },
+      
       { path: "employee", element: <Employee /> },
       // Configurable Input Templates
-      {
-        path: "config/templates",
-        element: <TemplateList />,
-      },
-      {
-        path: "config/templates/edit/:id?",
-        element: <TemplateEdit />,
-      },
-      {
-        path: "config/rule-types",
-        element: <RuleTypesManagement />,
-      },
-      {
-        path: "config/mapping-inputs-clients",
-        element: <PayrollInputMapping />,
-      },
-      {
-        path: "config/templates/preview",
-        element: <ExcelTemplatePreview />,
-      },
-      // Client Modes (Standard & Flexible)
       {
         path: "modes",
         element: <ModeSelection />,
@@ -159,7 +137,7 @@ const router = createBrowserRouter([
       {
         path: "processing/payslips", element: <Payslips />
       }
-        ],
+    ],
   },
 ]);
 

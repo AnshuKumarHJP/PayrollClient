@@ -25,7 +25,7 @@ const UserDropdown = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toast } = useToast();
-  const [isOpen,setIsOpen]= useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   const auth = useSelector((s) => s.Auth?.LogResponce);
   const authLoading = auth?.isLoading;
@@ -217,12 +217,12 @@ const UserDropdown = () => {
               Logged in at:{" "}
               {session?.hfLastLogin
                 ? new Date(session.hfLastLogin).toLocaleString("en-IN", {
-                    year: "numeric",
-                    month: "short",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
                 : ""}
             </p>
           </div>
@@ -232,21 +232,24 @@ const UserDropdown = () => {
 
         {/* ROLE SWITCH LIST */}
         <div className="max-h-[150px] overflow-y-auto">
-          {roles.map((role, i) => (
-            <DropdownMenuItem
-              key={i}
-              className="flex items-center justify-between"
-              onSelect={(e) => e.preventDefault()}
-            >
-              <span className="text-sm">{role.Name}</span>
+          {[...roles]
+            .sort((a, b) => a.Name.localeCompare(b.Name))
+            .map((role, i) => (
+              <DropdownMenuItem
+                key={role.Code ?? i}
+                className="flex items-center justify-between"
+                onSelect={(e) => e.preventDefault()}
+              >
+                <span className="text-sm">{role.Name}</span>
 
-              <Switch
-                checked={activeRole === role.Code}
-                onCheckedChange={() => handleRoleSwitch(role)}
-              />
-            </DropdownMenuItem>
-          ))}
+                <Switch
+                  checked={activeRole === role.Code}
+                  onCheckedChange={() => handleRoleSwitch(role)}
+                />
+              </DropdownMenuItem>
+            ))}
         </div>
+
 
         <DropdownMenuSeparator />
 

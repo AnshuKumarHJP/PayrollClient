@@ -1,10 +1,9 @@
-// components/Calendar.jsx
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./button";
 import "react-day-picker/style.css";
+import AppIcon from "../Component/AppIcon";
 
 export const Calendar = ({ className, classNames, showOutsideDays = true, ...props }) => {
   const defaultClassNames = {
@@ -48,8 +47,8 @@ export const Calendar = ({ className, classNames, showOutsideDays = true, ...pro
       mode="single"
       className={cn("p-0.5 sm:p-2 text-xs", className,defaultClassNames)}
       components={{
-        IconLeft: () => <ChevronLeft className="h-4 w-4 text-green-500" />,
-        IconRight: () => <ChevronRight className="h-4 w-4" />,
+        IconLeft: () => <AppIcon name="ChevronLeft" className="h-4 w-4 text-green-500" />,
+        IconRight: () => <AppIcon name="ChevronRight" className="h-4 w-4" />,
       }}
       {...props}
       />

@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AppIcon from "../Component/AppIcon";
 
 /* ROOT EXPORTS */
 export const Dialog = DialogPrimitive.Root;
@@ -65,7 +65,7 @@ export const DialogContent = React.forwardRef(
 
             {/* CLOSE BUTTON */}
             <DialogPrimitive.Close className="absolute right-4 top-[40%] opacity-70 hover:opacity-100 focus:outline-none">
-              <X className="h-5 w-5" />
+              <AppIcon name="X" className="h-5 w-5" />
             </DialogPrimitive.Close>
           </div>
 

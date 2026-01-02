@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from "react";
 import {Avatar} from "../Lib/avatar";
-import { CloudUpload, Download } from "lucide-react";
+import AppIcon from "../Component/AppIcon";
 
 const FileInput = forwardRef((props, ref) => {
   const {
@@ -129,7 +129,7 @@ const FileInput = forwardRef((props, ref) => {
             : "border-gray-300 hover:border-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-600"
         }`}
       >
-        <CloudUpload  className="text-gray-500 dark:text-gray-300 mb-2" />
+        <AppIcon name="CloudUpload"  className="text-gray-500 dark:text-gray-300 mb-2" />
         <p className="text-sm text-gray-600 dark:text-gray-300">
           Drag and drop your file here, or <span className="font-semibold">click to upload</span>
         </p>
@@ -175,7 +175,7 @@ const FileInput = forwardRef((props, ref) => {
                   }}
                   className="text-sm font-semibold text-gray-500 dark:text-gray-400 cursor-pointer flex gap-1 items-center"
                 >
-                  Download <Download size={18} />
+                  Download <AppIcon name="Download" size={18} />
                 </span>
               )}
 

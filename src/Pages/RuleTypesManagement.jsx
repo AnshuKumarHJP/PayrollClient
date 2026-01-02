@@ -1,92 +1,119 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  Suspense
+} from "react";
 
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogHeader,
   DialogFooter,
+  DialogDescription,
 } from "../Lib/dialog";
 
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
 import { Label } from "../Lib/label";
 import { Textarea } from "../Lib/textarea";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../Lib/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
 
 import { Badge } from "../Lib/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../Lib/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../Lib/dropdown-menu";
 
 import { Plus, Edit, Trash2, MoreHorizontal, Play } from "lucide-react";
+
+import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "../Lib/use-toast";
+
 
 import ruleTypesService from "../../api/services/ruleTypesService";
 import AdvanceTable from "../Component/AdvanceTable";
 import ValidationEngine from "../services/ValidationEngine";
 
-/* ============================================================
-   FORM FIELDS COMPONENT
-============================================================ */
-const FormFields = ({ data, setData, availableTypes }) => {
-  const field = (name) => ({
-    id: name,
-    value: data[name] ?? "",
-    onChange: (e) => setData({ ...data, [name]: e.target.value }),
+
+/* ============================================================================================
+    MEMOIZED ACTION BUTTONS
+============================================================================================ */
+const ActionsComponent = React.memo(({ row, onTest, onEdit, onDelete }) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="ghost" className="h-8 w-8 p-0">
+        <MoreHorizontal className="h-4 w-4" />
+      </Button>
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent align="end">
+      <DropdownMenuItem onClick={() => handleTestRule(row)}>
+        <div className="flex items-center">
+          <Play className="mr-2 h-4 w-4" />
+          <span>Test</span>
+        </div>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem onClick={() => onEdit(row)}>
+        <div className="flex items-center">
+          <Edit className="mr-2 h-4 w-4" />
+          <span>Edit</span>
+        </div>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem onClick={() => handleDelete(row.ValidationRuleCode)} className="text-red-600">
+        <div className="flex items-center">
+          <Trash2 className="mr-2 h-4 w-4" />
+          <span>Delete</span>
+        </div>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+));
+
+/* ============================================================================================
+    MEMOIZED FORM FIELDS
+============================================================================================ */
+const FormFields = React.memo(({ data, setData, availableTypes }) => {
+  const field = (key) => ({
+    value: data[key] ?? "",
+    onChange: (e) =>
+      setData((prev) => ({
+        ...prev,
+        [key]: e.target.value
+      }))
   });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-      {/* VALUE */}
+
       <div>
-        <Label>
-          Value <span className="text-red-500">*</span>
-        </Label>
-        <Input {...field("value")} placeholder="e.g., salary-range" />
+        <Label>Value *</Label>
+        <Input {...field("Value")} placeholder="e.g. salary-range" />
       </div>
 
-      {/* LABEL */}
       <div>
-        <Label>
-          Label <span className="text-red-500">*</span>
-        </Label>
-        <Input {...field("label")} placeholder="Readable label" />
+        <Label>Label *</Label>
+        <Input {...field("Label")} placeholder="Readable label" />
       </div>
 
-      {/* DESCRIPTION */}
       <div className="md:col-span-2">
         <Label>Description</Label>
-        <Textarea {...field("description")} placeholder="Explain rule logic" />
+        <Textarea {...field("Description")} placeholder="Description" />
       </div>
 
-      {/* CATEGORY */}
       <div>
         <Label>Category</Label>
-        <Input {...field("category")} placeholder="Validation, HR, Finance…" />
+        <Input {...field("Category")} placeholder="Validation" />
       </div>
 
-      {/* SEVERITY */}
       <div>
         <Label>Severity</Label>
         <Select
-          value={data.severity}
-          onValueChange={(v) => setData({ ...data, severity: v })}
+          value={data.Severity}
+          onValueChange={(v) => setData((prev) => ({ ...prev, Severity: v }))}
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Select severity" />
-          </SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Severity" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="low">Low</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
@@ -95,43 +122,42 @@ const FormFields = ({ data, setData, availableTypes }) => {
         </Select>
       </div>
 
-      {/* HANDLER TYPE */}
       <div>
-        <Label>Validation Type</Label>
-        <Select
-          value={data.type}
-          onValueChange={(v) => setData({ ...data, type: v })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select handler type" />
-          </SelectTrigger>
+        <Label>Type</Label>
 
+        <Select
+          value={data.Type}
+          onValueChange={(v) => setData((prev) => ({ ...prev, Type: v }))}
+        >
+          <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
           <SelectContent>
             {availableTypes.map((t) => (
-              <SelectItem key={t} value={t}>
-                {t}
-              </SelectItem>
+              <SelectItem key={t} value={t}>{t}</SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        {/* MANUAL CUSTOM TYPE */}
         <Input
           className="mt-2"
-          value={data.type}
-          onChange={(e) => setData({ ...data, type: e.target.value })}
+          value={data.Type}
+          onChange={(e) => setData((prev) => ({ ...prev, Type: e.target.value }))}
           placeholder="OR type custom handler"
         />
       </div>
 
-      {/* CONDITION */}
       <div>
         <Label>Condition</Label>
-        <Input {...field("condition")} placeholder="Regex, min-max, list…" />
+        <Input {...field("Condition")} placeholder="regex / range / function" />
       </div>
+
+      <div>
+        <Label>DisplayOrder</Label>
+        <Input {...field("DisplayOrder")} placeholder="e.g. 1" />
+      </div>
+
     </div>
   );
-};
+});
 
 /* ============================================================
    MAIN COMPONENT
@@ -208,17 +234,18 @@ const RuleTypesManagement = () => {
   /* ============================================================
       VALIDATE FORM
   ============================================================ */
-  const validateForm = () => {
-    if (!formData.value.trim() || !formData.label.trim()) {
+  const validateForm = useCallback(() => {
+    if (!formData.value || !formData.label) {
       toast({
-        title: "Required",
-        description: "Value and Label are required.",
+        title: "Missing fields",
+        description: "Value & Label are required.",
         variant: "destructive",
       });
       return false;
     }
     return true;
-  };
+  }, [formData]);
+
 
   /* ============================================================
       CREATE RULE
@@ -269,19 +296,31 @@ const RuleTypesManagement = () => {
   /* ============================================================
       DELETE
   ============================================================ */
-  const handleDelete = async (id) => {
-    try {
-      await ruleTypesService.deleteRuleType(id);
-      toast({ title: "Deleted", description: "Rule removed." });
-      fetchRuleTypes();
-    } catch {
-      toast({
-        title: "Error",
-        description: "Delete failed.",
-        variant: "destructive",
-      });
+  const handleDelete = useCallback(async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This cannot be undone.",
+      icon: "warning",
+      showCancelButton: true
+    });
+
+    if (result.isConfirmed) {
+      //  await dispatch(DeleteRuleType(id));
+      // dispatch(GetRuleTypes());
+      try {
+        await ruleTypesService.deleteRuleType(id);
+        toast({ title: "Deleted", description: "Rule removed." });
+        fetchRuleTypes();
+      } catch {
+        toast({
+          title: "Error",
+          description: "Delete failed.",
+          variant: "destructive",
+        });
+      }
     }
-  };
+  }, []);
+
 
   /* ============================================================
       TEST RULE
@@ -330,11 +369,9 @@ const RuleTypesManagement = () => {
       TABLE COLUMNS
   ============================================================ */
   const columns = [
-    { key: "label", label: "Label" },
-    { key: "value", label: "Key" },
-    { key: "type", label: "Type" },
+    { key: "label", label: "Label", sticky: true },
+    { key: "value", label: "Value", sticky: true },
     { key: "category", label: "Category" },
-    { key: "condition", label: "Condition" },
     { key: "description", label: "Description" },
     {
       key: "severity",
@@ -345,41 +382,29 @@ const RuleTypesManagement = () => {
             v === "high"
               ? "bg-red-100 text-red-800"
               : v === "medium"
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-green-100 text-green-800"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-green-100 text-green-800"
           }
         >
           {v}
         </Badge>
       ),
     },
+    { key: "condition", label: "Condition" },
+    { key: "type", label: "Type" },
+
   ];
 
-  const renderActions = (row) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleTestRule(row)}>
-          <Play className="mr-2 h-4 w-4" /> Test
-        </DropdownMenuItem>
-
-        <DropdownMenuItem onClick={() => openDialog("edit", row)}>
-          <Edit className="mr-2 h-4 w-4" /> Edit
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={() => handleDelete(row.id)}
-          className="text-red-600"
-        >
-          <Trash2 className="mr-2 h-4 w-4" /> Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+  const ActionsRenderer = useCallback(
+    (row) => (
+      <ActionsComponent
+        row={row}
+        onTest={handleTestRule}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    ),
+    [handleTestRule, handleEdit, handleDelete]
   );
 
   /* ============================================================
@@ -405,7 +430,8 @@ const RuleTypesManagement = () => {
           title="Rule Types"
           data={ruleTypes}
           columns={columns}
-          renderActions={renderActions}
+          renderActions={ActionsRenderer}
+          stickyRight={true}
         />
       )}
 

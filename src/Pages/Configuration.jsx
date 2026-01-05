@@ -14,7 +14,7 @@ import { Settings, X } from "lucide-react";
 import AppIcon from "../Component/AppIcon";
 import Loading from "../Component/Loading";
 import DynamicLazyImport from "../Component/DynamicLazyImport";
-import useCrypto from "../Security/useCrypto";
+import CryptoService from "../Security/useCrypto.jsx";
 import { menuItems } from "../Data/StaticData";
 
 
@@ -76,7 +76,6 @@ const Configuration = () => {
   const [isAddEditMode, setIsAddEditMode] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { encrypt, decrypt } = useCrypto();
 
   /* -----------------------------------------------------------------------
      ACTIVE ITEM
@@ -94,14 +93,14 @@ const Configuration = () => {
     const id = searchParams.get("id");
 
     // 1️⃣ Decrypt tab from path params
-    const decryptedTab = decrypt(tab);
+    const decryptedTab = CryptoService.DecryptWithAES(tab);
     if (decryptedTab && configItems.some(item => item.key === decryptedTab)) {
       setActiveMenu(decryptedTab);
     } else {
       // 2️⃣ Otherwise set first tab & update URL
       const firstKey = configItems[0].key;
       setActiveMenu(firstKey);
-      navigate(`/config/${encrypt(firstKey)}`);
+      navigate(`/config/${CryptoService.EncryptWithAES(firstKey)}`);
     }
 
     // 3️⃣ Add/Edit mode
@@ -114,7 +113,7 @@ const Configuration = () => {
       setCurrentItem(id ? { id: Number(id) } : null);
     }
 
-  }, [tab, searchParams, configItems, navigate, encrypt, decrypt]);
+  }, [tab, searchParams, configItems, navigate,CryptoService]);
 
   /* -----------------------------------------------------------------------
      MENU SELECT (updates URL)
@@ -123,9 +122,9 @@ const Configuration = () => {
     setActiveMenu(key);
     setIsAddEditMode(false);
     setCurrentItem(null);
-    navigate(`/config/${encrypt(key)}`);
+    navigate(`/config/${CryptoService.EncryptWithAES(key)}`);
     setMobileMenuOpen(false);
-  }, [navigate, encrypt]);
+  }, [navigate]);
 
   /* -----------------------------------------------------------------------
      ON SAVE / CANCEL

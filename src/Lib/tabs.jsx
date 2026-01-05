@@ -56,7 +56,6 @@ export const TabsTrigger = React.memo(TabsTriggerBase);
 const TabsContentBase = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    forceMount                                      // ⭐ content stays mounted
     className={cn(
       "mt-2",
       "ring-offset-background focus-visible:outline-none",
@@ -66,6 +65,7 @@ const TabsContentBase = React.forwardRef(({ className, ...props }, ref) => (
     {...props}
   />
 ));
+
 TabsContentBase.displayName = "TabsContent";
 
 export const TabsContent = React.memo(TabsContentBase);

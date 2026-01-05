@@ -74,7 +74,7 @@ const router = createBrowserRouter([
       },
       // Configuration Hub
       {path: "config/:tab", element: <Configuration /> },
-      // {path: "config", element: <Configuration /> },
+      {path: "config", element: <Configuration /> },
       
       { path: "employee", element: <Employee /> },
       // Configurable Input Templates

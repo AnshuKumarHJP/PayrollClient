@@ -21,6 +21,7 @@ import {
 
 import ClientAPI from "../../services/ClientApi";
 import { toast } from "../../Lib/use-toast";
+import CryptoService from "../../Security/useCrypto";
 
 /* ===============================================================
 // FieldValidationRule Actions - Added for FieldValidationRule API integration
@@ -34,7 +35,7 @@ export const GetAllFieldValidationRules = () => async (dispatch) => {
   dispatch({ type: GET_ALL_FIELDVALIDATIONRULES_REQUEST });
 
   try {
-    const res = await ClientAPI.get("/api/FieldValidationRule/GetAllFieldValidationRules");
+    const res = await ClientAPI("/api/FieldValidationRule/GetAllFieldValidationRules", null, "GET", null, 'normal');
     dispatch({ type: GET_ALL_FIELDVALIDATIONRULES_SUCCESS, payload: res.data });
     return res.data;
   } catch (error) {
@@ -53,7 +54,7 @@ export const GetFieldValidationRuleById = (id) => async (dispatch) => {
   dispatch({ type: GET_FIELDVALIDATIONRULE_REQUEST });
 
   try {
-    const res = await ClientAPI(`/api/FieldValidationRule/GetFieldValidationRuleById?Id=${id}`, null, "GET");
+    const res = await ClientAPI(`/api/FieldValidationRule/GetFieldValidationRuleById?Id=${id}`, null, "GET", null, 'normal');
     console.log(res.data);
 
     dispatch({ type: GET_FIELDVALIDATIONRULE_SUCCESS, payload: res.data });
@@ -71,22 +72,40 @@ export const GetFieldValidationRuleById = (id) => async (dispatch) => {
 // UPSERT FieldValidationRule
 ================================================================ */
 export const UpsertFieldValidationRule = (payload) => async (dispatch) => {
-  dispatch({ type: UPSERT_FIELDVALIDATIONRULE_REQUEST });
-
   try {
-    const res = await ClientAPI("/api/FieldValidationRule/UpsertFieldValidationRule", payload, "PUT");
+    const res = await ClientAPI("/api/FieldValidationRule/UpsertFieldValidationRule", payload, "PUT", null, "normal");
+    const decryptedResult = CryptoService.decrypt(res?.data);
 
-    dispatch({ type: UPSERT_FIELDVALIDATIONRULE_SUCCESS, payload: res.data });
+    if (!decryptedResult?.Status) {
+      const msg = decryptedResult?.Message || "Failed to save field validation rule";
 
-    toast({ title: "Success", description: "Field validation rule saved successfully." });
+      toast({
+        title: "Error",
+        description: msg,
+        variant: "destructive",
+      });
 
-    return res.data;
+      throw new Error(msg);
+    }
+    toast({
+      title: "Success",
+      description: decryptedResult?.Message || "Saved successfully",
+    });
+
+    // ✅ return decrypted payload to caller
+    return decryptedResult;
+
   } catch (error) {
-    const msg = error.response?.data?.message || "Failed to save field validation rule";
+    const msg =
+      error?.response?.data?.Message ||
+      error?.message ||
+      "Failed to save field validation rule";
 
-    dispatch({ type: UPSERT_FIELDVALIDATIONRULE_FAILURE, payload: msg });
-
-    toast({ title: "Error", description: msg, variant: "destructive" });
+    toast({
+      title: "Error",
+      description: msg,
+      variant: "destructive",
+    });
 
     throw error;
   }
@@ -99,7 +118,7 @@ export const DeleteFieldValidationRuleById = (id) => async (dispatch) => {
   dispatch({ type: DELETE_FIELDVALIDATIONRULE_REQUEST });
 
   try {
-    const res = await ClientAPI("/api/FieldValidationRule/DeleteFieldValidationRuleById", { Id: id }, "PUT");
+    const res = await ClientAPI("/api/FieldValidationRule/DeleteFieldValidationRuleById", { Id: id }, "PUT", null, 'normal');
 
     dispatch({ type: DELETE_FIELDVALIDATIONRULE_SUCCESS, payload: res.data });
 

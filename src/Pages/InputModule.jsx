@@ -7,14 +7,13 @@ import Loading from '../Component/Loading'
 
 // 🟢 Framer Motion
 import { motion } from "framer-motion";
-import useCrypto from "../Security/useCrypto";
+import CryptoService from "../Security/useCrypto.jsx";
+
 import AppIcon from "../Component/AppIcon";
 
 const InputModule = () => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { encrypt } = useCrypto();
-
   // ----------------------------------------------------
   // LOAD MODULES
   // ----------------------------------------------------
@@ -27,7 +26,7 @@ const InputModule = () => {
 
         // Map templates to UI model
         const mapped = activeTemplates.map((template) => {
-          const encryptedId = encrypt(template.id.toString()); // 🔥 encrypt ID
+          const encryptedId = CryptoService.EncryptWithAEs(template.id.toString()); // 🔥 encrypt ID
           return {
             title: template.name,
             description: template.description || `Manage ${template.module} related data.`,

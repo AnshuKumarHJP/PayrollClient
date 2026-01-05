@@ -1,3 +1,7 @@
 - [x] Add FieldValidationRule action type constants in ActionType.js
 - [x] Add FieldValidationRule action functions in Action.js
+- [x] Implement auto-detection of API URLs based on endpoint patterns
+- [x] Update ClientApi.js to use environment variables from .env file
+- [x] Update all FormBuilder actions to use only VITE_NORMAL_API_URL
+- [x] Implement apiType flag system to eliminate duplicate baseUrl code
 - [x] Verify API endpoints and test integration

@@ -44,13 +44,39 @@ export const DownloadTypes = [
    CONFIG MENU ITEMS
 ------------------------------------------------------------------------ */
 export const menuItems = [
-  { key: "fieldValidationRuleForm", title: "Field Validation Rule", icon: "Settings2", PagePath: "../Pages/FieldValidationRuleForm.jsx", PageEditPath: "../Pages/FieldValidationRuleForm.jsx" },
+  { key: "fieldValidationRuleForm", title: "Field Validation Rule", icon: "Settings2", PagePath: "../Pages/FieldValidationRuleList.jsx", PageEditPath: "../Pages/FieldValidationRuleForm.jsx" },
   { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   { key: "templates-preview", title: "Template Preview", icon: "FileText", PagePath: "../Pages/Builder/ExcelTemplatePreview.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "rule-types", title: "Validation Rule Types", icon: "ShieldCheck", PagePath: "../Pages/RuleTypesManagement.jsx", PageEditPath: "../Pages/RuleTypesManagement.jsx" },
   { key: "mapping-inputs", title: "Mapping Payroll Inputs to Clients", icon: "ArrowRightLeft", PagePath: "../Pages/PayrollInputMapping.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   { key: "config", title: "Configuration Menu", icon: "Settings2", PagePath: "../Pages/ConfigurationPage.jsx", PageEditPath: "../Pages/ConfigurationPage.jsx" },
+];
+
+
+
+// 🔹 Validation Types
+export const ValidationTypes = [
+  { label: "None", value: 0 },   // NONE
+  { label: "Length", value: 1 },   // LENGTH
+  { label: "Regex", value: 2 },    // REGEX
+  { label: "Range", value: 3 },    // RANGE
+  { label: "Custom", value: 4 },   // CUSTOM
+];
+
+// 🔹 Severity Levels
+export const Severities = [
+  { label: "None", value: 0 },   // NONE
+  { label: "High", value: 1 },     // HIGH
+  { label: "Medium", value: 2 },   // MEDIUM
+  { label: "Low", value: 3 },      // LOW
+];
+
+// 🔹 Categories
+export const Categories = [
+  { label: "None", value: 0 },   // NONE
+  { label: "Identity", value: 1 },   // IDENTITY
+  { label: "Financial", value: 2 },  // FINANCIAL
+  { label: "Contact", value: 3 },    // CONTACT
 ];

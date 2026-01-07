@@ -1,24 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Card, CardContent } from "../../Lib/card";
 import { Button } from "../../Lib/button";
-import { Input } from "../../Lib/input";
 import { Badge } from "../../Lib/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Lib/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
-import { FileText, Plus, Search, Edit, Copy, Trash2, Eye, Loader2, Download, Upload } from "lucide-react";
+import { FileText, Plus, Edit, Trash2, Download } from "lucide-react";
 import { templateService } from "../../../api/services/templateService";
 import { useToast } from "../../Lib/use-toast";
+import AdvanceTable from "../../Component/AdvanceTable";
 
 const TemplateList = ({ onAddEditMode }) => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedModule, setSelectedModule] = useState("all");
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { toast } = useToast();
-
   useEffect(() => {
     fetchTemplates();
   }, []);
@@ -40,8 +35,6 @@ const TemplateList = ({ onAddEditMode }) => {
       setLoading(false);
     }
   };
-
-  const filteredTemplates = templates.filter(template => template.name && template.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -123,12 +116,99 @@ const TemplateList = ({ onAddEditMode }) => {
     return sum;
   }, 0);
 
+  // Define columns for AdvanceTable
+  const columns = [
+    {
+      key: "name",
+      label: "Template Name",
+      minWidth: 200,
+      render: (value) => <span className="font-medium">{value}</span>
+    },
+    {
+      key: "version",
+      label: "Version",
+      minWidth: 100
+    },
+    {
+      key: "status",
+      label: "Status",
+      minWidth: 120,
+      render: (value) => getStatusBadge(value)
+    },
+    {
+      key: "fields",
+      label: "Fields",
+      minWidth: 100,
+      render: (value) => {
+        if (Array.isArray(value)) return value.length;
+        if (typeof value === 'number' && !isNaN(value)) return value;
+        return 0;
+      }
+    },
+    {
+      key: "Icon",
+      label: "Icon",
+      minWidth: 100
+    },
+    {
+      key: "lastModified",
+      label: "Last Modified",
+      minWidth: 150,
+      type: "date",
+      render: (value) => {
+        if (!value) return "-";
+        return new Date(value).toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    },
+    {
+      key: "createdBy",
+      label: "Created By",
+      minWidth: 120
+    }
+  ];
+
+  // Define renderActions for AdvanceTable
+  const renderActions = (row) => (
+     <div className="inline-flex items-center gap-1">
+      <Button
+        size="sm"
+        variant="warning"
+        onClick={() => handleEdit(row.id)}
+        title="Edit"
+      >
+        <Edit size={14} />
+      </Button>
+      <Button
+        size="sm"
+        variant="purple"
+        onClick={() => handleExportTemplate(row.id, 'json')}
+        title="Export JSON"
+      >
+        <Download size={14} />
+      </Button>
+      <Button
+        size="sm"
+        variant="destructive"
+        onClick={() => handleDelete(row.id)}
+        title="Delete"
+      >
+        <Trash2 size={14} />
+      </Button>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="p-2">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
+            <FileText className="h-6 w-6 animate-spin" />
             <span>Loading templates...</span>
           </div>
         </div>
@@ -213,102 +293,20 @@ const TemplateList = ({ onAddEditMode }) => {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Search Templates</label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  placeholder="Search by template name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Templates Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Templates</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Template Name</TableHead>
-                  <TableHead>Version</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Fields</TableHead>
-                  <TableHead>Icon</TableHead>
-                  <TableHead>Last Modified</TableHead>
-                  <TableHead>Created By</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTemplates.map((template,index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{template.name}</TableCell>
-                    <TableCell>{template.version}</TableCell>
-                    <TableCell>{getStatusBadge(template.status)}</TableCell>
-                    <TableCell>{Array.isArray(template.fields) ? template.fields.length : (typeof template.fields === 'number' && !isNaN(template.fields) ? template.fields : 0)}</TableCell>
-                    <TableCell>{template.Icon}</TableCell>
-                    <TableCell>
-                      {template.lastModified
-                        ? new Date(template.lastModified).toLocaleString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                        : "-"}
-                    </TableCell>
-
-                    <TableCell>{template.createdBy}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(template.id)}
-                          title="Edit"
-                        >
-                          <Edit size={14} />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleExportTemplate(template.id, 'json')}
-                          title="Export JSON"
-                        >
-                          <Download size={14} />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(template.id)}
-                          title="Delete"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <AdvanceTable
+        title="Templates"
+        columns={columns}
+        data={templates}
+        renderActions={renderActions}
+        renderActionsWidth={120}
+        stickyRight={true}
+        isLoading={loading}
+        icon="FileText"
+        // showIndex={true}
+      />
     </div>
   );
 };

@@ -239,7 +239,7 @@ const Configuration = () => {
           {/* DESKTOP */}
           <div
             activity:id="config-content-desktop"
-            className="hidden md:block bg-white shadow rounded-xl min-h-[300px] overflow-y-auto min-w-0"
+            className="hidden md:block min-h-[300px] overflow-y-auto min-w-0"
           >
             {content}
           </div>
@@ -247,7 +247,7 @@ const Configuration = () => {
           {/* MOBILE */}
           <div
             activity:id="config-content-mobile"
-            className="md:hidden bg-white shadow rounded-xl min-h-[300px] min-w-0"
+            className="md:hidden min-h-[300px] min-w-0"
           >
             {content}
           </div>

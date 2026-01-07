@@ -23,12 +23,18 @@ import {
   computeRightOffsets,
   getColStyle,
   EllipsisCell,
-  ResizeHandle
+  ResizeHandle,
+  normalizeValue
 } from "./TableHelper";
 import { Switch } from "../Lib/switch";
 import AppIcon from "./AppIcon";
 import { Density, DownloadTypes } from "../Data/StaticData";
 import DropdownSelect from "./DropdownSelect";
+import Tableskeleton from "../Skeleton/Tableskeleton";
+
+
+/* ---------------- SAFE HELPERS ---------------- */
+const safeArray = (v) => (Array.isArray(v) ? v : []);
 
 /* ---------------- READ NESTED ---------------- */
 const getValue = (obj, path) =>
@@ -55,11 +61,13 @@ const AdvanceTable = ({
   columnGroups = [],
   data = [],
   renderActions,
+  renderActionsWidth=90,
   stickyRight = false,
-  onBack,
+  isLoading = false,
   icon,
-  showIndex = true
+  showIndex = false
 }) => {
+  const safeData = useMemo(() => safeArray(data), [data]);
   const [cols, setCols] = useState(columns);
   const [visibleCols, setVisibleCols] = useState(columns.map((c) => c.key));
   const [sortConfig, setSortConfig] = useState("asc");
@@ -71,7 +79,7 @@ const AdvanceTable = ({
 
   const [isSmall, setIsSmall] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const resizing = useRef({
     columnIndex: null,
@@ -79,27 +87,34 @@ const AdvanceTable = ({
     startWidth: 0
   });
 
-  /* ---------------- SORT ---------------- */
-  const toggleSort = (key) => {
-    setSortConfig((prev) => {
-      if (!prev || prev.key !== key) return { key, direction: "asc" };
-      if (prev.direction === "asc") return { key, direction: "desc" };
-      return null;
-    });
-  };
+  /* ---------------- SORT TOGGLE ---------------- */
+const toggleSort = (key) => {
+  setSortConfig((prev) => {
+    if (!prev || prev.key !== key) {
+      return { key, direction: "asc" };
+    }
+    if (prev.direction === "asc") {
+      return { key, direction: "desc" };
+    }
+    return null; // reset (no sort)
+  });
+};
 
-  const sortRows = (rows) => {
-    if (!sortConfig) return rows;
-    const { key, direction } = sortConfig;
+/* ---------------- SORT ROWS ---------------- */
+const sortRows = (rows) => {
+  if (!sortConfig) return rows;
 
-    return [...rows].sort((a, b) => {
-      const A = getValue(a, key);
-      const B = getValue(b, key);
-      if (A < B) return direction === "asc" ? -1 : 1;
-      if (A > B) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  };
+  const { key, direction } = sortConfig;
+
+  return [...rows].sort((a, b) => {
+    const A = normalizeValue(getValue(a, key));
+    const B = normalizeValue(getValue(b, key));
+
+    if (A < B) return direction === "asc" ? -1 : 1;
+    if (A > B) return direction === "asc" ? 1 : -1;
+    return 0;
+  });
+};
 
   /* ---------------- FILTER ---------------- */
   const filtered = useMemo(() => {
@@ -286,9 +301,24 @@ const AdvanceTable = ({
 
         {/* TABLE */}
         <CardContent className="px-4">
-          <div className="border rounded-md overflow-x-auto">
-            <Table
-              className={`
+          {/* 🔥 LOADING STATE */}
+          {isLoading && (
+            <div className="flex items-center justify-center h-52">
+              <Tableskeleton />
+            </div>
+          )}
+
+          {/* ❌ EMPTY STATE */}
+          {!isLoading && safeData.length === 0 && (
+            <Tableskeleton />
+          )}
+
+          {/* ✅ TABLE */}
+          {!isLoading && safeData.length > 0 && (
+            <>
+              <div className="border rounded-md overflow-x-auto">
+                <Table
+                  className={`
                 text-sm w-full ${sizeClass}
                 [&_th]:px-0 [&_td]:px-0
                 [&_tbody_tr:nth-child(odd)>td]:bg-gray-50
@@ -299,183 +329,69 @@ const AdvanceTable = ({
                 [&_tbody_td]:border-l [&_tbody_td]:border-r [&_tbody_td]:border-gray-200
                 [&_thead_th]:border-l [&_thead_th]:border-r [&_thead_th]:border-gray-300
               `}
-            >
-              <TableHeader className="bg-emerald-100">
-                {/* GROUP HEADERS */}
-                {columnGroups.length > 0 && (
-                  <TableRow>
-                    {showIndex && (
-                      <TableCell
-                        onMouseEnter={() => setHoveredCol("__index__")}
-                        onMouseLeave={() => setHoveredCol(null)}
-                        className={`
+                >
+                  <TableHeader className="bg-emerald-100">
+                    {/* GROUP HEADERS */}
+                    {columnGroups.length > 0 && (
+                      <TableRow>
+                        {showIndex && (
+                          <TableCell
+                            onMouseEnter={() => setHoveredCol("__index__")}
+                            onMouseLeave={() => setHoveredCol(null)}
+                            className={`
                           border-l border-r border-gray-300
                           ${hoveredCol === "__index__" ? "bg-emerald-200" : "bg-emerald-100"}
                         `}
-                        style={{
-                          position: isSmall ? "relative" : "sticky",
-                          left: isSmall ? "auto" : 0,
-                          zIndex: 10,
-                          width: 60,
-                          paddingLeft: "10px"
-                        }}
-                      >
-                        #
-                      </TableCell>
-                    )}
+                            style={{
+                              position: isSmall ? "relative" : "sticky",
+                              left: isSmall ? "auto" : 0,
+                              zIndex: 10,
+                              width: 60,
+                              paddingLeft: "10px"
+                            }}
+                          >
+                            #
+                          </TableCell>
+                        )}
 
-                    {columnGroups.map((grp) => (
-                      <TableHead
-                        key={grp.title}
-                        colSpan={grp.span}
-                        className="bg-emerald-100 text-center font-semibold border-l border-r border-gray-300"
-                      >
-                        {grp.title}
-                      </TableHead>
-                    ))}
+                        {columnGroups.map((grp) => (
+                          <TableHead
+                            key={grp.title}
+                            colSpan={grp.span}
+                            className="bg-emerald-100 text-center font-semibold border-l border-r border-gray-300"
+                          >
+                            {grp.title}
+                          </TableHead>
+                        ))}
 
-                    {renderActions && (
-                      <TableHead
-                        onMouseEnter={() => setHoveredCol("__actions__")}
-                        onMouseLeave={() => setHoveredCol(null)}
-                        style={{ padding: "5px" }}
-                        className={`
+                        {renderActions && (
+                          <TableHead
+                            onMouseEnter={() => setHoveredCol("__actions__")}
+                            onMouseLeave={() => setHoveredCol(null)}
+                            style={{ padding: "5px",width: renderActionsWidth }}
+                            className={`
                           border-l border-r border-gray-300 text-center
                           ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
                         `}
-                      >
-                        Actions
-                      </TableHead>
+                          >
+                            Actions
+                          </TableHead>
+                        )}
+                      </TableRow>
                     )}
-                  </TableRow>
-                )}
 
-                {/* MAIN HEADER */}
-                <TableRow className="group">
-                  {/* INDEX HEADER */}
-                  {showIndex && (
-                    <TableHead
-                      onMouseEnter={() => setHoveredCol("__index__")}
-                      onMouseLeave={() => setHoveredCol(null)}
-                      className={`
+                    {/* MAIN HEADER */}
+                    <TableRow className="group">
+                      {/* INDEX HEADER */}
+                      {showIndex && (
+                        <TableHead
+                          onMouseEnter={() => setHoveredCol("__index__")}
+                          onMouseLeave={() => setHoveredCol(null)}
+                          className={`
                         border-l border-r border-gray-300 
                         transition-colors
                         ${hoveredCol === "__index__" ? "bg-emerald-200" : "bg-emerald-100"}
                       `}
-                      style={{
-                        position: isSmall ? "relative" : "sticky",
-                        left: isSmall ? "auto" : 0,
-                        zIndex: 10,
-                        width: 60,
-                        paddingLeft: "10px"
-                      }}
-                    >
-                      #
-                    </TableHead>
-                  )}
-
-                  {/* DYNAMIC HEADERS */}
-                  {cols
-                    .filter((c) => visibleCols.includes(c.key))
-                    .map((col, idx) => (
-                      <TableHead
-                        key={col.key}
-                        onMouseEnter={() => setHoveredCol(col.key)}
-                        onMouseLeave={() => setHoveredCol(null)}
-                        className={`
-                          border-l border-r border-gray-300 
-                          transition-colors duration-200
-                          ${hoveredCol === col.key ? "bg-emerald-200" : "bg-emerald-100"}
-                        `}
-                        style={getColStyle(
-                          col,
-                          idx,
-                          leftOffsets,
-                          isSmall,
-                          rightOffsets,
-                          true
-                        )}
-                      >
-                        {/* FILTER */}
-                        <div className="px-2">
-                          <Input
-                            placeholder={`Search ${col.label}`}
-                            className=" h-7 px-1text-xs  bg-transparent border-0 border-b border-gray-400 rounded-none outline-none
-                           ring-0 ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-b focus:border-emerald-600
-                            shadow-none focus:shadow-none px-0"
-                            value={colFilters[col.key] || ""}
-                            onChange={(e) =>
-                              setColFilters((p) => ({
-                                ...p,
-                                [col.key]: e.target.value
-                              }))
-                            }
-                          />
-                        </div>
-
-                        {/* LABEL / SORT */}
-                        <div
-                          onClick={() => toggleSort(col.key)}
-                          className="mt-3 cursor-pointer flex items-center justify-between px-2 select-none"
-                        >
-                          {col.label}
-                          {sortConfig?.key === col.key &&
-                            (sortConfig.direction === "asc" ? (
-                              <AppIcon name="ArrowUpNarrowWide" size={14} />
-                            ) : (
-                              <AppIcon name="ArrowDownWideNarrow" size={14} />
-                            ))}
-                        </div>
-
-                        <ResizeHandle
-                          onMouseDown={(e) =>
-                            startResize(e, idx, col.width || col.minWidth)
-                          }
-                        />
-                      </TableHead>
-                    ))}
-
-                  {/* ACTION HEADER */}
-                  {renderActions && (
-                    <TableHead
-                      onMouseEnter={() => setHoveredCol("__actions__")}
-                      onMouseLeave={() => setHoveredCol(null)}
-                      style={{ padding: "5px" }}
-                      className={`
-                        md:sticky right-0 border-l border-r border-gray-300
-                        text-center px-3 z-10
-                        transition-colors
-                        ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
-                      `}
-                    >
-                      Actions
-                    </TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-
-              {/* BODY */}
-              <TableBody>
-                {pageRows.map((row, i) => {
-                  const rowId =
-                    row.id || row._id || row.empCode || `row-${i}`;
-
-                  return (
-                    <motion.tr
-                      key={rowId}
-                      variants={rowAnim}
-                      initial="hidden"
-                      animate="show"
-                    >
-                      {/* INDEX CELL */}
-                      {showIndex && (
-                        <TableCell
-                          onMouseEnter={() => setHoveredCol("__index__")}
-                          onMouseLeave={() => setHoveredCol(null)}
-                          className={`
-                            border-l border-r border-gray-200 pl-4
-                            ${hoveredCol === "__index__" ? "bg-emerald-100" : "bg-white"}
-                          `}
                           style={{
                             position: isSmall ? "relative" : "sticky",
                             left: isSmall ? "auto" : 0,
@@ -484,78 +400,194 @@ const AdvanceTable = ({
                             paddingLeft: "10px"
                           }}
                         >
-                          {(currentPage - 1) * rowsPerPage + i + 1}
-                        </TableCell>
+                          #
+                        </TableHead>
                       )}
 
-                      {/* BODY CELLS */}
+                      {/* DYNAMIC HEADERS */}
                       {cols
                         .filter((c) => visibleCols.includes(c.key))
-                        .map((col, idx) => {
-                          const raw = getValue(row, col.key);
-                          const val = col.render
-                            ? col.render(raw, row)
-                            : formatValue(raw, col.type);
+                        .map((col, idx) => (
+                          <TableHead
+                            key={col.key}
+                            onMouseEnter={() => setHoveredCol(col.key)}
+                            onMouseLeave={() => setHoveredCol(null)}
+                            className={`
+                          border-l border-r border-gray-300 
+                          transition-colors duration-200
+                          ${hoveredCol === col.key ? "bg-emerald-200" : "bg-emerald-100"}
+                        `}
+                            style={getColStyle(
+                              col,
+                              idx,
+                              leftOffsets,
+                              isSmall,
+                              rightOffsets,
+                              true
+                            )}
+                          >
+                            {/* FILTER */}
+                            <div className="px-2">
+                              <Input
+                                placeholder={`Search ${col.label}`}
+                                className=" h-7 px-1text-xs  bg-transparent border-0 border-b border-gray-400 rounded-none outline-none
+                           ring-0 ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-b focus:border-emerald-600
+                            shadow-none focus:shadow-none px-0"
+                                value={colFilters[col.key] || ""}
+                                onChange={(e) =>
+                                  setColFilters((p) => ({
+                                    ...p,
+                                    [col.key]: e.target.value
+                                  }))
+                                }
+                              />
+                            </div>
 
-                          return (
+                            {/* LABEL / SORT */}
+                            <div
+                              onClick={() => toggleSort(col.key)}
+                              className="mt-3 cursor-pointer flex items-center justify-between px-2 select-none"
+                            >
+                              {col.label}
+                              {sortConfig?.key === col.key &&
+                                (sortConfig.direction === "asc" ? (
+                                  <AppIcon name="ArrowUpNarrowWide" size={14} />
+                                ) : (
+                                  <AppIcon name="ArrowDownWideNarrow" size={14} />
+                                ))}
+                            </div>
+
+                            <ResizeHandle
+                              onMouseDown={(e) =>
+                                startResize(e, idx, col.width || col.minWidth)
+                              }
+                            />
+                          </TableHead>
+                        ))}
+
+                      {/* ACTION HEADER */}
+                      {renderActions && (
+                        <TableHead
+                          onMouseEnter={() => setHoveredCol("__actions__")}
+                          onMouseLeave={() => setHoveredCol(null)}
+                          style={{ padding: "5px",width: renderActionsWidth }}
+                          className={`
+                        md:sticky right-0 border-l border-r border-gray-300
+                        text-center px-3 z-10
+                        transition-colors
+                        ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
+                      `}
+                        >
+                          Actions
+                        </TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+
+                  {/* BODY */}
+                  <TableBody>
+                    {pageRows.map((row, i) => {
+                      const rowId =
+                        row.id || row._id || row.empCode || `row-${i}`;
+
+                      return (
+                        <motion.tr
+                          key={rowId}
+                          variants={rowAnim}
+                          initial="hidden"
+                          animate="show"
+                        >
+                          {/* INDEX CELL */}
+                          {showIndex && (
                             <TableCell
-                              key={`${rowId}-${col.key}`}
-                              onMouseEnter={() => setHoveredCol(col.key)}
+                              onMouseEnter={() => setHoveredCol("__index__")}
                               onMouseLeave={() => setHoveredCol(null)}
                               className={`
+                            border-l border-r border-gray-200 pl-4
+                            ${hoveredCol === "__index__" ? "bg-emerald-100" : "bg-white"}
+                          `}
+                              style={{
+                                position: isSmall ? "relative" : "sticky",
+                                left: isSmall ? "auto" : 0,
+                                zIndex: 10,
+                                width: 60,
+                                paddingLeft: "10px"
+                              }}
+                            >
+                              {(currentPage - 1) * rowsPerPage + i + 1}
+                            </TableCell>
+                          )}
+
+                          {/* BODY CELLS */}
+                          {cols
+                            .filter((c) => visibleCols.includes(c.key))
+                            .map((col, idx) => {
+                              const raw = getValue(row, col.key);
+                              const val = col.render
+                                ? col.render(raw, row)
+                                : formatValue(raw, col.type);
+
+                              return (
+                                <TableCell
+                                  key={`${rowId}-${col.key}`}
+                                  onMouseEnter={() => setHoveredCol(col.key)}
+                                  onMouseLeave={() => setHoveredCol(null)}
+                                  className={`
                                 px-2 border-l border-r border-gray-200
                                 transition-colors
                                 ${hoveredCol === col.key ? "bg-emerald-100" : ""}
                               `}
-                              style={getColStyle(
-                                col,
-                                idx,
-                                leftOffsets,
-                                isSmall,
-                                rightOffsets,
-                                false
-                              )}
-                            >
-                              <EllipsisCell
-                                width={col.width || col.minWidth || 150}
-                              >
-                                {val}
-                              </EllipsisCell>
-                            </TableCell>
-                          );
-                        })}
+                                  style={getColStyle(
+                                    col,
+                                    idx,
+                                    leftOffsets,
+                                    isSmall,
+                                    rightOffsets,
+                                    false
+                                  )}
+                                >
+                                  <EllipsisCell
+                                    width={col.width || col.minWidth || 150}
+                                  >
+                                    {val}
+                                  </EllipsisCell>
+                                </TableCell>
+                              );
+                            })}
 
-                      {/* ACTIONS CELL */}
-                      {renderActions && (
-                        <TableCell
-                          onMouseEnter={() => setHoveredCol("__actions__")}
-                          onMouseLeave={() => setHoveredCol(null)}
-                          style={{ padding: "5px" }}
-                          className={`
+                          {/* ACTIONS CELL */}
+                          {renderActions && (
+                            <TableCell
+                              onMouseEnter={() => setHoveredCol("__actions__")}
+                              onMouseLeave={() => setHoveredCol(null)}
+                              style={{ padding: "5px",width: renderActionsWidth }}
+                              className={`
                             md:sticky right-0 bg-white z-10 
                             border-l border-r border-gray-200 
                             text-center px-3
                             ${hoveredCol === "__actions__" ? "bg-emerald-100" : ""}
                           `}
-                        >
-                          {renderActions(row)}
-                        </TableCell>
-                      )}
-                    </motion.tr>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                            >
+                              {renderActions(row)}
+                            </TableCell>
+                          )}
+                        </motion.tr>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
 
-          {/* PAGINATION */}
-          <PaginationAdvance
-            count={totalPages}
-            page={currentPage}
-            rowsPerPage={rowsPerPage}
-            onChangePage={setCurrentPage}
-            onChangePageSize={setRowsPerPage}
-          />
+              {/* PAGINATION */}
+              <PaginationAdvance
+                count={totalPages}
+                page={currentPage}
+                rowsPerPage={rowsPerPage}
+                onChangePage={setCurrentPage}
+                onChangePageSize={setRowsPerPage}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
     </motion.div>

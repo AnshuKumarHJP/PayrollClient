@@ -2,6 +2,32 @@
 //  TABLE HELPER UTILITIES  (FINAL MERGED VERSION)
 // =============================================================
 
+ /* ---------------- NORMALIZE VALUE ---------------- */
+export const normalizeValue = (value) => {
+  if (value === null || value === undefined) return "";
+
+  // date
+  if (value instanceof Date) return value.getTime();
+
+  // numeric string → number
+  if (typeof value === "string" && !isNaN(value)) {
+    return Number(value);
+  }
+
+  // boolean
+  if (typeof value === "boolean") {
+    return value ? 1 : 0;
+  }
+
+  // string (case-insensitive)
+  if (typeof value === "string") {
+    return value.toLowerCase();
+  }
+
+  return value;
+};
+
+
 // -------------------------------------------------------------
 // LEFT sticky offsets
 // -------------------------------------------------------------

@@ -7,6 +7,7 @@ import { FileText, Plus, Edit, Trash2, Download } from "lucide-react";
 import { templateService } from "../../../api/services/templateService";
 import { useToast } from "../../Lib/use-toast";
 import AdvanceTable from "../../Component/AdvanceTable";
+import { SweetConfirm } from "../../Component/SweetAlert";
 
 const TemplateList = ({ onAddEditMode }) => {
   const navigate = useNavigate();
@@ -60,22 +61,26 @@ const TemplateList = ({ onAddEditMode }) => {
   };
 
   const handleDelete = async (templateId) => {
-    if (window.confirm("Are you sure you want to delete this template?")) {
-      try {
-        await templateService.delete(templateId);
-        fetchTemplates();
-        toast({
-          title: 'Success',
-          description: 'Template deleted successfully.',
-        });
-      } catch (err) {
-        toast({
-          title: 'Error',
-          description: 'Failed to delete template. Please try again.',
-          variant: 'destructive',
-        });
+    SweetConfirm({
+      title: "Delete Template",
+      text: "Are you sure you want to delete this template?",
+      onConfirm: async () => {
+        try {
+          await templateService.delete(templateId);
+          fetchTemplates();
+          toast({
+            title: 'Success',
+            description: 'Template deleted successfully.',
+          });
+        } catch (err) {
+          toast({
+            title: 'Error',
+            description: 'Failed to delete template. Please try again.',
+            variant: 'destructive',
+          });
+        }
       }
-    }
+    });
   };
 
   const handleExportTemplate = async (templateId, format = 'json') => {

@@ -8,10 +8,9 @@ import {
   DropdownMenuItem,
 } from "../Lib/dropdown-menu";
 
-import { Bell } from "lucide-react";
-
 // ⭐ ADD FRAMER MOTION
 import { motion, AnimatePresence } from "framer-motion";
+import AppIcon from "./AppIcon";
 
 export default function NotificationDropdown() {
   const [notifying, setNotifying] = useState(true);
@@ -38,8 +37,7 @@ export default function NotificationDropdown() {
               <span className="absolute inset-0 rounded-full bg-orange-400 opacity-75 animate-ping" />
             </span>
           )}
-
-          <Bell size={18} className="text-emerald-700" />
+          <AppIcon name={"Bell"} size={18} className="text-emerald-700"/>
         </motion.button>
       </DropdownMenuTrigger>
 
@@ -51,7 +49,7 @@ export default function NotificationDropdown() {
           exit={{ opacity: 0, scale: 0.96, y: -6 }}
           transition={{ duration: 0.18 }}
           className="
-            mt-3 w-[350px] sm:w-[360px] max-h-[480px]
+            mt-3 w-[320px] sm:w-[360px] max-h-[480px]
             rounded-md border border-emerald-200/60 bg-emerald-50/60
             backdrop-blur-xl shadow-xl p-3 flex flex-col
           "
@@ -94,13 +92,13 @@ export default function NotificationDropdown() {
 
                     {/* Text */}
                     <div className="flex-1">
-                      <p className="text-sm text-gray-700">
+                      <p className="text-[10px] md:text-sm text-gray-700">
                         <span className="font-semibold text-gray-900">Terry Franci</span>{" "}
                         requested permission to modify{" "}
                         <span className="font-semibold text-gray-900">Project – Nganter App</span>
                       </p>
 
-                      <p className="flex items-center gap-2 text-xs text-gray-500">
+                      <p className="text-[8px] md:text-xs flex items-center gap-2 text-gray-500">
                         <span>Project</span>
                         <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                         <span>5 min ago</span>
@@ -116,10 +114,10 @@ export default function NotificationDropdown() {
               <Link
                 to="/notifications"
                 className="
-                  px-4 py-2 text-sm font-medium text-center rounded-lg
+                  px-4 py-2 font-medium text-center rounded-lg
                   border border-emerald-200 bg-emerald-100/40
                   hover:bg-emerald-200/60 text-emerald-800
-                  transition-all shadow-sm block
+                  transition-all shadow-sm block text-[10px] md:text-sm
                 "
               >
                 View All Notifications

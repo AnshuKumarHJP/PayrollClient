@@ -1,8 +1,8 @@
-import { useState } from "react";
 import Modal from "../../Component/Modal";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
 import { Button } from "../../Lib/button";
+import { Badge } from "../../Lib/badge";
 import { Input } from "../../Lib/input";
 import { Label } from "../../Lib/label";
 import {
@@ -15,11 +15,11 @@ import {
 import { Textarea } from "../../Lib/textarea";
 import FileInput from "../../Lib/FileInput";
 
-const TemplatePreviewDialog = ({
+const FormBuilderPreviewDialog = ({
   isOpen,
   onOpenChange,
-  templateName,
-  templateDescription,
+  formName,
+  formDescription,
   isActive,
   version,
   fields,
@@ -29,38 +29,55 @@ const TemplatePreviewDialog = ({
     <Modal
       isOpen={isOpen}
       onClose={() => onOpenChange(false)}
-      title={`Template Preview: ${templateName || "New Template"}`}
       Header={
-        <div className="p-4">
-          <h2 className="text-lg font-semibold">
-            Template Preview: {templateName || "New Template"}
-          </h2>
-        </div>
+        <h2 className="text-sm sm:text-lg md:text-xl p-2">
+          Form Preview : {formName || "New Form"}
+        </h2>
       }
       Body={
-        <div className="space-y-6 p-4">
-          {/* TEMPLATE DETAILS */}
+        <div className="space-y-6">
+          {/* FORM DETAILS */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-lg mb-1">
-              {templateName || "Template Name"}
+            <h3 className="font-semibold
+               text-base sm:text-lg md:text-xl
+               mb-1">
+              {formName || "Form Name"}
             </h3>
-
-            {templateDescription && (
-              <p className="text-gray-600 text-sm">{templateDescription}</p>
+            {formDescription && (
+              <p className="text-gray-600 text-sm sm:text-base">
+                {formDescription}
+              </p>
             )}
-
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-              <span>Status: {isActive ? "Active" : "Draft"}</span>
-              <span>Version: {version}</span>
+            {/* Responsive Status Row */}
+            <div className="
+      flex flex-col sm:flex-row
+      sm:items-center gap-2 sm:gap-4
+      mt-3 text-sm sm:text-base
+    ">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Status:</span>
+                <Badge
+                  size="xs"
+                  className={
+                    isActive
+                      ? "bg-green-200 text-green-800"
+                      : "bg-red-500 text-gray-100"
+                  }
+                >
+                  {isActive ? "Active" : "Draft"}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Version:</span>
+                <Badge variant="warning" size="xs">{version}</Badge>
+              </div>
             </div>
           </div>
-
           {/* FORM PREVIEW */}
           <Card>
             <CardHeader>
               <CardTitle>Form Preview</CardTitle>
             </CardHeader>
-
             <CardContent className="space-y-4">
               {fields.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -75,20 +92,18 @@ const TemplatePreviewDialog = ({
                         <span className="text-red-500">*</span>
                       )}
                     </Label>
-
                     {/* TEXT / BASIC */}
                     {["text", "email", "number", "date"].includes(
                       field.Type
                     ) && (
-                      <Input
-                        type={field.Type}
-                        placeholder={field.Placeholder || ""}
-                        maxLength={field.MaxLength}
-                        defaultValue={field.DefaultValue || ""}
-                        disabled
-                      />
-                    )}
-
+                        <Input
+                          type={field.Type}
+                          placeholder={field.Placeholder || ""}
+                          maxLength={field.MaxLength}
+                          defaultValue={field.DefaultValue || ""}
+                          disabled
+                        />
+                      )}
                     {/* TEXTAREA */}
                     {field.Type === "textarea" && (
                       <Textarea
@@ -98,7 +113,6 @@ const TemplatePreviewDialog = ({
                         disabled
                       />
                     )}
-
                     {/* SELECT */}
                     {field.Type === "select" && (
                       <Select disabled>
@@ -109,12 +123,11 @@ const TemplatePreviewDialog = ({
                             }
                           />
                         </SelectTrigger>
-
                         <SelectContent className="max-h-60 overflow-y-auto">
                           {(Array.isArray(field.OptionsJson)
                             ? field.OptionsJson
-                            : field.OptionsJson?.split(",") || []
-                          ).map((option, i) => {
+                            : field.OptionsJson?.split(",")
+                          )?.map((option, i) => {
                             const value = typeof option === "object" ? option.value : option.trim();
                             const label = typeof option === "object" ? option.label : option.trim();
                             return (
@@ -126,7 +139,6 @@ const TemplatePreviewDialog = ({
                         </SelectContent>
                       </Select>
                     )}
-
                     {/* CHECKBOX */}
                     {field.Type === "checkbox" && (
                       <label className="flex items-center gap-2">
@@ -139,15 +151,13 @@ const TemplatePreviewDialog = ({
                         <span className="text-sm">{field.Label}</span>
                       </label>
                     )}
-
                     {/* FILE INPUT */}
                     {field.Type === "file" && <FileInput disabled />}
-
                     {/* VALIDATION */}
-                    {field.ValidationRuleCode && field.ValidationRuleCode !== "none" && (
+                    {(field.ValidationRuleLabel || field.ValidationRuleCode) && (field.ValidationRuleLabel || field.ValidationRuleCode) !== "none" && (
                       <div className="text-xs text-gray-500">
-                        Validation:{" "}
-                        {formatValidationDisplay(field.ValidationRuleCode)}
+                        Validation :{" "}
+                        <Badge size="xs" variant="info"> {formatValidationDisplay(field.ValidationRuleLabel || field.ValidationRuleCode)}</Badge>
                       </div>
                     )}
                   </div>
@@ -157,8 +167,13 @@ const TemplatePreviewDialog = ({
           </Card>
         </div>
       }
+      Footer={
+        <div className="flex justify-end p-4">
+          <Button onClick={() => onOpenChange(false)}>Close</Button>
+        </div>
+      }
     />
   );
 };
 
-export default TemplatePreviewDialog;
+export default FormBuilderPreviewDialog;

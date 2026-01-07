@@ -1105,11 +1105,9 @@
   "templates": [
     {
       "id": "1",
-      "clientCode": "CLI001",
       "name": "Employee Onboarding",
       "description": "Standard employee onboarding form used across all clients",
       "status": "active",
-      "isCommon": true,
       "version": "1.0",
       "addApi": "http://localhost:3001/onboarding",
       "updateApi": "http://localhost:3001/onboarding",
@@ -1120,147 +1118,160 @@
       "fields": [
         {
           "id": 1764755310221,
-          "name": "firstName",
-          "label": "First Name",
-          "type": "text",
-          "required": true,
-          "validation": "required",
-          "maxLength": null,
-          "placeholder": "Enter First Name",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "Personal Info",
-          "groupBackendKey": "personalDetails",
-          "applicable": [
+          "Name": "firstName",
+          "Label": "First Name",
+          "Type": "text",
+          "Required": true,
+          "Validation": "required",
+          "MaxLength": null,
+          "Placeholder": "Enter First Name",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "Personal Info",
+          "GroupBackendKey": "personalDetails",
+          "Applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none",
+          "ValidationRuleCode": 5,
+          "ApplicableJson": [
+            "form"
+          ],
+          "OptionsJson": "",
+          "FieldGroup": ""
         },
         {
           "id": 1764755336006,
-          "name": "lastName",
-          "label": "Last Name",
-          "type": "text",
-          "required": false,
-          "validation": "none",
-          "maxLength": null,
-          "placeholder": "Enter Last Name",
-          "options": "",
-          "defaultValue": "",
-          "group": "Personal Info",
-          "groupBackendKey": "personalDetails",
-          "applicable": [
+          "Name": "lastName",
+          "Label": "Last Name",
+          "Type": "text",
+          "Required": false,
+          "Validation": "none",
+          "MaxLength": null,
+          "Placeholder": "Enter Last Name",
+          "Options": "",
+          "DefaultValue": "",
+          "Group": "Personal Info",
+          "GroupBackendKey": "personalDetails",
+          "Applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1764829539295,
-          "name": "email",
-          "label": "Email",
-          "type": "email",
-          "required": true,
-          "validation": "email-format",
-          "maxLength": null,
-          "placeholder": "Enter Email",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "Personal Info",
-          "groupBackendKey": "personalDetails",
-          "applicable": [
+          "Name": "email",
+          "Label": "Email",
+          "Type": "email",
+          "Required": true,
+          "Validation": "email-format",
+          "MaxLength": null,
+          "Placeholder": "Enter Email",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "Personal Info",
+          "GroupBackendKey": "personalDetails",
+          "Applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1764759779055,
-          "name": "address",
-          "label": "Address",
-          "type": "text",
-          "required": true,
-          "validation": "none",
-          "maxLength": null,
-          "placeholder": "Enter your Address",
-          "options": "",
-          "apiUrl": "a",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "Address",
-          "groupBackendKey": "address",
-          "applicable": [
+          "Name": "address",
+          "Label": "Address",
+          "Type": "text",
+          "Required": true,
+          "Validation": "none",
+          "MaxLength": null,
+          "Placeholder": "Enter your Address",
+          "Options": "",
+          "ApiUrl": "a",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "Address",
+          "GroupBackendKey": "address",
+          "Applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1764766261999,
-          "name": "phone",
-          "label": "Mobile",
-          "type": "text",
-          "required": true,
-          "validation": "required",
-          "maxLength": null,
-          "placeholder": "Enter your Mobile ",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "Personal Info",
-          "groupBackendKey": "personalDetails",
-          "applicable": [
+          "Name": "phone",
+          "Label": "Mobile",
+          "Type": "text",
+          "Required": true,
+          "Validation": "required",
+          "MaxLength": null,
+          "Placeholder": "Enter your Mobile ",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "Personal Info",
+          "GroupBackendKey": "personalDetails",
+          "Applicable": [
             "form"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1764829624745,
-          "name": "joiningDate",
-          "label": "Joining Date",
-          "type": "date",
-          "required": true,
-          "validation": "none",
-          "maxLength": null,
-          "placeholder": "",
-          "options": "",
-          "defaultValue": "",
-          "group": "Employment Info",
-          "groupBackendKey": "employmentDetails",
-          "applicable": [
+          "Name": "joiningDate",
+          "Label": "Joining Date",
+          "Type": "date",
+          "Required": true,
+          "Validation": "none",
+          "MaxLength": null,
+          "Placeholder": "",
+          "Options": "",
+          "DefaultValue": "",
+          "Group": "Employment Info",
+          "GroupBackendKey": "employmentDetails",
+          "Applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         },
         {
           "id": 1764829695822,
-          "name": "salary",
-          "label": "Salary [ CTC ]",
-          "type": "number",
-          "required": true,
-          "validation": "salary-range",
-          "maxLength": null,
-          "placeholder": "Enter Salary ",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "Employment Info",
-          "groupBackendKey": "employmentDetails",
-          "applicable": [
+          "Name": "salary",
+          "Label": "Salary [ CTC ]",
+          "Type": "number",
+          "Required": true,
+          "Validation": "salary-range",
+          "MaxLength": null,
+          "Placeholder": "Enter Salary ",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "Employment Info",
+          "GroupBackendKey": "employmentDetails",
+          "Applicable": [
             "form",
             "upload"
-          ]
+          ],
+          "validation": "none"
         }
       ],
       "createdBy": "currentUser",
-      "lastModified": "2025-12-24T04:28:07.749Z"
+      "lastModified": "2026-01-07T11:23:43.408Z"
     },
     {
       "id": "2",
@@ -1279,98 +1290,98 @@
       "fields": [
         {
           "id": 1765000002001,
-          "name": "employeeId",
-          "label": "Employee ID",
-          "type": "text",
-          "required": true,
-          "validation": "unique",
-          "maxLength": null,
-          "placeholder": "",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "",
-          "groupBackendKey": "",
-          "applicable": [
+          "Name": "employeeId",
+          "Label": "Employee ID",
+          "Type": "text",
+          "Required": true,
+          "Validation": "unique",
+          "MaxLength": null,
+          "Placeholder": "",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "",
+          "GroupBackendKey": "",
+          "Applicable": [
             "form",
             "upload"
           ]
         },
         {
           "id": 1765000002002,
-          "name": "date",
-          "label": "Date",
-          "type": "date",
-          "required": true,
-          "applicable": [
+          "Name": "date",
+          "Label": "Date",
+          "Type": "date",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000002003,
-          "name": "checkIn",
-          "label": "Check In",
-          "type": "time",
-          "required": true,
-          "validation": "none",
-          "maxLength": null,
-          "placeholder": "HH:MM",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "",
-          "groupBackendKey": "",
-          "applicable": [
+          "Name": "checkIn",
+          "Label": "Check In",
+          "Type": "time",
+          "Required": true,
+          "Validation": "none",
+          "MaxLength": null,
+          "Placeholder": "HH:MM",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "",
+          "GroupBackendKey": "",
+          "Applicable": [
             "form",
             "upload"
           ]
         },
         {
           "id": 1765000002004,
-          "name": "checkOut",
-          "label": "Check Out",
-          "type": "time",
-          "required": true,
-          "validation": "none",
-          "maxLength": null,
-          "placeholder": "HH:MM",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "",
-          "groupBackendKey": "",
-          "applicable": [
+          "Name": "checkOut",
+          "Label": "Check Out",
+          "Type": "time",
+          "Required": true,
+          "Validation": "none",
+          "MaxLength": null,
+          "Placeholder": "HH:MM",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "",
+          "GroupBackendKey": "",
+          "Applicable": [
             "form",
             "upload"
           ]
         },
         {
           "id": 1765000002005,
-          "name": "hoursWorked",
-          "label": "Hours Worked",
-          "type": "number",
-          "required": true,
-          "applicable": [
+          "Name": "hoursWorked",
+          "Label": "Hours Worked",
+          "Type": "number",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000002006,
-          "name": "status",
-          "label": "Status",
-          "type": "select",
-          "required": true,
-          "options": [
+          "Name": "status",
+          "Label": "Status",
+          "Type": "select",
+          "Required": true,
+          "Options": [
             {
               "value": "present",
               "label": "Present"
@@ -1392,23 +1403,23 @@
               "label": "Present"
             }
           ],
-          "applicable": [
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000002007,
-          "name": "overtime",
-          "label": "Overtime",
-          "type": "number",
-          "required": false,
-          "applicable": [
+          "Name": "overtime",
+          "Label": "Overtime",
+          "Type": "number",
+          "Required": false,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         }
       ],
       "createdBy": "currentUser",
@@ -1431,32 +1442,32 @@
       "fields": [
         {
           "id": 1765000003001,
-          "name": "employeeId",
-          "label": "Employee ID",
-          "type": "text",
-          "required": true,
-          "validation": "unique",
-          "maxLength": null,
-          "placeholder": "",
-          "options": "",
-          "apiUrl": "",
-          "valueKey": "",
-          "labelKey": "",
-          "defaultValue": "",
-          "group": "",
-          "groupBackendKey": "",
-          "applicable": [
+          "Name": "employeeId",
+          "Label": "Employee ID",
+          "Type": "text",
+          "Required": true,
+          "Validation": "unique",
+          "MaxLength": null,
+          "Placeholder": "",
+          "Options": "",
+          "ApiUrl": "",
+          "ValueKey": "",
+          "LabelKey": "",
+          "DefaultValue": "",
+          "Group": "",
+          "GroupBackendKey": "",
+          "Applicable": [
             "form",
             "upload"
           ]
         },
         {
           "id": 1765000003002,
-          "name": "leaveType",
-          "label": "Leave Type",
-          "type": "select",
-          "required": true,
-          "options": [
+          "Name": "leaveType",
+          "Label": "Leave Type",
+          "Type": "select",
+          "Required": true,
+          "Options": [
             {
               "value": "annual",
               "label": "Annual"
@@ -1482,67 +1493,67 @@
               "label": "Present"
             }
           ],
-          "applicable": [
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003003,
-          "name": "startDate",
-          "label": "Start Date",
-          "type": "date",
-          "required": true,
-          "applicable": [
+          "Name": "startDate",
+          "Label": "Start Date",
+          "Type": "date",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003004,
-          "name": "endDate",
-          "label": "End Date",
-          "type": "date",
-          "required": true,
-          "applicable": [
+          "Name": "endDate",
+          "Label": "End Date",
+          "Type": "date",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003005,
-          "name": "daysRequested",
-          "label": "Days Requested",
-          "type": "number",
-          "required": true,
-          "applicable": [
+          "Name": "daysRequested",
+          "Label": "Days Requested",
+          "Type": "number",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003006,
-          "name": "reason",
-          "label": "Reason",
-          "type": "textarea",
-          "required": true,
-          "applicable": [
+          "Name": "reason",
+          "Label": "Reason",
+          "Type": "textarea",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003007,
-          "name": "status",
-          "label": "Status",
-          "type": "select",
-          "required": true,
-          "options": [
+          "Name": "status",
+          "Label": "Status",
+          "Type": "select",
+          "Required": true,
+          "Options": [
             {
               "value": "pending",
               "label": "Pending"
@@ -1560,11 +1571,11 @@
               "label": "Present"
             }
           ],
-          "applicable": [
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         }
       ],
       "createdBy": "currentUser",
@@ -1587,23 +1598,23 @@
       "fields": [
         {
           "id": 1765000003001,
-          "name": "employeeId",
-          "label": "Employee ID",
-          "type": "text",
-          "required": true,
-          "applicable": [
+          "Name": "employeeId",
+          "Label": "Employee ID",
+          "Type": "text",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003002,
-          "name": "leaveType",
-          "label": "Leave Type",
-          "type": "select",
-          "required": true,
-          "options": [
+          "Name": "leaveType",
+          "Label": "Leave Type",
+          "Type": "select",
+          "Required": true,
+          "Options": [
             {
               "value": "CL",
               "label": "CL"
@@ -1625,113 +1636,38 @@
               "label": "Present"
             }
           ],
-          "applicable": [
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003003,
-          "name": "leaveDays",
-          "label": "Leave Days",
-          "type": "number",
-          "required": true,
-          "applicable": [
+          "Name": "leaveDays",
+          "Label": "Leave Days",
+          "Type": "number",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000003004,
-          "name": "approvedBy",
-          "label": "Approved By",
-          "type": "text",
-          "required": false,
-          "applicable": [
+          "Name": "approvedBy",
+          "Label": "Approved By",
+          "Type": "text",
+          "Required": false,
+          "Applicable": [
             "form"
           ],
-          "validation": "none"
+          "Validation": "none"
         }
       ],
       "createdBy": "currentUser",
       "lastModified": "2025-12-23T12:26:44.542Z"
-    },
-    {
-      "id": "4",
-      "clientCode": "CLI001",
-      "name": "Loan",
-      "description": "EMI and outstanding balances must be updated.",
-      "status": "active",
-      "Icon": "Rose",
-      "version": "1.0",
-      "fields": [
-        {
-          "id": 1765000004001,
-          "name": "employeeId",
-          "label": "Employee ID",
-          "type": "text",
-          "required": true,
-          "applicable": [
-            "form",
-            "upload"
-          ]
-        },
-        {
-          "id": 1765000004002,
-          "name": "loanType",
-          "label": "Loan Type",
-          "type": "select",
-          "options": [
-            {
-              "value": "salaryAdvance",
-              "label": "Salary Advance"
-            },
-            {
-              "value": "personalLoan",
-              "label": "Personal Loan"
-            },
-            {
-              "value": "travelLoan",
-              "label": "Travel Loan"
-            },
-            {
-              "value": "present",
-              "label": "Present"
-            }
-          ],
-          "required": true,
-          "applicable": [
-            "form",
-            "upload"
-          ]
-        },
-        {
-          "id": 1765000004003,
-          "name": "emiAmount",
-          "label": "EMI Amount",
-          "type": "number",
-          "required": true,
-          "applicable": [
-            "form",
-            "upload"
-          ]
-        },
-        {
-          "id": 1765000004004,
-          "name": "outstandingBalance",
-          "label": "Outstanding Balance",
-          "type": "number",
-          "required": true,
-          "applicable": [
-            "form",
-            "upload"
-          ]
-        }
-      ],
-      "createdBy": "currentUser",
-      "lastModified": "2025-12-04T12:07:18.947Z"
     },
     {
       "id": "5",
@@ -1850,50 +1786,50 @@
       "fields": [
         {
           "id": 1765000006001,
-          "name": "employeeId",
-          "label": "Employee ID",
-          "type": "text",
-          "required": true,
-          "applicable": [
+          "Name": "employeeId",
+          "Label": "Employee ID",
+          "Type": "text",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000006002,
-          "name": "lastWorkingDay",
-          "label": "Last Working Day",
-          "type": "date",
-          "required": true,
-          "applicable": [
+          "Name": "lastWorkingDay",
+          "Label": "Last Working Day",
+          "Type": "date",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000006003,
-          "name": "fullAndFinalAmount",
-          "label": "Full & Final Amount",
-          "type": "number",
-          "required": true,
-          "applicable": [
+          "Name": "fullAndFinalAmount",
+          "Label": "Full & Final Amount",
+          "Type": "number",
+          "Required": true,
+          "Applicable": [
             "form",
             "upload"
           ],
-          "validation": "none"
+          "Validation": "none"
         },
         {
           "id": 1765000006004,
-          "name": "remarks",
-          "label": "Remarks",
-          "type": "textarea",
-          "required": false,
-          "applicable": [
+          "Name": "remarks",
+          "Label": "Remarks",
+          "Type": "textarea",
+          "Required": false,
+          "Applicable": [
             "form"
           ],
-          "validation": "none"
+          "Validation": "none"
         }
       ],
       "createdBy": "currentUser",

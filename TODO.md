@@ -1,7 +1,8 @@
-- [x] Add FieldValidationRule action type constants in ActionType.js
-- [x] Add FieldValidationRule action functions in Action.js
-- [x] Implement auto-detection of API URLs based on endpoint patterns
-- [x] Update ClientApi.js to use environment variables from .env file
-- [x] Update all FormBuilder actions to use only VITE_NORMAL_API_URL
-- [x] Implement apiType flag system to eliminate duplicate baseUrl code
-- [x] Verify API endpoints and test integration
+- [x] Update import in FormBuilderPreviewDialog.jsx to use Modal instead of Dialog components
+- [x] Update JSX in FormBuilderPreviewDialog.jsx to use Modal with appropriate props
+- [x] Import SweetConfirm from SweetAlert.jsx in TemplateEdit.jsx
+- [x] Remove SweetConfirm for delete field action (direct delete)
+- [x] Remove SweetConfirm for update template action (direct save)
+- [x] Simplify SweetAlert.jsx by removing withReactContent and using text-based alerts
+- [x] Add SweetConfirm for delete template action in TemplateList.jsx
+- [x] Add SweetSuccess for save/update field and template actions in TemplateEdit.jsx

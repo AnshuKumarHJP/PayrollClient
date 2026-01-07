@@ -4,55 +4,63 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
 import { Button } from "../../Lib/button";
 import { Input } from "../../Lib/input";
 import { Label } from "../../Lib/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../Lib/select";
 import { Textarea } from "../../Lib/textarea";
 import { Switch } from "../../Lib/switch";
-import { MultiSelect } from "../../Lib/MultiSelect";
 import { Badge } from "../../Lib/badge";
 import AdvanceTable from "../../Component/AdvanceTable";
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../Lib/dialog";
-import { Alert, AlertDescription } from "../../Lib/alert";
-
 import {
   Plus,
   Edit,
   Trash2,
   Save,
   Eye,
-  Settings,
-  CheckCircle,
-  Loader2,
 } from "lucide-react";
 
 import { templateService } from "../../../api/services/templateService";
 import ruleTypesService from "../../../api/services/ruleTypesService";
 import { useToast } from "../../Lib/use-toast";
-import TemplatePreviewDialog from "./TemplatePreviewDialog";
 
 // Redux
 import { useSelector, useDispatch } from "react-redux";
-import { setSelectedClient } from "../../Store/Slices/GlobalSaveSlice";
+import Loading from '../../Component/Loading'
+import AppIcon from "../../Component/AppIcon";
+import FieldDialog from "./BuilderComponents/FieldDialog";
+import { ActiveBadge } from "../../Component/HealperComponents";
+import FormBuilderPreviewDialog from "./FormBuilderPreviewDialog";
+import { SweetConfirm, SweetSuccess } from "../../Component/SweetAlert";
+
+
+// ------------------------------------------------
+// DEFAULT DETAILS (FormBuilderDetails)
+// ------------------------------------------------
+const emptyField = {
+  Name: "",
+  Label: "",
+  Type: "text",
+  Required: false,
+  ValidationRuleCode: null,
+  MaxLength: "",
+  Placeholder: "",
+  OptionsJson: "",
+  ApplicableJson: ["form"],
+  ApiUrl: "",
+  ValueKey: "",
+  LabelKey: "",
+  DefaultValue: "",
+  FieldGroup: "",
+  GroupBackendKey: "",
+  Active: true,
+};
 
 const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
   const templateId = propId;
   const { toast } = useToast();
   const dispatch = useDispatch();
-
-  const clientCode = useSelector((state) => state.GlobalSaveStore?.SelectedClient);
-
   const [loading, setLoading] = useState(false);
   const [version, setVersion] = useState("1.0");
   const [templateName, setTemplateName] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [isCommon, setIsCommon] = useState(false);
   const [addApi, setAddApi] = useState("");
   const [updateApi, setUpdateApi] = useState("");
   const [getApi, setGetApi] = useState("");
@@ -62,28 +70,11 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
   const [fields, setFields] = useState([]);
   const [ruleTypes, setRuleTypes] = useState([]);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState(false);
-  const [editingField, setEditingField] = useState(null);
-
-  const [fieldForm, setFieldForm] = useState({
-    name: "",
-    label: "",
-    type: "text",
-    required: false,
-    validation: "none",
-    maxLength: "",
-    placeholder: "",
-    options: "",
-    apiUrl: "",
-    valueKey: "",
-    labelKey: "",
-    defaultValue: "",
-    group: "",
-    groupBackendKey: "",
-    applicable: ["form", "upload"],
-  });
 
   const [saveStatus, setSaveStatus] = useState(null);
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+  const [initialFieldForm, setInitialFieldForm] = useState(emptyField);
+
 
   // LOADERS
   useEffect(() => {
@@ -117,7 +108,6 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
       setTemplateName(template.name);
       setTemplateDescription(template.description || "");
       setIsActive(template.status === "active");
-      setIsCommon(template.isCommon || false);
       setVersion(template.version);
       setAddApi(template.addApi || "");
       setUpdateApi(template.updateApi || "");
@@ -147,92 +137,54 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
 
   // FIELD DIALOG OPEN
   const handleAddField = () => {
-    setEditingField(null);
-    setFieldForm({
-      name: "",
-      label: "",
-      type: "text",
-      required: false,
-      validation: "none",
-      maxLength: "",
-      placeholder: "",
-      options: "",
-      apiUrl: "",
-      valueKey: "",
-      labelKey: "",
-      defaultValue: "",
-      group: "",
-      groupBackendKey: "",
-      applicable: ["form", "upload"],
-    });
+    // setEditingField(null);
+    setInitialFieldForm(emptyField);
     setIsFieldDialogOpen(true);
   };
 
-  const handleEditField = (f) => {
-    setEditingField(f);
-    setFieldForm({
-      name: f.name,
-      label: f.label,
-      type: f.type,
-      required: f.required,
-      validation: f.validation,
-      maxLength: f.maxLength || "",
-      placeholder: f.placeholder || "",
-      options: f.options || "",
-      apiUrl: f.apiUrl || "",
-      valueKey: f.valueKey || "",
-      labelKey: f.labelKey || "",
-      defaultValue: f.defaultValue || "",
-      group: f.group || "",
-      groupBackendKey: f.groupBackendKey || "",
-      applicable: f.applicable || [],
-    });
-    if (f.clientCode) dispatch(setSelectedClient(f.clientCode));
+  const handleEditField = (row) => {
+    // setEditingField(row);
+    setInitialFieldForm({ ...row });
     setIsFieldDialogOpen(true);
   };
 
   // SAVE FIELD
-  const handleSaveField = () => {
-    if (!isCommon && !clientCode)
-      return toast({
-        title: "Client Missing",
-        description: "Client code is required.",
-        variant: "destructive",
-      });
-
-    if (!fieldForm.name || !fieldForm.label)
+  const handleSaveField = (processedField) => {
+    if (!processedField.Name || !processedField.Label)
       return toast({
         title: "Required",
         description: "Field name & label required",
         variant: "destructive",
       });
-
-    const obj = {
-      id: editingField ? editingField.id : Date.now(),
-      ...fieldForm,
-      maxLength: fieldForm.maxLength ? parseInt(fieldForm.maxLength) : null,
-    };
-
-    setFields(
-      editingField ? fields.map((x) => (x.id === editingField.id ? obj : x)) : [...fields, obj]
-    );
+    if (initialFieldForm.id) {
+      setFields(fields.map((f) => (f.id === initialFieldForm.id ? processedField : f)));
+      SweetSuccess({
+        title: "Updated",
+        text: "Field updated successfully.",
+      });
+    } else {
+      processedField.id = Date.now();
+      processedField.DisplayOrder = fields.length + 1;
+      setFields([...fields, processedField]);
+      SweetSuccess({
+        title: "Created",
+        text: "Field created successfully.",
+      });
+    }
 
     setIsFieldDialogOpen(false);
   };
 
   const handleDeleteField = (id) => {
-    if (confirm("Delete field?")) setFields(fields.filter((x) => x.id !== id));
+    SweetConfirm({
+      title: "Delete Field",
+      text: "Are you sure you want to delete this field?",
+      onConfirm: () => setFields(fields.filter((x) => x.id !== id))
+    });
   };
 
   // SAVE TEMPLATE
   const handleSaveTemplate = async () => {
-    if (!isCommon && !clientCode)
-      return toast({
-        title: "Client Missing",
-        description: "Select a client first.",
-        variant: "destructive",
-      });
-
     if (!templateName.trim())
       return toast({
         title: "Missing",
@@ -244,11 +196,9 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
       setSaveStatus("saving");
 
       const payload = {
-        clientCode: isCommon ? null : clientCode,
         name: templateName,
         description: templateDescription,
         status: isActive ? "active" : "inactive",
-        isCommon,
         version,
         addApi,
         updateApi,
@@ -264,9 +214,9 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
         ? await templateService.update(templateId, payload)
         : await templateService.create(payload);
 
-      toast({
+      SweetSuccess({
         title: templateId ? "Updated" : "Created",
-        description: `Template ${templateId ? "updated" : "created"}.`,
+        text: `Template ${templateId ? "updated" : "created"} successfully.`,
       });
 
       onSave && onSave(savedTemplate);
@@ -307,444 +257,259 @@ const TemplateEdit = ({ id: propId, onSave, onCancel }) => {
   };
 
   if (loading)
+    return (<Loading />);
+
+  const renderActions = (row) => {
     return (
-      <div className="p-2 flex justify-center items-center min-h-[300px]">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="flex gap-1">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={row.index === 0}
+          onClick={() => moveField(row.index, "up")}
+        >
+          ↑
+        </Button>
+
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={row.index === fields.length - 1}
+          onClick={() => moveField(row.index, "down")}
+        >
+          ↓
+        </Button>
+
+        <Button size="sm" variant="outline" onClick={() => handleEditField(row)}>
+          <Edit size={14} />
+        </Button>
+
+        <Button size="sm" variant="outline" onClick={() => handleDeleteField(row.id)}>
+          <Trash2 size={14} />
+        </Button>
       </div>
     );
+  }
+
+  const columns = [
+    { key: "Name", label: "Name",sticky:true },
+    { key: "Label", label: "Label" },
+    {
+      key: "Type",
+      label: "Type",
+      render: (value) => <Badge>{value}</Badge>,
+    },
+    {
+      key: "Required",
+      label: "Required",
+      render: (value) =>
+        value ? (
+          <Badge className="bg-red-100 text-red-800">Required</Badge>
+        ) : (
+          <Badge variant="outline">Optional</Badge>
+        ),
+    },
+    {
+      key: "ValidationRuleCode",
+      label: "Validation",
+      render: (value) => (
+        <Badge variant="secondary">{formatValidationDisplay(value)}</Badge>
+      ),
+    },
+    { key: "MaxLength", label: "Max Length" },
+    { key: "Placeholder", label: "Placeholder" },
+    {
+      key: "OptionsJson",
+      label: "Options",
+      render: (value) => value ? JSON.stringify(value) : "-",
+    },
+    {
+      key: "ApplicableJson",
+      label: "Applicable",
+      render: (value) =>
+        Array.isArray(value) && value.length > 0
+          ? value.join(", ").toUpperCase()
+          : "-",
+    },
+    { key: "ApiUrl", label: "API URL" },
+    { key: "ValueKey", label: "Value Key" },
+    { key: "LabelKey", label: "Label Key" },
+    { key: "DefaultValue", label: "Default Value" },
+    {
+      key: "FieldGroup",
+      label: "Group",
+      render: (value) => value || "General",
+    },
+    { key: "GroupBackendKey", label: "Group Backend Key" },
+    {
+      key: "Active",
+      label: "Active",
+      render: (value) => <ActiveBadge value={value} />,
+    },
+  ]
 
   return (
-    <div className="p-2">
-      {/* HEADER */}
-      <div className="flex justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Settings size={22} />
-          <h1 className="text-xl font-bold">{templateId ? "Edit Template" : "Create Template"}</h1>
-        </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsPreviewDialogOpen(true)}>
-            <Eye size={16} className="mr-1" /> Preview
-          </Button>
-
-          <Button
-            variant="success"
-            className="bg-green-600/90 text-white"
-            disabled={(!isCommon && !clientCode) || saveStatus === "saving"}
-            onClick={handleSaveTemplate}
-          >
-            <Save size={16} className="mr-1" />
-            {saveStatus === "saving" ? "Saving..." : "Save"}
-          </Button>
-          <Button onClick={handleAddField} variant="purple">
-            <Plus size={16} className="mr-1" /> Add Field
-          </Button>
-        </div>
-      </div>
-
-      {/* SETTINGS */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Template Settings</CardTitle>
-        </CardHeader>
-
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <div>
-            <Label>Template Name <span className="text-red-500">*</span></Label>
-            <Input
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              placeholder="Enter template name"
-            />
+    <>
+      <div className="bg-white shadow-xl rounded-2xl overflow-hidden ">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
+         px-4 sm:px-6 py-3 sm:py-5 bg-gradient-to-r from-emerald-400 to-green-400">
+          {/* LEFT CONTENT */}
+          <div className="items-start gap-3">
+            <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
+              <AppIcon name={"BookOpenCheck"} size={30} />  Field Validation Rule
+            </h2>
+            <p className="text-green-100 text-xs sm:text-sm">
+              Create and manage validation rules dynamically
+            </p>
           </div>
 
-          <div>
-            <Label>Add Api <span className="text-red-500">*</span></Label>
-            <Input
-              value={addApi}
-              onChange={(e) => setAddApi(e.target.value)}
-              placeholder="Enter add API URL"
-            />
-          </div>
-
-          <div>
-            <Label>Update Api *</Label>
-            <Input
-              value={updateApi}
-              onChange={(e) => setUpdateApi(e.target.value)}
-              placeholder="Enter update API URL"
-            />
-          </div>
-
-          <div>
-            <Label>Get Api *</Label>
-            <Input
-              value={getApi}
-              onChange={(e) => setGetApi(e.target.value)}
-              placeholder="Enter get API URL"
-            />
-          </div>
-
-          <div>
-            <Label>Bulk Api <span className="text-red-500">*</span></Label>
-            <Input
-              value={bulkApi}
-              onChange={(e) => setBulkApi(e.target.value)}
-              placeholder="Enter bulk API URL"
-            />
-          </div>
-
-          <div>
-            <Label>Template Icon <span className="text-red-500">*</span></Label>
-            <Input
-              value={Icon}
-              onChange={(e) => setIcon(e.target.value)}
-              placeholder="Enter icon class or URL"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <Label>Description</Label>
-            <Textarea
-              rows={2}
-              value={templateDescription}
-              onChange={(e) => setTemplateDescription(e.target.value)}
-              placeholder="Enter description"
-            />
-          </div>
-
-          <div className="md:col-span-2 flex flex-wrap gap-6">
-            <div className="flex gap-2 items-center">
-              <Switch checked={isActive} onCheckedChange={setIsActive} />
-              <Label>Active</Label>
-            </div>
-
-            <div className="flex gap-2 items-center">
-              <Switch checked={isCommon} onCheckedChange={setIsCommon} />
-              <Label>Common Template</Label>
-            </div>
-
-            <div className="flex gap-2 items-center">
-              <Switch checked={groupSave} onCheckedChange={setGroupSave} />
-              <Label>Group Save</Label>
-            </div>
-          </div>
-          <div>
-            <Label>Client Code</Label>
-            <Input
-              value={clientCode || ""}
-              disabled
-              className="bg-gray-100"
-              placeholder="Auto-filled"
-            />
-          </div>
-
-        </CardContent>
-
-      </Card>
-
-      {/* FIELDS TABLE */}
-      <AdvanceTable
-        title="Fields"
-        columns={[
-          { key: "name", label: "Name" },
-          { key: "label", label: "Label" },
-          {
-            key: "group",
-            label: "Group",
-            render: (value) => value || "General",
-          },
-          {
-            key: "applicable",
-            label: "Applicable",
-            render: (value) =>
-              Array.isArray(value) && value.length > 0
-                ? value.join(", ").toUpperCase()
-                : "-",
-          },
-          {
-            key: "type",
-            label: "Type",
-            render: (value) => <Badge>{value}</Badge>,
-          },
-          {
-            key: "required",
-            label: "Required",
-            render: (value) =>
-              value ? (
-                <Badge className="bg-red-100 text-red-800">Required</Badge>
-              ) : (
-                <Badge variant="outline">Optional</Badge>
-              ),
-          },
-          {
-            key: "validation",
-            label: "Validation",
-            render: (value) => (
-              <Badge variant="secondary">{formatValidationDisplay(value)}</Badge>
-            ),
-          },
-        ]}
-        data={fields.map((f, i) => ({ ...f, index: i }))}
-        renderActions={(row) => (
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={row.index === 0}
-              onClick={() => moveField(row.index, "up")}
-            >
-              ↑
+          {/* RIGHT ACTIONS */}
+          <div className=" flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto ">
+            <Button variant="outline" onClick={() => setIsPreviewDialogOpen(true)}>
+              <Eye size={16} className="mr-1" /> Preview
             </Button>
 
             <Button
-              size="sm"
-              variant="outline"
-              disabled={row.index === fields.length - 1}
-              onClick={() => moveField(row.index, "down")}
+              variant="success"
+              className="bg-green-600/90 text-white"
+              disabled={saveStatus === "saving"}
+              onClick={handleSaveTemplate}
             >
-              ↓
+              <Save size={16} className="mr-1" />
+              {saveStatus === "saving" ? "Saving..." : "Save"}
             </Button>
-
-            <Button size="sm" variant="outline" onClick={() => handleEditField(row)}>
-              <Edit size={14} />
-            </Button>
-
-            <Button size="sm" variant="outline" onClick={() => handleDeleteField(row.id)}>
-              <Trash2 size={14} />
+            <Button onClick={handleAddField} variant="purple">
+              <Plus size={16} className="mr-1" /> Add Field
             </Button>
           </div>
-        )}
-      />
+        </div>
 
-      {/* FIELD DIALOG */}
-      <Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
-        <DialogContent
-          className="max-w-4xl"
-          header={
-            <DialogHeader>
-              <DialogTitle>{editingField ? "Edit Field" : "Add Field"}</DialogTitle>
-            </DialogHeader>
-          }
-          body={
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+        <div className="space-y-6 p-2 md:p-4">
+          <form>
+            {/* SETTINGS */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Template Settings</CardTitle>
+              </CardHeader>
 
-              {/* NAME */}
-              <div>
-                <Label>Name <span className="text-red-500">*</span></Label>
-                <Input
-                  placeholder="Enter field key (e.g., employeeCode)"
-                  value={fieldForm.name}
-                  onChange={(e) => setFieldForm({ ...fieldForm, name: e.target.value })}
-                />
-              </div>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              {/* LABEL */}
-              <div>
-                <Label>Label <span className="text-red-500">*</span></Label>
-                <Input
-                  placeholder="Display label (e.g., Employee Code)"
-                  value={fieldForm.label}
-                  onChange={(e) => setFieldForm({ ...fieldForm, label: e.target.value })}
-                />
-              </div>
+                <div>
+                  <Label>Template Name <span className="text-red-500">*</span></Label>
+                  <Input
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="Enter template name"
+                  />
+                </div>
 
-              {/* TYPE */}
-              <div>
-                <Label>Type <span className="text-red-500">*</span></Label>
-                <Select
-                  value={fieldForm.type}
-                  onValueChange={(v) => setFieldForm({ ...fieldForm, type: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose field type" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-64 overflow-y-auto">
-                    {[
-                      "text", "textarea", "number", "email", "password", "tel", "url",
-                      "select", "multi-select", "radio", "checkbox", "checkbox-group", "switch",
-                      "date", "datetime", "time", "month", "year",
-                      "file", "image", "document", "signature",
-                      "autocomplete", "api-select", "api-multi-select", "richtext",
-                      "color", "range", "rating", "currency", "percentage", "tags",
-                    ].map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div>
+                  <Label>Add Api <span className="text-red-500">*</span></Label>
+                  <Input
+                    value={addApi}
+                    onChange={(e) => setAddApi(e.target.value)}
+                    placeholder="Enter add API URL"
+                  />
+                </div>
 
-              {/* VALIDATION */}
-              <div>
-                <Label>Validation <span className="text-red-500">*</span></Label>
-                <Select
-                  value={fieldForm.validation}
-                  onValueChange={(v) => setFieldForm({ ...fieldForm, validation: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select validation rule" />
-                  </SelectTrigger>
+                <div>
+                  <Label>Update Api *</Label>
+                  <Input
+                    value={updateApi}
+                    onChange={(e) => setUpdateApi(e.target.value)}
+                    placeholder="Enter update API URL"
+                  />
+                </div>
 
-                  <SelectContent className="max-h-64 overflow-y-auto">
-                    {ruleTypes.map((r) => (
-                      <SelectItem key={r.id || r.value} value={r.value}>
-                        {r.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div>
+                  <Label>Get Api *</Label>
+                  <Input
+                    value={getApi}
+                    onChange={(e) => setGetApi(e.target.value)}
+                    placeholder="Enter get API URL"
+                  />
+                </div>
 
-              {/* MAX LENGTH */}
-              <div>
-                <Label>Max Length</Label>
-                <Input
-                  type="number"
-                  placeholder="Maximum allowed characters"
-                  value={fieldForm.maxLength}
-                  onChange={(e) => setFieldForm({ ...fieldForm, maxLength: e.target.value })}
-                />
-              </div>
+                <div>
+                  <Label>Bulk Api <span className="text-red-500">*</span></Label>
+                  <Input
+                    value={bulkApi}
+                    onChange={(e) => setBulkApi(e.target.value)}
+                    placeholder="Enter bulk API URL"
+                  />
+                </div>
 
-              {/* PLACEHOLDER */}
-              <div>
-                <Label>Placeholder <span className="text-red-500">*</span></Label>
-                <Input
-                  placeholder="Input hint text (e.g., Enter employee code)"
-                  value={fieldForm.placeholder}
-                  onChange={(e) => setFieldForm({ ...fieldForm, placeholder: e.target.value })}
-                />
-              </div>
+                <div>
+                  <Label>Template Icon <span className="text-red-500">*</span></Label>
+                  <Input
+                    value={Icon}
+                    onChange={(e) => setIcon(e.target.value)}
+                    placeholder="Enter icon class or URL"
+                  />
+                </div>
 
-              {/* GROUP */}
-              <div>
-                <Label>Group</Label>
-                <Input
-                  placeholder="UI Group (e.g., Basic Details)"
-                  value={fieldForm.group}
-                  onChange={(e) => setFieldForm({ ...fieldForm, group: e.target.value })}
-                />
-              </div>
+                <div className="md:col-span-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    rows={2}
+                    value={templateDescription}
+                    onChange={(e) => setTemplateDescription(e.target.value)}
+                    placeholder="Enter description"
+                  />
+                </div>
 
-              {/* GROUP BACKEND KEY */}
-              <div>
-                <Label>Group Backend Key</Label>
-                <Input
-                  placeholder="Backend key (e.g., basicInfo)"
-                  value={fieldForm.groupBackendKey}
-                  onChange={(e) => setFieldForm({ ...fieldForm, groupBackendKey: e.target.value })}
-                />
-              </div>
-
-              {/* SELECT EXTRA OPTIONS */}
-              {fieldForm.type === "select" && (
-                <>
-                  <div className="md:col-span-2">
-                    <Label>Options <span className="text-red-500">*</span></Label>
-                    <Input
-                      placeholder='Comma separated (e.g., "Male,Female,Other")'
-                      value={fieldForm.options}
-                      onChange={(e) => setFieldForm({ ...fieldForm, options: e.target.value })}
-                    />
+                <div className="md:col-span-2 flex flex-wrap gap-6">
+                  <div className="flex gap-2 items-center">
+                    <Switch checked={isActive} onCheckedChange={setIsActive} />
+                    <Label>Active</Label>
                   </div>
 
-                  <div className="md:col-span-2">
-                    <Label>API URL</Label>
-                    <Input
-                      placeholder="https://api.example.com/users"
-                      value={fieldForm.apiUrl}
-                      onChange={(e) => setFieldForm({ ...fieldForm, apiUrl: e.target.value })}
-                    />
+
+                  <div className="flex gap-2 items-center">
+                    <Switch checked={groupSave} onCheckedChange={setGroupSave} />
+                    <Label>Group Save</Label>
                   </div>
+                </div>
+              </CardContent>
 
-                  {fieldForm.apiUrl && (
-                    <>
-                      <div>
-                        <Label>Value Key <span className="text-red-500">*</span></Label>
-                        <Input
-                          placeholder="e.g., id"
-                          value={fieldForm.valueKey}
-                          onChange={(e) => setFieldForm({ ...fieldForm, valueKey: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <Label>Label Key <span className="text-red-500">*</span></Label>
-                        <Input
-                          placeholder="e.g., name"
-                          value={fieldForm.labelKey}
-                          onChange={(e) => setFieldForm({ ...fieldForm, labelKey: e.target.value })}
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-
-              {/* DEFAULT VALUE */}
-              <div className="md:col-span-2">
-                <Label>Default Value</Label>
-                <Input
-                  placeholder="Pre-filled default value"
-                  value={fieldForm.defaultValue}
-                  onChange={(e) => setFieldForm({ ...fieldForm, defaultValue: e.target.value })}
-                />
-              </div>
-
-              {/* APPLICABLE */}
-              <div className="md:col-span-2">
-                <Label>Applicable <span className="text-red-500">*</span></Label>
-                <MultiSelect
-                  options={[
-                    { value: "form", label: "Form" },
-                    { value: "upload", label: "Upload" },
-                  ]}
-                  placeholder="Where this field is used"
-                  value={fieldForm.applicable}
-                  onChange={(v) => setFieldForm({ ...fieldForm, applicable: v })}
-                />
-              </div>
-
-              {/* REQUIRED */}
-              <div className="flex gap-2 items-center md:col-span-2">
-                <input
-                  type="checkbox"
-                  checked={fieldForm.required}
-                  onChange={(e) => setFieldForm({ ...fieldForm, required: e.target.checked })}
-                />
-                <Label>Required</Label>
-              </div>
-            </div>
+            </Card>
+            {/* FIELDS TABLE */}
+          </form>
+          {(fields?.length > 0) &&
+            <AdvanceTable
+              title="Fields"
+              columns={columns}
+              data={fields}
+              renderActions={renderActions}
+              showIndex={true}
+            />
           }
-          footer={
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setIsFieldDialogOpen(false)}>
-                Cancel
-              </Button>
+        </div>
 
-              <Button onClick={handleSaveField}>
-                {editingField ? "Update" : "Add"}
-              </Button>
-            </div>
-          }
+
+        {/* FIELD DIALOG */}
+        <FieldDialog
+          isOpen={isFieldDialogOpen}
+          onClose={() => setIsFieldDialogOpen(false)}
+          initialFieldForm={initialFieldForm}
+          onSave={handleSaveField}
         />
-      </Dialog>
 
 
-      {/* Preview */}
-      <TemplatePreviewDialog
-        isOpen={isPreviewDialogOpen}
-        onOpenChange={setIsPreviewDialogOpen}
-        templateName={templateName}
-        templateDescription={templateDescription}
-        isActive={isActive}
-        isCommon={isCommon}
-        version={version}
-        fields={fields}
-        formatValidationDisplay={formatValidationDisplay}
-      />
-    </div>
+        {/* Preview */}
+        <FormBuilderPreviewDialog
+          isOpen={isPreviewDialogOpen}
+          onOpenChange={setIsPreviewDialogOpen}
+          formName={templateName}
+          formDescription={templateDescription}
+          isActive={isActive}
+          version={version}
+          fields={fields}
+          formatValidationDisplay={formatValidationDisplay}
+        />
+      </div>
+    </>
   );
 };
 

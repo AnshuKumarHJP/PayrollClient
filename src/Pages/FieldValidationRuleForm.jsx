@@ -31,6 +31,7 @@ import {
 
 import { Categories, Severities, ValidationTypes } from "../Data/StaticData";
 import AppIcon from "../Component/AppIcon";
+import { SweetSuccess } from "../Component/SweetAlert";
 
 /* =====================================================
    DEFAULT FORM
@@ -183,6 +184,10 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
 
         if (res?.Status) {
           dispatch(GetAllFieldValidationRules());
+          SweetSuccess({
+            title: form.Id ? "Updated" : "Created",
+            text: `Field validation rule ${form.Id ? "updated" : "created"} successfully.`,
+          });
           onSave?.(res);
         }
       } catch (err) {

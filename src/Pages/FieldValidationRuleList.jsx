@@ -23,6 +23,7 @@ import { Badge } from "../Lib/badge";
 
 import { ValidationTypes, Categories } from "../Data/StaticData";
 import { ActiveBadge, SeverityBadge } from "../Component/HealperComponents";
+import { SweetConfirm } from "../Component/SweetAlert";
 
 /* ----------------------------------------------------
    VALIDATION PARAMS CELL (PURE)
@@ -98,9 +99,15 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
   );
 
   const handleDelete = useCallback(
-    async (id) => {
-      await dispatch(DeleteFieldValidationRuleById(id));
-      dispatch(GetAllFieldValidationRules()); // explicit refresh
+    (id) => {
+      SweetConfirm({
+        title: "Delete Field Validation Rule",
+        text: "Are you sure you want to delete this field validation rule?",
+        onConfirm: async () => {
+          await dispatch(DeleteFieldValidationRuleById(id));
+          dispatch(GetAllFieldValidationRules()); // explicit refresh
+        }
+      });
     },
     [dispatch]
   );

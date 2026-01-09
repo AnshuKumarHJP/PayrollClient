@@ -90,21 +90,23 @@ export default function ClientApi(
 ) {
   // ---------- BASE URL RESOLUTION ----------
   let finalBaseUrl = "";
+  let NORMAL_API_URL = import.meta.env.VITE_PAYROLL_API_BASE_URL;
+  let SECURITY_API_URL = import.meta.env.VITE_SECURITY_API_BASE_URL;
+
+  if (NORMAL_API_URL === undefined) {
+    return console.error("VITE_NORMAL_API_URL is not defined in environment variables.");
+  }
+  
+  if (SECURITY_API_URL === undefined) {
+    return console.error("VITE_SECURITY_API_URL is not defined in environment variables.");
+  }
 
   if (apiType === "security") {
-    finalBaseUrl =
-      import.meta.env.VITE_SECURITY_API_URL ||
-      "https://stfqc.integrumapps.com/security.api";
+    finalBaseUrl = SECURITY_API_URL
   } else if (apiType === "normal") {
-    finalBaseUrl =
-      import.meta.env.VITE_NORMAL_API_URL ||
-      "https://stfqc.integrumapps.com/Hrsuite.PayrollMgt.Api";
+    finalBaseUrl = NORMAL_API_URL
   } else {
-    finalBaseUrl = url.includes("/api/Security/") || url.includes("/api/Auth/")
-      ? import.meta.env.VITE_SECURITY_API_URL ||
-        "https://stfqc.integrumapps.com/security.api"
-      : import.meta.env.VITE_NORMAL_API_URL ||
-        "https://stfqc.integrumapps.com/Hrsuite.PayrollMgt.Api";
+    finalBaseUrl = url.includes("/api/Security/") ? SECURITY_API_URL : NORMAL_API_URL
   }
 
   const Baseurl = `${finalBaseUrl}${url}`;
@@ -119,34 +121,19 @@ export default function ClientApi(
 
   switch (httpMethod) {
     case "GET":
-      return axios
-        .get(Baseurl, { headers })
-        .then(checkStatus)
-        .catch(checkStatus);
+      return axios.get(Baseurl, { headers }).then(checkStatus).catch(checkStatus);
 
     case "POST":
-      return axios
-        .post(Baseurl, payload?.data ?? payload, { headers })
-        .then(checkStatus)
-        .catch(checkStatus);
+      return axios.post(Baseurl,payload, { headers }).then(checkStatus).catch(checkStatus);
 
     case "PUT":
       // 🔥 SUPPORTS RAW STRING OR OBJECT
-      return axios({
-        method: "PUT",
-        url: Baseurl,
-        data: payload?.data ?? payload, // string OR object
-        headers,
-        transformRequest: [(data) => data], // 🚫 disable auto stringify
-      })
+      return axios({method: "PUT",url: Baseurl,payload,headers,transformRequest: [(data) => data],})
         .then(checkStatus)
         .catch(checkStatus);
 
     case "DELETE":
-      return axios
-        .delete(Baseurl, { headers })
-        .then(checkStatus)
-        .catch(checkStatus);
+      return axios.delete(Baseurl, { headers }).then(checkStatus).catch(checkStatus);
 
     default:
       console.error("Invalid HTTP Method", httpMethod);
@@ -154,25 +141,3 @@ export default function ClientApi(
   }
 }
 
-/* =======================================================
-   ✅ USAGE
-======================================================= */
-
-// 🔐 RAW STRING API
-// const encrypted = CryptoService.encrypt(form);
-// ClientApi(
-//   "/api/FieldValidationRule/UpsertFieldValidationRule",
-//   `"${encrypted}"`,
-//   "PUT",
-//   null,
-//   "normal"
-// );
-
-// 📦 NORMAL JSON API
-// ClientApi(
-//   "/api/client/detail",
-//   { data: payloadObject },
-//   "POST",
-//   token,
-//   "normal"
-// );

@@ -154,10 +154,10 @@ const FormBuilderPreviewDialog = ({
                     {/* FILE INPUT */}
                     {field.Type === "file" && <FileInput disabled />}
                     {/* VALIDATION */}
-                    {(field.ValidationRuleLabel || field.ValidationRuleCode) && (field.ValidationRuleLabel || field.ValidationRuleCode) !== "none" && (
+                    {(field.ValidationRuleLabel || field.ValidationRuleId) && (field.ValidationRuleLabel || field.ValidationRuleId) !== "none" && (
                       <div className="text-xs text-gray-500">
                         Validation :{" "}
-                        <Badge size="xs" variant="info"> {formatValidationDisplay(field.ValidationRuleLabel || field.ValidationRuleCode)}</Badge>
+                        <Badge size="xs" variant="info"> {formatValidationDisplay(field.ValidationRuleLabel || field.ValidationRuleId)}</Badge>
                       </div>
                     )}
                   </div>

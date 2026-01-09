@@ -71,8 +71,7 @@ const processFieldDetails = (field) => {
     Label: field.Label.trim(),
     Type: field.Type.trim(),
     Required: field.Required ?? false,
-    ValidationRuleCode: field.ValidationRuleCode ? Number(field.ValidationRuleCode) : null,
-    MaxLength: field.MaxLength ? Number(field.MaxLength) : null,
+    ValidationRuleId: field.ValidationRuleId ? Number(field.ValidationRuleId) : null,
     ApplicableJson: field.ApplicableJson || ["form"],
     // Ensure other fields are trimmed if strings
     Placeholder: field.Placeholder?.trim() || "",
@@ -111,7 +110,6 @@ const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
   };
 
   return (
-    // <OffCanvas isOpen={isOpen} onClose={onClose} position="left" size="w-full">
     <Modal
       isOpen={isOpen}
       onClose={onClose}
@@ -153,8 +151,6 @@ const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
         </CardContent>
       </div>
     </Modal>
-
-    // </OffCanvas>
   );
 };
 

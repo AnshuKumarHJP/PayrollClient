@@ -31,11 +31,11 @@ const FieldValidationSelect = ({ fieldForm, setFieldForm }) => {
             <Label>Validation <span className="text-red-500"> *</span></Label>
 
             <Select
-                value={fieldForm.ValidationRuleCode || "0"}
+                value={fieldForm.ValidationRuleId || "0"}
                 onValueChange={(v) =>
                     setFieldForm({
                         ...fieldForm,
-                        ValidationRuleCode: v === "0" ? null : v,
+                        ValidationRuleId: v === "0" ? null : v,
                     })
                 }
                 disabled={isLoading}   // 🌟 disables select while loading

@@ -46,7 +46,7 @@ export const DownloadTypes = [
 export const menuItems = [
   { key: "fieldValidationRuleForm", title: "Field Validation Rule", icon: "Settings2", PagePath: "../Pages/FieldValidationRuleList.jsx", PageEditPath: "../Pages/FieldValidationRuleForm.jsx" },
   { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "templates-preview", title: "Template Preview", icon: "FileText", PagePath: "../Pages/Builder/ExcelTemplatePreview.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "templates-preview", title: "New Template", icon: "FileText", PagePath: "../Pages/Builder/FormBuilderList.jsx", PageEditPath: "../Pages/Builder/FormBuilderForm.jsx" },
   { key: "mapping-inputs", title: "Mapping Payroll Inputs to Clients", icon: "ArrowRightLeft", PagePath: "../Pages/PayrollInputMapping.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
@@ -79,4 +79,13 @@ export const Categories = [
   { label: "Identity", value: 1 },   // IDENTITY
   { label: "Financial", value: 2 },  // FINANCIAL
   { label: "Contact", value: 3 },    // CONTACT
+];
+
+export const Modules = [
+  { label: "None", value: 0 },
+  { label: "Onboarding", value: 1 },
+  { label: "Attendance", value: 2 },
+  { label: "Expense", value: 3 },
+  { label: "Payroll", value: 4 },
+  { label: "Tax", value: 5 },
 ];

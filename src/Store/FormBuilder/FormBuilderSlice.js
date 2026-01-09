@@ -24,19 +24,27 @@ import {
   DELETE_FIELDVALIDATIONRULE_FAILURE,
 
   CLEAR_SUCCESS,
-  CLEAR_ERROR
+  CLEAR_ERROR,
+  DELETE_FORMBUILDER_FAILURE,
+  UPSERT__FORMBUILDER_FAILURE,
+  GET_FORMBUILDER_BY_ID_FAILURE,
+  GET_FORMBUILDER_FAILURE,
+  DELETE_FORMBUILDER_SUCCESS,
+  UPSERT__FORMBUILDER_SUCCESS,
+  GET_FORMBUILDER_BY_ID_SUCCESS,
+  GET_FORMBUILDER_SUCCESS,
+  DELETE_FORMBUILDER_REQUEST,
+  UPSERT__FORMBUILDER_REQUEST,
+  GET_FORMBUILDER_BY_ID_REQUEST,
+  GET_FORMBUILDER_REQUEST
 } from "./ActionType";
 
 /* =====================================================
    INITIAL STATE
 ===================================================== */
 const initialState = {
-  FieldValidationRule: {
-    data: [],        // ✅ always array
-    isLoading: false,
-    error: null,
-    Success: null
-  }
+  FieldValidationRule: { data: [], isLoading: false, error: null, Success: null },
+  FormBuilder: { data: [], isLoading: false, error: null, Success: null },
 };
 
 /* =====================================================
@@ -58,6 +66,20 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
           error: null,
           Success: null
         }
+      };
+
+    case GET_FORMBUILDER_REQUEST:
+    case GET_FORMBUILDER_BY_ID_REQUEST:
+    case UPSERT__FORMBUILDER_REQUEST:
+    case DELETE_FORMBUILDER_REQUEST:
+      return {
+        ...state,
+        FormBuilder: {
+          ...state.FormBuilder,
+          isLoading: true,
+          error: null,
+          Success: null,
+        },
       };
 
     /* ================= SUCCESS ================= */
@@ -89,6 +111,39 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
         }
       };
 
+    case GET_FORMBUILDER_SUCCESS:
+      return {
+        ...state,
+        FormBuilder: {
+          ...state.FormBuilder,
+          isLoading: false,
+          data: action.payload,
+        },
+      };
+
+    case GET_FORMBUILDER_BY_ID_SUCCESS:
+      return {
+        ...state,
+        FormBuilder: {
+          ...state.FormBuilder,
+          isLoading: false,
+          data: action.payload,
+          Success: true,
+        },
+      };
+
+    case UPSERT__FORMBUILDER_SUCCESS:
+    case DELETE_FORMBUILDER_SUCCESS:
+      return {
+        ...state,
+        FormBuilder: {
+          ...state.FormBuilder,
+          isLoading: false,
+          Success: true,
+        },
+      };
+
+
     /* ================= FAILURE ================= */
     case GET_ALL_FIELDVALIDATIONRULES_FAILURE:
     case GET_FIELDVALIDATIONRULE_FAILURE:
@@ -103,6 +158,21 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
           Success: false
         }
       };
+
+    case GET_FORMBUILDER_FAILURE:
+    case GET_FORMBUILDER_BY_ID_FAILURE:
+    case UPSERT__FORMBUILDER_FAILURE:
+    case DELETE_FORMBUILDER_FAILURE:
+      return {
+        ...state,
+        FormBuilder: {
+          ...state.FormBuilder,
+          isLoading: false,
+          error: action.payload,
+          Success: false,
+        },
+      };
+
 
     /* ================= CLEAR ================= */
     case CLEAR_SUCCESS:

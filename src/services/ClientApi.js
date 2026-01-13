@@ -1,12 +1,3 @@
-// =======================================================
-// src/api/ClientApi.js  ✅ CORRECTED & FINAL
-// =======================================================
-// ✔ Same structure as your current file
-// ✔ Uses Baseurl correctly (bug fixed)
-// ✔ Supports RAW STRING PUT (encrypted string APIs)
-// ✔ Keeps your 401/session-expired logic intact
-// =======================================================
-
 import axios from "axios";
 import { persistor, store } from "../Store/Store";
 import { resetGlobalStore } from "../Store/Slices/GlobalSlice";
@@ -96,7 +87,7 @@ export default function ClientApi(
   if (NORMAL_API_URL === undefined) {
     return console.error("VITE_NORMAL_API_URL is not defined in environment variables.");
   }
-  
+
   if (SECURITY_API_URL === undefined) {
     return console.error("VITE_SECURITY_API_URL is not defined in environment variables.");
   }
@@ -119,21 +110,36 @@ export default function ClientApi(
     token: accessToken || token || "",
   };
 
-  switch (httpMethod) {
+   switch (httpMethod) {
     case "GET":
-      return axios.get(Baseurl, { headers }).then(checkStatus).catch(checkStatus);
+      return axios
+        .get(Baseurl, { headers })
+        .then(checkStatus)
+        .catch(checkStatus);
 
     case "POST":
-      return axios.post(Baseurl,payload, { headers }).then(checkStatus).catch(checkStatus);
+      return axios
+        .post(Baseurl, payload?.data ?? payload, { headers })
+        .then(checkStatus)
+        .catch(checkStatus);
 
     case "PUT":
       // 🔥 SUPPORTS RAW STRING OR OBJECT
-      return axios({method: "PUT",url: Baseurl,payload,headers,transformRequest: [(data) => data],})
+      return axios({
+        method: "PUT",
+        url: Baseurl,
+        data: payload?.data ?? payload, // string OR object
+        headers,
+        transformRequest: [(data) => data], // 🚫 disable auto stringify
+      })
         .then(checkStatus)
         .catch(checkStatus);
 
     case "DELETE":
-      return axios.delete(Baseurl, { headers }).then(checkStatus).catch(checkStatus);
+      return axios
+        .delete(Baseurl, { headers })
+        .then(checkStatus)
+        .catch(checkStatus);
 
     default:
       console.error("Invalid HTTP Method", httpMethod);

@@ -17,26 +17,11 @@ export const Auth_Reducer = (state = initialState, action) => {
       };
 
     case GET_AUTH_SUCCESS:
-      return {
-        ...state,
-        LogResponce: {
-          ...state.LogResponce,
-          isLoading: false,
-          data: action.payload,
-          error: null,
-          Success: true,
-        },
+      return {...state, LogResponce: { ...state.LogResponce, isLoading: false,data: action.payload,error: null,Success: true,},
       };
 
     case GET_AUTH_FAILURE:
-      return {
-        ...state,
-        LogResponce: {
-          ...state.LogResponce,
-          isLoading: false,
-          error: action.payload,
-          Success: false,
-        },
+      return {...state,LogResponce: {...state.LogResponce, isLoading: false, error: action.payload, Success: false,},
       };
     case "RESET_AUTH":
         return initialState;

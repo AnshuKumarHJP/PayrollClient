@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Lib/tabs";
 import { Loader2, XCircle, CheckCircle, Plus, Trash } from "lucide-react";
 
 import AppIcon from "../Component/AppIcon";
-import { templateService } from "../../api/services/templateService";
 import FormInputTypes from "./FormInputTypes";
 import useValidationRules from "../Hooks/useValidationRules";
 
@@ -16,176 +15,152 @@ import Loading from "./Loading";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
 };
 
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.96 },
-  show: { opacity: 1, scale: 1, transition: { duration: 0.22 } },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.22 } }
 };
 
+/* -------------------------------------------------
+      GROUP FIELDS EXACTLY BASED ON TEMPLATE
+------------------------------------------------- */
 const groupFields = (fields = []) => {
   const grouped = {};
-  for (const f of fields) {
-    const key = f.group || "General";
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(f);
-  }
+
+  fields.forEach((f) => {
+    const groupName = f.FieldGroup?.trim() || "General";
+    if (!grouped[groupName]) grouped[groupName] = [];
+    grouped[groupName].push(f);
+  });
+
   return grouped;
 };
 
+/* -------------------------------------------------
+      FLATTEN (for edit mode)
+------------------------------------------------- */
 const flattenEditData = (obj, out = {}) => {
   Object.entries(obj || {}).forEach(([k, v]) => {
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      flattenEditData(v, out);
-    } else {
-      out[k] = v;
-    }
+    if (v && typeof v === "object" && !Array.isArray(v)) flattenEditData(v, out);
+    else out[k] = v;
   });
   return out;
 };
 
+
 const DynamicForm = ({
-  templateId,
+  Template = null,
   editId = null,
   editData = null,
   onSuccess,
   onCancel,
   AddMore = false,
-  GroupData = false,
+  GroupData = false
 }) => {
-  const [template, setTemplate] = useState(null);
-  const [forms, setForms] = useState([]);
-  const [errorsArr, setErrorsArr] = useState([]);
+
+  /* ----------------------------------------------
+         PARSE TEMPLATE
+   ---------------------------------------------- */
+  const fields = useMemo(() => {
+    if (!Template?.FieldsConfigurations) return [];
+
+    return Template.FieldsConfigurations.map((f) => {
+      let applicable = [];
+      let options = [];
+
+      try {
+        applicable = JSON.parse(f.ApplicableJson || "[]");
+      } catch { }
+
+      try {
+        options = JSON.parse(f.OptionsJson || "[]");
+      } catch { }
+
+      return { ...f, applicable, options };
+    }).filter((f) => f.applicable.includes("form"));
+  }, [Template]);
+
+  const groups = useMemo(() => groupFields(fields), [fields]);
+
+
+  /* ----------------------------------------------
+        MAKE DEFAULT FORM
+  ---------------------------------------------- */
+  const makeDefaults = useCallback(() => {
+    const d = {};
+    fields.forEach((f) => {
+      d[f.Name] = f.DefaultValue ?? (f.Type === "checkbox" ? false : "");
+    });
+    return d;
+  }, [fields]);
+
+  /* ----------------------------------------------
+        INITIAL FORMS
+  ---------------------------------------------- */
+  const [forms, setForms] = useState(() => {
+    if (!fields.length) return [];
+
+    if (editData) {
+      const base = makeDefaults();
+      const flat = flattenEditData(editData);
+      fields.forEach((f) => {
+        if (flat[f.Name] !== undefined) base[f.Name] = flat[f.Name];
+      });
+      return [base];
+    }
+
+    return [makeDefaults()];
+  });
+
+  const [errorsArr, setErrorsArr] = useState([{}]);
+
   const [isGrouped, setIsGrouped] = useState(false);
 
   const [status, setStatus] = useState({
-    loading: true,
     submitting: false,
     apiSuccess: null,
-    error: null,
+    error: null
   });
 
-  // ⭐ Load ruleTypes dynamically + validate()
-  const { validate: validateForm, loading: rulesLoading } =
-    useValidationRules(template);
 
-  /* --------------------------------------------------
-     LOAD TEMPLATE & PRE-FILL VALUES
-  -------------------------------------------------- */
-  useEffect(() => {
-    let alive = true;
+  const { validate, loading: rulesLoading } = useValidationRules(Template);
 
-    const load = async () => {
-      try {
-        setStatus((s) => ({ ...s, loading: true }));
 
-        const result = await templateService.getById(templateId);
+  /* ----------------------------------------------
+        HANDLE VALUE CHANGE  — FIXED ASYNC
+  ---------------------------------------------- */
+  const handleValue = useCallback(
+    async (i, fieldName, value) => {
+      setForms((prev) => {
+        const copy = [...prev];
+        copy[i] = { ...copy[i], [fieldName]: value };
+        return copy;
+      });
 
-        const t =
-          Array.isArray(result)
-            ? result.find((x) => x.status === "active")
-            : result?.status === "active"
-            ? result
-            : null;
+      const result = await validate({
+        ...forms[i],
+        [fieldName]: value
+      });
 
-        if (!t) throw new Error("No active template found.");
-        if (!alive) return;
-
-        setTemplate(t);
-
-        const fields = t.fields?.filter(
-          (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
-        ) || [];
-
-        const makeDefaults = () => {
-          const d = {};
-          fields.forEach((f) => {
-            d[f.name] = f.defaultValue ?? (f.type === "checkbox" ? false : "");
-          });
-          return d;
+      setErrorsArr((prev) => {
+        const copy = [...prev];
+        copy[i] = {
+          ...copy[i],
+          [fieldName]: result.errors?.[fieldName] || null
         };
+        return copy;
+      });
+    },
+    [forms, validate]
+  );
 
-        let newForms = [];
-        let newErrors = [];
-
-        if (editData) {
-          if (Array.isArray(editData)) {
-            newForms = editData.map((rec) => {
-              const base = makeDefaults();
-              const flat = flattenEditData(rec);
-              fields.forEach((f) => {
-                if (flat[f.name] !== undefined) base[f.name] = flat[f.name];
-              });
-              return base;
-            });
-            newErrors = newForms.map(() => ({}));
-          } else {
-            const base = makeDefaults();
-            const flat = flattenEditData(editData);
-            fields.forEach((f) => {
-              if (flat[f.name] !== undefined) base[f.name] = flat[f.name];
-            });
-            newForms = [base];
-            newErrors = [{}];
-          }
-        } else {
-          newForms = [makeDefaults()];
-          newErrors = [{}];
-        }
-
-        setForms(newForms);
-        setErrorsArr(newErrors);
-      } catch (err) {
-        setStatus((s) => ({ ...s, error: err.message }));
-      } finally {
-        if (alive) setStatus((s) => ({ ...s, loading: false }));
-      }
-    };
-
-    load();
-    return () => (alive = false);
-  }, [templateId]);
-
-  const filteredFields = useMemo(() => {
-    return (
-      template?.fields?.filter(
-        (f) => Array.isArray(f.applicable) && f.applicable.includes("form")
-      ) || []
-    );
-  }, [template]);
-
-  const groups = useMemo(() => groupFields(filteredFields), [filteredFields]);
-
-  /* --------------------------------------------------
-     HANDLE CHANGE
-  -------------------------------------------------- */
-  const handleValue = useCallback((i, fieldName, value) => {
-    setForms((old) => {
-      const copy = [...old];
-      copy[i] = { ...copy[i], [fieldName]: value };
-      return copy;
-    });
-
-    const formCopy = { ...forms[i], [fieldName]: value };
-    const result = validateForm(formCopy);
-
-    setErrorsArr((old) => {
-      const c = [...old];
-      c[i] = { ...c[i], [fieldName]: result.errors[fieldName] || null };
-      return c;
-    });
-  }, [forms, validateForm]);
-
-  /* --------------------------------------------------
-     ADD / REMOVE FORM
-  -------------------------------------------------- */
+  /* ----------------------------------------------
+        ADD / REMOVE FORMS
+  ---------------------------------------------- */
   const addMore = () => {
-    const d = {};
-    filteredFields.forEach((f) => {
-      d[f.name] = f.defaultValue ?? (f.type === "checkbox" ? false : "");
-    });
-    setForms((p) => [...p, d]);
+    setForms((p) => [...p, makeDefaults()]);
     setErrorsArr((p) => [...p, {}]);
   };
 
@@ -194,142 +169,143 @@ const DynamicForm = ({
     setErrorsArr((p) => p.filter((_, x) => x !== i));
   };
 
-  /* --------------------------------------------------
-     FULL VALIDATION BEFORE SUBMIT
-  -------------------------------------------------- */
-  const validateAll = () => {
-    let ok = true;
-    const collected = [];
+  /* ----------------------------------------------
+        VALIDATE ALL — FIXED ASYNC
+  ---------------------------------------------- */
+  const validateAll = async () => {
+    const collectedErrors = [];
+    let isValid = true;
 
-    forms.forEach((f) => {
-      const r = validateForm(f);
-      collected.push(r.errors || {});
-      if (!r.valid) ok = false;
-    });
+    for (const form of forms) {
+      const result = await validate(form);
+      collectedErrors.push(result.errors || {});
+      if (!result.valid) isValid = false;
+    }
 
-    setErrorsArr(collected);
-    return ok;
+    setErrorsArr(collectedErrors);
+    return isValid;
   };
-
-  /* --------------------------------------------------
-     BUILD PAYLOAD (grouped or flat)
-  -------------------------------------------------- */
+  /* ----------------------------------------------
+        BUILD PAYLOAD
+  ---------------------------------------------- */
   const buildPayload = () => {
     if (!GroupData) return forms;
 
     return forms.map((form) => {
-      const grouped = {};
+      const g = {};
+
       for (const [gName, flds] of Object.entries(groups)) {
-        const key = flds[0]?.groupBackendKey || gName.replace(/\s+/g, "");
-        grouped[key] = {};
+        const key = flds[0].GroupBackendKey || gName.toLowerCase();
+        g[key] = {};
+
         flds.forEach((f) => {
-          grouped[key][f.name] = form[f.name];
+          g[key][f.Name] = form[f.Name];
         });
       }
-      return grouped;
+
+      return g;
     });
   };
 
-  /* --------------------------------------------------
-     SUBMIT HANDLER
-  -------------------------------------------------- */
+
+
+  /* ----------------------------------------------
+        SUBMIT — FIXED ASYNC validateAll()
+  ---------------------------------------------- */
   const handleSubmit = async (e) => {
-    e?.preventDefault();
+    e.preventDefault();
 
-    setStatus((s) => ({ ...s, submitting: true }));
+    setStatus((s) => ({
+      ...s,
+      submitting: true,
+      apiSuccess: null
+    }));
 
-    if (!validateAll()) {
-      setStatus((s) => ({ ...s, submitting: false, apiSuccess: false }));
+    const isValid = await validateAll();
+
+    // 🚫 STOP HERE IF ANY ERROR EXISTS
+    if (!isValid) {
+      setStatus((s) => ({
+        ...s,
+        submitting: false,
+        apiSuccess: false
+      }));
       return;
     }
 
     const payload = buildPayload();
-    const final = payload.length === 1 && editId ? payload[0] : payload;
+    const final = editId && payload.length === 1 ? payload[0] : payload;
 
     try {
-      const res = await onSuccess({
+      const ok = await onSuccess({
         isEdit: !!editId,
         recordId: editId,
-        data: final,
+        data: final
       });
+
+
       setStatus((s) => ({
         ...s,
         submitting: false,
-        apiSuccess: !!res,
+        apiSuccess: ok
       }));
     } catch {
-      setStatus((s) => ({ ...s, submitting: false, apiSuccess: false }));
+      setStatus((s) => ({
+        ...s,
+        submitting: false,
+        apiSuccess: false
+      }));
     }
   };
 
-  /* --------------------------------------------------
-     RENDER FIELD
-  -------------------------------------------------- */
-  const renderField = useCallback((i, field) => {
-    const val = forms[i]?.[field.name];
-    const err = errorsArr[i]?.[field.name];
 
-    const config = {
-      InputType: field.type,
-      DataType: field.type,
-      FormFieldName: field.label,
-      Placeholder:field?.placeholder,
-      Options: field.options ?? [],
-      DefaultDisable: field.disabled ?? false,
-      Accept: field.accept,
-    };
+  /* ----------------------------------------------
+        RENDER FIELD
+  ---------------------------------------------- */
+  const renderField = useCallback(
+    (i, f) => {
+      const val = forms[i]?.[f.Name];
+      const err = errorsArr[i]?.[f.Name];
 
-    return (
-      <div>
-        <FormInputTypes
-          f={config}
-          value={val}
-          onChange={(v) => handleValue(i, field.name, v)}
-          hasError={!!err}
-        />
-        {err && <p className="text-red-600 text-xs mt-1">{err}</p>}
-      </div>
-    );
-  }, [forms, errorsArr, handleValue]);
+      const placeholder =
+        f.Placeholder && f.Placeholder.trim()
+          ? f.Placeholder
+          : `Enter ${f.Label}`;
 
-  /* --------------------------------------------------
-     LOADING / ERROR STATES
-  -------------------------------------------------- */
-  if (status.loading || rulesLoading) return <Loading />;
+      const config = {
+        InputType: f.Type,
+        Label: f.Label,
+        Placeholder: placeholder,
+        Options: f.options,
+        Accept: f.Accept
+      };
 
-  if (status.error)
-    return (
-      <Alert className="border-red-500 m-4">
-        <XCircle className="h-4 w-4" />
-        <AlertDescription>{status.error}</AlertDescription>
-      </Alert>
-    );
+      return (
+        <div>
+          <FormInputTypes
+            f={config}
+            value={val}
+            onChange={(v) => handleValue(i, f.Name, v)}
+            hasError={!!err}
+          />
+          {err && <p className="text-red-600 text-xs mt-1">{err}</p>}
+        </div>
+      );
+    },
+    [forms, errorsArr, handleValue]
+  );
+  console.log(status);
 
-  /* --------------------------------------------------
-     MAIN UI
-  -------------------------------------------------- */
-  
+  if (rulesLoading) return <Loading />;
+
+  /* ----------------------------------------------
+         MAIN UI
+   ---------------------------------------------- */
   return (
-    <motion.div className="p-2" variants={fadeIn} initial="hidden" animate="show">
-      <div className="md:flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          {template?.Icon && <AppIcon name={template.Icon} size={26} />}
-          <h1 className="text-xl font-bold">{template?.name}</h1>
-        </div>
+    <motion.div variants={fadeIn} initial="hidden" animate="show">
 
-        <div className="flex gap-3">
-          <Button variant="success" onClick={() => setIsGrouped((p) => !p)}>
-            {isGrouped ? "Ungroup" : "Group"}
-          </Button>
 
-          {AddMore && (
-            <Button variant="outline" onClick={addMore}>
-              <Plus className="mr-2 h-4 w-4" /> Add More
-            </Button>
-          )}
-        </div>
-      </div>
-
+      {/* SUCCESS / ERROR */}
       <AnimatePresence>
         {status.apiSuccess === true && (
           <motion.div variants={scaleIn} initial="hidden" animate="show" exit="hidden">
@@ -350,92 +326,143 @@ const DynamicForm = ({
         )}
       </AnimatePresence>
 
-      <form onSubmit={handleSubmit}>
-        <AnimatePresence>
-          {forms.map((_, i) => (
-            <motion.div
-              key={i}
-              variants={fadeIn}
-              initial="hidden"
-              animate="show"
-              exit={{ opacity: 0, y: -8 }}
-            >
-              <Card className="p-4 mb-4 border border-emerald-200">
-                {AddMore && forms.length > 1 && (
-                  <div className="flex justify-between mb-4">
-                    <div className="text-sm font-semibold">Entry #{i + 1}</div>
-                    <Button variant="destructive" size="sm" onClick={() => removeForm(i)}>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
 
-                {/* GROUPED VIEW */}
-                {isGrouped ? (
-                  <Tabs defaultValue={Object.keys(groups)[0]} className="w-full">
-                    <TabsList
-                      className="w-full grid bg-emerald-100/40 border p-0"
-                      style={{
-                        gridTemplateColumns: `repeat(${Object.keys(groups).length}, 1fr)`,
-                      }}
-                    >
-                      {Object.keys(groups).map((g) => (
-                        <TabsTrigger
-                          key={g}
-                          value={g}
-                          className="text-sm font-medium text-emerald-700
-                          data-[state=active]:bg-emerald-300 data-[state=active]:text-emerald-900"
-                        >
-                          {g}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+      {/* HEADER */}
+      <div className="bg-white shadow-xl rounded-2xl overflow-hidden " >
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
+         px-4 sm:px-6 py-3 sm:py-5 border-b  bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg mb-4">
+          {/* LEFT CONTENT */}
+          <div className="flex items-start gap-3">
+            <AppIcon
+              name={Template.Icon}
+              size={24}
+              className="text-white shrink-0 mt-1 sm:mt-0"
+            />
 
-                    {Object.entries(groups).map(([gName, flds]) => (
-                      <TabsContent key={gName} value={gName} className="mt-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {flds.map((f) => (
-                            <div key={f.name}>
-                              <Label>{f.label}</Label>
-                              {renderField(i, f)}
-                            </div>
-                          ))}
-                        </div>
-                      </TabsContent>
-                    ))}
-                  </Tabs>
-                ) : (
-                  /* FLAT VIEW */
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredFields.map((f) => (
-                      <div key={f.name}>
-                        <Label>{f.label}</Label>
-                        {renderField(i, f)}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+            <div>
+              <h2 className="text-base sm:text-xl font-semibold text-white leading-tight">
+                {Template?.Name}
+              </h2>
+              {Template?.Description && (
+                <p className="text-green-100 text-xs sm:text-sm mt-1">
+                  {Template.Description}
+                </p>
+              )}
+            </div>
+          </div>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
+          {/* RIGHT ACTIONS */}
+          <div className=" flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto ">
+            <Button
+              onClick={() => setIsGrouped((p) => !p)}
+              className=" w-full sm:w-auto bg-green-600 text-white hover:bg-green-700
+        active:bg-green-800 shadow-md hover:shadow-lg  transition-all duration-200" >
+              {isGrouped ? "Ungroup" : "Group"}
+            </Button>
 
-          <Button type="submit" disabled={status.submitting}>
-            {status.submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…
-              </>
-            ) : (
-              "Submit"
+            {AddMore && (
+              <Button
+                onClick={addMore}
+                className="w-full sm:w-auto border border-green-200
+          text-green-700 bg-white hover:bg-green-50 hover:text-green-800
+          active:bg-green-100 shadow-sm transition-all duration-200 flex items-center justify-center">
+                <Plus className="mr-2 h-4 w-4" />
+                Add More
+              </Button>
             )}
-          </Button>
+          </div>
         </div>
-      </form>
+
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-6 p-2 md:p-4">
+          <AnimatePresence>
+            {forms.map((_, i) => (
+              <motion.div
+                key={i}
+                variants={fadeIn}
+                initial="hidden"
+                animate="show"
+                exit={{ opacity: 0, y: -8 }}
+              >
+                <Card className="p-4 mb-4 border border-emerald-200">
+                  {AddMore && forms.length > 1 && (
+                    <div className="flex justify-between mb-4">
+                      <div className="text-sm font-semibold">Entry #{i + 1}</div>
+                      <Button variant="destructive" className="w-fit" size="sm" onClick={() => removeForm(i)}>
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* GROUPED VIEW */}
+                  {isGrouped ? (
+                    <Tabs defaultValue={Object.keys(groups)[0]} className="w-full">
+                      <TabsList
+                        className="w-full grid bg-emerald-100/40 border p-0"
+                        style={{
+                          gridTemplateColumns: `repeat(${Object.keys(groups).length}, 1fr)`,
+                        }}
+                      >
+                        {Object.keys(groups).map((g) => (
+                          <TabsTrigger
+                            key={g}
+                            value={g}
+                            className="text-sm font-medium text-emerald-700
+                          data-[state=active]:bg-emerald-300 data-[state=active]:text-emerald-900"
+                          >
+                            {g}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+
+                      {Object.entries(groups).map(([gName, flds]) => (
+                        <TabsContent key={gName} value={gName} className="mt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {flds.map((f) => (
+                              <div key={f.Name} >
+                                <Label>{f.Label}</Label>
+                                {renderField(i, f)}
+                              </div>
+                            ))}
+                          </div>
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  ) : (
+                    /* FLAT VIEW */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {fields.map((f) => (
+                        <div key={f.Name}>
+                          <Label>{f.Label}</Label>
+                          {renderField(i, f)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {/* FOOTER BUTTONS */}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+
+            <Button type="submit" disabled={status.submitting}>
+              {status.submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </motion.div>
   );
 };

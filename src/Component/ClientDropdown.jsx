@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../Lib/select"; // your Select component
-
+} from "../Lib/select";
 import { fetchClients } from "../../api/services/clientServices";
 import { useSelector } from "react-redux";
 
@@ -22,59 +21,68 @@ const ClientDropdown = ({
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const LogResponce = useSelector((state) => state.Auth?.LogResponce?.data);
-  const clientListFromStore = LogResponce?.ClientList || [];
+  const storeClients = useSelector(
+    (state) => state.Auth?.LogResponce?.data?.ClientList || []
+  );
 
-  // ============================
-  // LOAD CLIENTS (store or API)
-  // ============================
+  /* =========================
+     LOAD CLIENTS
+  ========================= */
   useEffect(() => {
-    const loadClients = async () => {
+    const load = async () => {
       setLoading(true);
       try {
         if (UserClient) {
-          setClients(clientListFromStore);
+          setClients(storeClients);
         } else {
           const apiClients = await fetchClients();
-          setClients(apiClients);
+          setClients(apiClients || []);
         }
-      } catch (err) {
-        console.error("Client load error:", err);
+      } catch (e) {
+        console.error("Client load error", e);
       } finally {
         setLoading(false);
       }
     };
-    loadClients();
-  }, [UserClient, clientListFromStore]);
 
-  // ============================
-  // LOAD ActiveClient FROM SESSION
-  // ============================
+    load();
+  }, [UserClient, storeClients]);
+
+  /* =========================
+     INITIAL SELECTION
+  ========================= */
   useEffect(() => {
-    const savedClient = sessionStorage.getItem("activeClient");
+    if (loading || clients.length === 0) return;
 
-    if (!loading && clients.length > 0) {
-      if (savedClient) {
-        onChange(savedClient);
-      } else if (FstindexSelected && clients.length > 0) {
-        const first = clients[0]?.Code;
-        onChange(first);
-        sessionStorage.setItem("activeClient", first);
-      }
+    const saved = sessionStorage.getItem("activeClient");
+
+    if (saved) {
+      onChange(saved);
+    } else if (FstindexSelected) {
+      const firstId = String(clients[0].Id);
+      sessionStorage.setItem("activeClient", firstId);
+      onChange(firstId);
     }
-  }, [loading, clients]);
+  }, [loading, clients, FstindexSelected, onChange]);
 
-  // ============================
-  // SAVE TO SESSION STORAGE
-  // ============================
+  /* =========================
+     HANDLE CHANGE
+  ========================= */
   const handleSelectChange = (val) => {
     sessionStorage.setItem("activeClient", val);
     onChange(val);
   };
 
+  /* =========================
+     NORMALIZED VALUE
+  ========================= */
+  const selectedValue = value
+    ? String(value)
+    : sessionStorage.getItem("activeClient") || "";
+
   return (
     <Select
-      value={value || sessionStorage.getItem("activeClient") || ""}
+      value={selectedValue}
       onValueChange={handleSelectChange}
       disabled={disabled || loading}
     >
@@ -90,7 +98,10 @@ const ClientDropdown = ({
         )}
 
         {clients.map((client) => (
-          <SelectItem key={client.Code} value={client.Code}>
+          <SelectItem
+            key={client.Id}
+            value={String(client.Id)}   // 🔥 STRING
+          >
             {client.Name}
           </SelectItem>
         ))}

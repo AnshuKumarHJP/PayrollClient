@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import {
@@ -9,6 +10,7 @@ import {
   SelectValue,
 } from "../Lib/select";
 import { Badge } from "../Lib/badge";
+import { Modules } from "../Data/StaticData";
 import {
   CheckCircle,
   Users,
@@ -16,199 +18,187 @@ import {
   Link,
   Unlink,
 } from "lucide-react";
-import { templateService } from "../../api/services/templateService";
+import {
+  InsertClientFormBuilderHeaderMapping,
+  DeleteClientFormBuilderHeaderMappingById,
+  GetClientFormBuilderHeaderMappingsByClientId,
+  GetFormBuilder,
+} from "../Store/FormBuilder/Action";
+import AppIcon from "../Component/AppIcon";
+import { SkeletonCard } from "../Skeleton/Skeletons";
+import ClientDropdown from "../Component/ClientDropdown";
 
 const PayrollInputMapping = () => {
-  const [clients, setClients] = useState([]);
-  const [templates, setTemplates] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientTemplates, setClientTemplates] = useState([]);
-  const [availableTemplates, setAvailableTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [mapping, setMapping] = useState({});
+  const dispatch = useDispatch();
 
-  // Safe match helper
-  const isMatch = (a, b) => String(a || "").trim() === String(b || "").trim();
+  /* ===================== REDUX ===================== */
+  const { LogResponce } = useSelector((s) => s.Auth);
+  const { FormBuilder, ClientFormBuilderHeaderMapping } =
+    useSelector((s) => s.FormBuilderStore);
 
-  // Load clients + templates
+  const clients = LogResponce?.data?.ClientList || [];
+  const formBuilders = FormBuilder?.data || [];
+  const mappings = ClientFormBuilderHeaderMapping?.data || [];
+
+  /* ===================== LOCAL STATE ===================== */
+  const [selectedClientCode, setSelectedClientCode] = useState(
+    sessionStorage.getItem("activeClient") || ""
+  );
+
+  const ClientContractId = 0;
+  const TeamId = 0;
+
+  /* ===================== SELECTED CLIENT ===================== */
+  const selectedClient = useMemo(
+    () => clients.find((c) => String(c.Id) === String(selectedClientCode)),
+    [clients, selectedClientCode]
+  );
+
+  const selectedClientId = useMemo(
+    () => selectedClient?.Id ?? null,
+    [selectedClient?.Id]
+  );
+
+  /* ===================== API GUARD ===================== */
+  const lastFetchedClientIdRef = useRef(null);
+
+  /* ===================== LOAD FORM BUILDERS (ONCE) ===================== */
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
+    dispatch(GetFormBuilder());
+  }, [dispatch]);
 
-        // Load clients
-        const clientsResponse = await fetch("/api/db.json");
-        const dbData = await clientsResponse.json();
-        setClients(dbData.clients || []);
+  /* ===================== LOAD MAPPINGS (ONCE PER CLIENT) ===================== */
+  useEffect(() => {
+    if (!selectedClientId) return;
 
-        // Load templates
-        const templateList = await templateService.getAll();
-        setTemplates(templateList || []);
-      } catch (error) {
-        console.error("Failed to load data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (lastFetchedClientIdRef.current === selectedClientId) return;
 
-    loadData();
+    lastFetchedClientIdRef.current = selectedClientId;
+
+    dispatch(GetClientFormBuilderHeaderMappingsByClientId(selectedClientId));
+  }, [dispatch, selectedClientId]);
+
+  /* ===================== DERIVED DATA ===================== */
+  const mappedTemplateIds = useMemo(() => {
+    if (!selectedClientId) return [];
+    return mappings
+      .filter((m) => m.ClientId === selectedClientId)
+      .map((m) => m.FormBuilderId);
+  }, [mappings, selectedClientId]);
+
+  const clientTemplates = useMemo(
+    () => formBuilders.filter((f) => mappedTemplateIds.includes(f.Id)),
+    [formBuilders, mappedTemplateIds]
+  );
+
+  const availableTemplates = useMemo(
+    () => formBuilders.filter((f) => !mappedTemplateIds.includes(f.Id)),
+    [formBuilders, mappedTemplateIds]
+  );
+
+  /* ===================== HANDLERS ===================== */
+  const handleClientChange = useCallback((Id) => {
+    setSelectedClientCode(Id);
+    lastFetchedClientIdRef.current = null; // reset guard on client change
   }, []);
 
-  // Update mappings when client changes
-  useEffect(() => {
-    if (!selectedClient || templates.length === 0) return;
+  const handleMap = useCallback(
+    (formBuilderId) => {
+      if (!selectedClientId) return;
 
-    console.log("Selected Client:", selectedClient);
-    console.log("Loaded Templates:", templates);
-
-    // CURRENT MAPPED
-    const currentMapped = templates.filter((t) =>
-      isMatch(t.clientCode, selectedClient.clientCode)
-    );
-    setClientTemplates(currentMapped);
-
-    // AVAILABLE (not mapped OR common)
-    const available = templates.filter(
-      (t) =>
-        t.isCommon === true ||
-        t.clientCode === null ||
-        !isMatch(t.clientCode, selectedClient.clientCode)
-    );
-    setAvailableTemplates(available);
-
-    // INITIAL MAPPING STATE
-    const mapState = {};
-    templates.forEach((t) => {
-      mapState[t.id] = isMatch(t.clientCode, selectedClient.clientCode);
-    });
-    setMapping(mapState);
-
-    console.log("Mapped Templates:", currentMapped);
-    console.log("Available Templates:", available);
-  }, [selectedClient, templates]);
-
-  const handleClientChange = (clientCode) => {
-    const client = clients.find((c) => isMatch(c.clientCode, clientCode));
-    setSelectedClient(client);
-  };
-
-  const handleTemplateMapping = async (templateId, shouldMap) => {
-    try {
-      const template = templates.find((t) => t.id === templateId);
-      if (!template) return;
-
-      const updatedTemplate = {
-        ...template,
-        clientCode: shouldMap ? selectedClient.clientCode : null,
-      };
-
-      await templateService.update(templateId, updatedTemplate);
-
-      // Update mapping state
-      setMapping((prev) => ({
-        ...prev,
-        [templateId]: shouldMap,
-      }));
-
-      // Update template list
-      const newList = templates.map((t) =>
-        t.id === templateId ? updatedTemplate : t
+      dispatch(
+        InsertClientFormBuilderHeaderMapping({
+          ClientId: selectedClientId,
+          ClientContractId,
+          TeamId,
+          FormBuilderId: formBuilderId,
+          IsActive: true,
+        })
       );
-      setTemplates(newList);
-    } catch (error) {
-      console.error("Mapping update failed:", error);
-    }
-  };
+    },
+    [dispatch, selectedClientId]
+  );
 
-  const getTemplateStats = (clientCode) => {
-    const filtered = templates.filter((t) => isMatch(t.clientCode, clientCode));
-    return {
-      total: filtered.length,
-      active: filtered.filter((t) => t.status === "active").length,
-    };
-  };
+  const handleUnmap = useCallback(
+    (formBuilderId) => {
+      if (!selectedClientId) return;
 
-  if (loading) {
-    return (
-      <div className="p-4">
-        <h1 className="text-xl font-semibold mb-4">Payroll Input Mapping</h1>
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
-  }
+      const existing = mappings.find(
+        (m) =>
+          m.ClientId === selectedClientId &&
+          m.FormBuilderId === formBuilderId
+      );
 
+      if (!existing) return;
+
+      dispatch(DeleteClientFormBuilderHeaderMappingById(existing.Id));
+    },
+    [dispatch, mappings, selectedClientId]
+  );
+
+  /* ===================== RENDER ===================== */
   return (
-    <div className="p-4 space-y-6">
+    <div className="space-y-4">
       {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">Payroll Input Mapping</h1>
-        <p className="text-gray-600 text-sm">
-          Map templates to clients for customized payroll input workflows
+      <div>
+        <h1 className="text-base sm:text-xl md:text-2xl font-bold">
+          Payroll Input Mapping
+        </h1>
+        <p className="text-xs sm:text-sm text-gray-600">
+          Map templates to clients for payroll workflows
         </p>
       </div>
 
-      {/* CLIENT SELECTION */}
+      {/* CLIENT SELECT */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users size={20} />
-            Select Client
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Users size={16} /> Select Client
           </CardTitle>
         </CardHeader>
-
-        <CardContent>
-          <div className="max-w-md">
-            <Select onValueChange={handleClientChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a client to manage templates" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => {
-                  const stats = getTemplateStats(client.clientCode);
-                  return (
-                    <SelectItem key={client.id} value={client.clientCode}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{client.clientName}</span>
-                        <Badge variant="secondary" className="ml-2">
-                          {stats.active}/{stats.total} templates
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-          </div>
+        <CardContent className="">
+          <ClientDropdown
+            value={sessionStorage.getItem("activeClient") || ""}
+            onChange={(c) => { handleClientChange }}
+            placeholder="Select Client"
+            className="w-full"
+            UserClient={true}
+            FstindexSelected={true}
+          />
         </CardContent>
       </Card>
 
-      {/* AFTER CLIENT SELECTED */}
-      {selectedClient && (
+      {selectedClientId && (
         <>
-          {/* CURRENT MAPPINGS */}
+          {/* ===================== MAPPED ===================== */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText size={20} />
-                Current Template Mappings for {selectedClient.clientName}
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <FileText size={16} /> Mapped Forms
               </CardTitle>
             </CardHeader>
-
             <CardContent>
-              {clientTemplates.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No templates currently mapped to this client
+              {ClientFormBuilderHeaderMapping.isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
+              ) : clientTemplates.length === 0 ? (
+                <p className="text-center text-gray-500 py-6 text-sm">
+                  No forms mapped
                 </p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {clientTemplates.map((template) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {clientTemplates.map((t) => (
                     <div
-                      key={template.id}
+                      key={t.Id}
                       className="border rounded-lg p-4 bg-green-50 border-green-200"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-green-800">
-                          {template.name}
+                        <h4 className="font-medium text-green-800 flex gap-2 items-center">
+                          <AppIcon name={t.Icon} />
+                          {t.Name}
                         </h4>
                         <Badge className="bg-green-100 text-green-800">
                           <CheckCircle size={12} className="mr-1" />
@@ -217,18 +207,19 @@ const PayrollInputMapping = () => {
                       </div>
 
                       <p className="text-sm text-green-600 mb-3">
-                        {template.description}
+                        {t.Description}
                       </p>
 
                       <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">
-                          {template.module}
+                        <Badge variant="success" className="text-[10px]">
+                          {Modules.find((m) => m.value === t.ModuleId)?.label ||
+                            t.ModuleId}
                         </Badge>
 
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleTemplateMapping(template.id, false)}
+                          onClick={() => handleUnmap(t.Id)}
                         >
                           <Unlink size={14} className="mr-1" />
                           Unmap
@@ -241,86 +232,70 @@ const PayrollInputMapping = () => {
             </CardContent>
           </Card>
 
-          {/* AVAILABLE TEMPLATES */}
+          {/* ===================== AVAILABLE ===================== */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Link size={20} />
-                Available Templates to Map
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <Link size={16} /> Available Forms
               </CardTitle>
             </CardHeader>
-
             <CardContent>
-              {availableTemplates.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  All templates are already mapped to clients
+              {FormBuilder.isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
+              ) : availableTemplates.length === 0 ? (
+                <p className="text-center text-gray-500 py-6 text-sm">
+                  All forms are mapped
                 </p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableTemplates.map((template) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {availableTemplates.map((t) => (
                     <div
-                      key={template.id}
-                      className="border rounded-lg p-4 bg-gray-50 hover:bg-blue-50 transition-colors"
+                      key={t.Id}
+                      className="border rounded-lg p-3 sm:p-4 bg-gray-50 hover:bg-blue-50 transition-colors flex flex-col gap-3"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-gray-800">{template.name}</h4>
-                        <Badge variant="success">{template.status}</Badge>
+                      <div className="flex justify-between items-start gap-2">
+                        <h4 className="font-medium text-gray-800 flex items-center gap-2 text-sm sm:text-base">
+                          <AppIcon name={t.Icon} />
+                          {t.Name}
+                        </h4>
+                        <Badge
+                          variant={t.IsActive ? "success" : "destructive"}
+                        >
+                          {t.IsActive ? "Active" : "Inactive"}
+                        </Badge>
                       </div>
 
-                      <p className="text-sm text-gray-600 mb-3">
-                        {template.description}
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        {t.Description || "Form builder template"}
                       </p>
 
-                      <div className="flex items-center justify-between">
-                        <Badge variant="success" className="text-xs">
-                          {template.module}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <Badge variant="purple" className="text-[10px]">
+                          {Modules.find((m) => m.value === t.ModuleId)?.label ||
+                            t.ModuleId}
                         </Badge>
 
                         <Button
                           size="sm"
-                          onClick={() => handleTemplateMapping(template.id, true)}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          variant="outline"
+                          onClick={() => handleMap(t.Id)}
+                          className="text-xs sm:text-sm"
                         >
                           <Link size={14} className="mr-1" />
-                          Map to Client
+                          <span className="hidden sm:inline">
+                            Map to Client
+                          </span>
+                          <span className="sm:hidden">Map</span>
                         </Button>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-          {/* SUMMARY */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Mapping Summary</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {clientTemplates.length}
-                  </div>
-                  <div className="text-sm text-gray-600">Templates Mapped</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {availableTemplates.length}
-                  </div>
-                  <div className="text-sm text-gray-600">Available Templates</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {clientTemplates.filter((t) => t.status === "active").length}
-                  </div>
-                  <div className="text-sm text-gray-600">Active Templates</div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </>

@@ -12,6 +12,9 @@ import GoogleIcn from "../Image/google-color-svgrepo-com.svg";
 import FullLogo from "../Image/hfactor-logo-dark.png";
 import Loading from "../Component/Loading";
 import AppIcon from "../Component/AppIcon";
+import { Toaster } from "@/Lib/toaster";
+import { Toaster as Sonner } from "@/Lib/sonner";
+import { TooltipProvider } from "@/Lib/tooltip";
 
 const carouselSlides = [
   {
@@ -89,8 +92,10 @@ const Login = () => {
   };
 
   return (
+    <TooltipProvider>
+          <Toaster />
+          <Sonner />
     <div className="min-h-screen flex bg-emerald-50 relative">
-
       {/* GLOBAL LOADING OVERLAY */}
       {authLoading && <Loading />}
 
@@ -215,6 +220,7 @@ const Login = () => {
       </div>
 
     </div>
+    </TooltipProvider>
   );
 };
 

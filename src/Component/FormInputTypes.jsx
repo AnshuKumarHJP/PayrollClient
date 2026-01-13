@@ -4,10 +4,10 @@ import { Switch } from "../Lib/switch";
 import { Input } from "../Lib/input";
 import { Button } from "../Lib/button";
 import { cn } from "../Lib/utils";
-import { UploadCloud, Delete, FileIcon, Loader2 } from "lucide-react";
 import { toast } from "../Lib/use-toast";
 import axios from "axios";
 import { motion } from "framer-motion";
+import AppIcon from "./AppIcon";
 
 /* ===========================================================
    ANIMATION VARIANTS
@@ -22,78 +22,60 @@ const fadeFast = {
   show: { opacity: 1, transition: { duration: 0.12 } }
 };
 
-const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
-  const typeRaw = (f.InputType || f.DataType || "string").toLowerCase();
+/* ===========================================================
+   ✅ FIXED COMPONENT SIGNATURE (CRITICAL)
+=========================================================== */
+const FormInputTypes = ({
+  f = {},
+  value,
+  onChange,
+  hasError = false
+}) => {
+  const type = (f.InputType || f.DataType || "text").toLowerCase();
   const disabled = Boolean(f.DefaultDisable);
-  const type = typeRaw;
+
+  const placeholder =
+    f.Placeholder && f.Placeholder.trim()
+      ? f.Placeholder
+      : `${["select", "api-select"].includes(type) ? "Select" : "Enter"} ${f.Label || "Field"}`;
 
   /* ---------------- FILE ---------------- */
-  if (type === "file" || type === "image" || type === "document") {
+  if (["file", "image", "document"].includes(type)) {
     return (
-      <motion.div
-        variants={fade}
-        initial="hidden"
-        animate="show"
-        className="flex flex-col items-start w-full max-w-[280px]"
-      >
-        <label className="w-full">
-          <motion.div
-            whileHover={{ scale: disabled ? 1 : 1.02 }}
+      <motion.div variants={fade} initial="hidden" animate="show">
+        <label className="w-full cursor-pointer">
+          <div
             className={cn(
-              "flex items-center justify-center w-full h-9 border border-dashed rounded-md text-xs md:text-sm font-medium gap-2",
+              "flex items-center justify-center h-9 border border-dashed rounded-md gap-2 text-sm",
               disabled
-                ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
+                ? "bg-gray-100 text-gray-400"
                 : hasError
-                ? "border-red-400 bg-red-50 text-red-700"
-                : "border-emerald-400 text-emerald-700 hover:bg-emerald-50 cursor-pointer"
+                ? "border-red-400 text-red-600"
+                : "border-emerald-400 text-emerald-700 hover:bg-emerald-50"
             )}
           >
-            <UploadCloud className="h-4 w-4" />
-            <span>{disabled ? "File Disabled" : "Choose File"}</span>
-          </motion.div>
+            <AppIcon name="UploadCloud" className="h-4 w-4" />
+            Choose File
+          </div>
 
           {!disabled && (
             <input
               type="file"
               accept={f.Accept || "*"}
-              className="hidden"
+              hidden
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  onChange(file.name);
+                  onChange?.(file.name);
                   toast({
                     title: "File Selected",
-                    description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)`
+                    description: file.name
                   });
                 }
               }}
             />
           )}
         </label>
-
-        {value && (
-          <motion.div
-            variants={fadeFast}
-            initial="hidden"
-            animate="show"
-            className="mt-2 flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded-md text-xs text-emerald-700 border border-emerald-200 w-fit"
-          >
-            <FileIcon className="h-3 w-3" />
-            <span className="truncate max-w-[160px]">{value}</span>
-
-            {!disabled && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
-                onClick={() => onChange("")}
-                type="button"
-              >
-                <Delete className="h-3 w-3" />
-              </Button>
-            )}
-          </motion.div>
-        )}
       </motion.div>
     );
   }
@@ -101,123 +83,98 @@ const FormInputTypes = (f = {}, value, onChange, hasError = false) => {
   /* ---------------- SWITCH ---------------- */
   if (["boolean", "switch"].includes(type)) {
     return (
-      <motion.div
-        variants={fade}
-        initial="hidden"
-        animate="show"
-        className="flex items-center gap-2"
-      >
-        <Switch
-          checked={Boolean(value)}
-          onCheckedChange={(v) => onChange(Boolean(v))}
-          disabled={disabled}
-        />
-        <span className="text-xs text-gray-700">{value ? "True" : "False"}</span>
-      </motion.div>
+      <Switch
+        checked={Boolean(value)}
+        onCheckedChange={(v) => onChange?.(Boolean(v))}
+        disabled={disabled}
+      />
     );
   }
 
   /* ---------------- RADIO ---------------- */
   if (type === "radio") {
     return (
-      <motion.div
-        variants={fade}
-        initial="hidden"
-        animate="show"
-        className="flex flex-col gap-2"
-      >
+      <div className="flex flex-col gap-2">
         {f.Options?.map((o, i) => (
-          <motion.label key={i} variants={fadeFast} className="flex items-center gap-2 text-sm">
+          <label key={i} className="flex items-center gap-2">
             <input
               type="radio"
-              disabled={disabled}
               checked={value === o}
-              onChange={() => onChange(o)}
+              disabled={disabled}
+              onChange={() => onChange?.(o)}
             />
             {o}
-          </motion.label>
+          </label>
         ))}
-      </motion.div>
+      </div>
     );
   }
 
   /* ---------------- CHECKBOX GROUP ---------------- */
   if (type === "checkbox-group") {
     const arr = Array.isArray(value) ? value : [];
-
     return (
-      <motion.div variants={fade} initial="hidden" animate="show" className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {f.Options?.map((o, i) => (
-          <motion.label key={i} variants={fadeFast} className="flex items-center gap-2 text-sm">
+          <label key={i} className="flex items-center gap-2">
             <input
               type="checkbox"
-              disabled={disabled}
               checked={arr.includes(o)}
-              onChange={(e) => {
-                const newArr = e.target.checked
-                  ? [...arr, o]
-                  : arr.filter((x) => x !== o);
-
-                onChange(newArr);
-              }}
+              disabled={disabled}
+              onChange={(e) =>
+                onChange?.(
+                  e.target.checked ? [...arr, o] : arr.filter((x) => x !== o)
+                )
+              }
             />
             {o}
-          </motion.label>
+          </label>
         ))}
-      </motion.div>
+      </div>
     );
   }
 
   /* ---------------- SELECT ---------------- */
-  if (type === "api-select" || type === "select") {
+  if (["select", "api-select"].includes(type)) {
     return (
-      <motion.div variants={fade} initial="hidden" animate="show">
-        <SelectComponent
-          f={f}
-          value={value}
-          onChange={onChange}
-          hasError={hasError}
-          disabled={disabled}
-        />
-      </motion.div>
+      <SelectComponent
+        f={{ ...f, Placeholder: placeholder }}
+        value={value}
+        onChange={onChange}
+        hasError={hasError}
+        disabled={disabled}
+      />
     );
   }
 
   /* ---------------- TEXTAREA ---------------- */
   if (type === "textarea") {
     return (
-      <motion.textarea
-        variants={fade}
-        initial="hidden"
-        animate="show"
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
+      <textarea
+        value={value ?? ""}
+        onChange={(e) => onChange?.(e.target.value)}
         disabled={disabled}
+        placeholder={placeholder}
         className={cn(
           "w-full p-2 border rounded-md",
-          hasError && "border-red-400",
-          disabled && "bg-gray-100 text-gray-400 cursor-not-allowed"
+          hasError && "border-red-400"
         )}
       />
     );
   }
 
-  /* ---------------- DEFAULT TEXT & NUMBER ---------------- */
-  
+  /* ---------------- DEFAULT INPUT ---------------- */
   return (
-    <motion.div variants={fade} initial="hidden" animate="show">
-      <Input
-        type={type}
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        placeholder={f.Placeholder || f.FormFieldName || ""}
-        className={cn(hasError && "border-red-400")}
-      />
-    </motion.div>
+    <Input
+      type={type}
+      value={value ?? ""}
+      onChange={(e) => onChange?.(e.target.value)}
+      disabled={disabled}
+      placeholder={placeholder}
+      className={cn(hasError && "border-red-400")}
+    />
   );
 };
-
 
 /* ================= SELECT COMPONENT ================= */
 
@@ -225,65 +182,54 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const staticOptions = useMemo(() => {
-    if (Array.isArray(f.Options)) {
-      return f.Options.map((o) => ({
-        label: typeof o === "object" ? o.label : o,
-        value: typeof o === "object" ? o.value : o
-      }));
-    }
-    return [];
-  }, [f.Options]);
+  const staticOptions = useMemo(
+    () =>
+      Array.isArray(f.Options)
+        ? f.Options.map((o) => ({
+            label: typeof o === "object" ? o.label : o,
+            value: typeof o === "object" ? o.value : o
+          }))
+        : [],
+    [f.Options]
+  );
 
   useEffect(() => {
     const load = async () => {
-      if (f.apiUrl) {
-        setLoading(true);
-        try {
-          const res = await axios.get(f.apiUrl);
-          const data = res.data;
-
-          const opts = data.map((item) => ({
-            label: item[f.labelKey || "label"] || item.name,
-            value: item[f.valueKey || "value"] || item.id
-          }));
-
-          setOptions(opts);
-        } catch {
-          setOptions([]);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setOptions(staticOptions);
+      if (!f.apiUrl) return setOptions(staticOptions);
+      setLoading(true);
+      try {
+        const res = await axios.get(f.apiUrl);
+        setOptions(
+          res.data.map((x) => ({
+            label: x[f.LabelKey || "name"],
+            value: x[f.ValueKey || "id"]
+          }))
+        );
+      } catch {
+        setOptions([]);
+      } finally {
+        setLoading(false);
       }
     };
-
     load();
   }, [f.apiUrl, staticOptions]);
 
-  if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
+  if (loading) return <AppIcon name="Loader2" className="animate-spin" />;
 
   return (
-    <motion.div variants={fadeFast} initial="hidden" animate="show">
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className={cn(hasError && "border-red-400")}>
-          <SelectValue placeholder="Select" />
-        </SelectTrigger>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger className={cn(hasError && "border-red-400")}>
+        <SelectValue placeholder={f.Placeholder} />
+      </SelectTrigger>
 
-        <SelectContent>
-          {options.map((opt, i) => (
-            <SelectItem
-              key={i}
-              value={opt.value}
-            >
-              <span className="text-sm">{opt.label}</span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-
-      </Select>
-    </motion.div>
+      <SelectContent>
+        {options.map((o, i) => (
+          <SelectItem key={i} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 

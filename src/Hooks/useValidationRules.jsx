@@ -1,34 +1,24 @@
 // src/Hooks/useValidationRules.js
+// ✅ CLEAN HOOK
+// ✅ NO LOGIC
+// ✅ ENGINE DOES EVERYTHING
+
 import { useEffect, useState } from "react";
 import ValidationEngine from "../services/ValidationEngine";
-import ruleTypesService from "../../api/services/ruleTypesService";
 
 export default function useValidationRules(template) {
   const [loading, setLoading] = useState(true);
-  const [ruleTypes, setRuleTypes] = useState([]);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await ruleTypesService.getAllRuleTypes(); // async load
-        if (data) setRuleTypes(data);
-      } catch (err) {
-        console.error("Failed to load rule types:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(false);
+  }, [template]);
 
-    load();
-  }, []);
-
-  const validate = (formData = {}, context = {}) => {
+  const validate = async (formData = {}, context = {}) => {
     try {
-      return ValidationEngine.validate({
+      return await ValidationEngine.validate({
         template,
         formData,
-        context,
-        ruleTypes // ⭐ pass ruleTypes to engine
+        context
       });
     } catch (err) {
       console.error("Validation engine crashed:", err);

@@ -127,9 +127,10 @@ const FormBuilderList = ({ onAddEditMode }) => {
     }
   };
 
-  const totalForms = FormBuilder?.data?.length;
-  const activeForms = FormBuilder?.data?.filter(f => f.Active).length;
-  const inactiveForms = FormBuilder?.data?.filter(f => !f.Active).length;
+  const data = Array.isArray(FormBuilder?.data) ? FormBuilder.data : [];
+  const totalForms = data.length;
+  const activeForms = data.filter(f => f.Active).length;
+  const inactiveForms = data.filter(f => !f.Active).length;
 
   // console.log(FormBuilder?.data);
 

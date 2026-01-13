@@ -98,9 +98,6 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   const [saveStatus, setSaveStatus] = useState(null);
   const { FormBuilder, FieldValidationRule } = useSelector((state) => state.FormBuilderStore);
 
-  console.log(HeaderCode);
-  console.log(FormBuilder?.data);
-
 
   // ------------------------------------------------
   // LOAD RULES + FORM
@@ -131,8 +128,6 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
     try {
       setLoading(true);
       let form = FormBuilder?.data?.find(f => f.Id === HeaderCode);
-      console.log(form);
-
       if (!form) {
         toast({
           title: "Error",
@@ -256,8 +251,6 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
 
 
 
-
-
   // ------------------------------------------------
   // DELETE FIELD
   // ------------------------------------------------
@@ -327,6 +320,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
         FieldsConfigurations: fields.map(f => ({ ...f, ApplicableJson: JSON.stringify(f.ApplicableJson || []) })),
       };
 
+      
       const res = await dispatch(UpsertFormBuilder(FormBuilderHeader));
 
       if (res?.Status) {
@@ -355,13 +349,10 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   // ------------------------------------------------
   const columns = [
     { key: "Label", label: "Label", minWidth: 140, sticky: true },
-
     { key: "Name", label: "Name", minWidth: 140 },
 
     {
-      key: "Type",
-      label: "Type",
-      minWidth: 120,
+      key: "Type",label: "Type",minWidth: 120,
       render: (v) => <Badge className="text-xs">{v}</Badge>
     },
 
@@ -433,9 +424,6 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   if (loading) {
     <Loading />
   }
-
-  console.log(fields);
-  
 
   // ------------------------------------------------
   // MAIN UI
@@ -593,39 +581,43 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           {fields.length > 0 && (
             <AdvanceTable
               title="Fields"
-              data={fields}
+              data={fields.sort((a, b) => a.DisplayOrder - b.DisplayOrder)}
               columns={columns}
               stickyRight={true}
               showIndex={true}
-              renderActions={(row) => (
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={row.index === 0}
-                    onClick={() => moveField(row.index, "up")}
-                  >
-                    ↑
-                  </Button>
+              renderActions={(row) => {
+                const sortedFields = fields.sort((a, b) => a.DisplayOrder - b.DisplayOrder);
+                const currentIndex = sortedFields.findIndex(f => f.id === row.id);
+                return (
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={currentIndex === 0}
+                      onClick={() => moveField(currentIndex, "up")}
+                    >
+                      ↑
+                    </Button>
 
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={row.index === fields.length - 1}
-                    onClick={() => moveField(row.index, "down")}
-                  >
-                    ↓
-                  </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={currentIndex === sortedFields.length - 1}
+                      onClick={() => moveField(currentIndex, "down")}
+                    >
+                      ↓
+                    </Button>
 
-                  <Button size="sm" variant="outline" onClick={() => openEditField(row)}>
-                    <AppIcon name="Edit" size={14} />
-                  </Button>
+                    <Button size="sm" variant="outline" onClick={() => openEditField(row)}>
+                      <AppIcon name="Edit" size={14} />
+                    </Button>
 
-                  <Button size="sm" variant="outline" onClick={() => deleteField(row.id)}>
-                    <AppIcon name="Trash2" size={14} />
-                  </Button>
-                </div>
-              )}
+                    <Button size="sm" variant="outline" onClick={() => deleteField(row.id)}>
+                      <AppIcon name="Trash2" size={14} />
+                    </Button>
+                  </div>
+                );
+              }}
             />
           )}
         </div>

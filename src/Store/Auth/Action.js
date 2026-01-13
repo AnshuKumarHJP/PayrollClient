@@ -5,6 +5,7 @@ import {
   GET_AUTH_SUCCESS,
   GET_AUTH_FAILURE
 } from "./ActionType";
+import { toast } from "../../Lib/use-toast";
 
 const getAuthRequest = () => ({ type: GET_AUTH_REQUEST });
 const getAuthSuccess = (data) => ({ type: GET_AUTH_SUCCESS, payload: data });
@@ -105,7 +106,18 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
     }
 
   } catch (error) {
-    console.error(" AUTH FAILED", error);
-    dispatch(getAuthFailure(error?.response?.data || "Login failed"));
+    console.error("AUTH FAILED", error);
+    let errorMessage = "Login failed";
+    if (error.code === "ERR_NETWORK") {
+      toast({
+        title: 'Network Error',
+        description: 'Unable to connect to the server. Please check your internet connection or try again later.',
+        variant: 'destructive',
+      })
+      errorMessage = "Unable to connect to the server. Please check your internet connection or try again later.";
+    } else if (error.response && error.response.data) {
+      errorMessage = error.response.data;
+    }
+    dispatch(getAuthFailure(errorMessage));
   }
 };

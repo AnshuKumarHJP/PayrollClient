@@ -205,83 +205,91 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
      RENDER
   ===================================================== */
   return (
-      <div className="bg-white shadow-xl rounded-2xl overflow-hidden ">
-        {/* Header */}
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b bg-gradient-to-r from-emerald-400 to-green-400">
-          <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
-          <AppIcon name={"BookOpenCheck"} size={30}/>  Field Validation Rule
-          </h2>
-          <p className="text-green-100 text-xs sm:text-sm">
-            Create and manage validation rules dynamically
-          </p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6 p-2 md:p-4">
+    <div className="bg-white shadow-xl rounded-2xl overflow-hidden ">
+      {/* Header */}
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b bg-gradient-to-r from-emerald-400 to-green-400">
+        <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
+          <AppIcon name={"BookOpenCheck"} size={30} />  Field Validation Rule
+        </h2>
+        <p className="text-green-100 text-xs sm:text-sm">
+          Create and manage validation rules dynamically
+        </p>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-6 p-2 md:p-4">
 
-          {/* BASIC INFO */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {form.Id ? "Edit Validation Rule" : "Create Validation Rule"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Rule Code</Label>
-                <Input
-                  name="RuleCode"
-                  placeholder="Enter rule code"
-                  value={form.RuleCode}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <Label>Rule Name</Label>
-                <Input
-                  name="RuleName"
-                  placeholder="Enter rule name"
-                  value={form.RuleName}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Description</Label>
-                <Textarea
-                  name="RuleDescription"
-                  placeholder="Enter rule description"
-                  value={form.RuleDescription}
-                  onChange={handleChange}
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* BASIC INFO */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {form.Id ? "Edit Validation Rule" : "Create Validation Rule"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Rule Code</Label>
+              <Input
+                name="RuleCode"
+                placeholder="Enter rule code"
+                value={form.RuleCode}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <Label>Rule Name</Label>
+              <Input
+                name="RuleName"
+                placeholder="Enter rule name"
+                value={form.RuleName}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label>Description</Label>
+              <Textarea
+                name="RuleDescription"
+                placeholder="Enter rule description"
+                value={form.RuleDescription}
+                onChange={handleChange}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* TARGET */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Target Mapping</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* TARGET */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Target Mapping</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Target Entity</Label>
               <Input
                 name="TargetEntity"
                 placeholder="Target Entity"
                 value={form.TargetEntity}
                 onChange={handleChange}
               />
+            </div>
+            <div>
+              <Label>Target Field</Label>
               <Input
                 name="TargetField"
                 placeholder="Target Field"
                 value={form.TargetField}
                 onChange={handleChange}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* SETTINGS */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Rule Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* SETTINGS */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Rule Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <Label>Validation Types</Label>
               <Select
                 value={String(form.ValidationType)}
                 onValueChange={(v) =>
@@ -297,6 +305,10 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label>Severities</Label>
 
               <Select
                 value={String(form.Severity)}
@@ -313,7 +325,10 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
 
+            <div>
+              <Label>Categories</Label>
               <Select
                 value={String(form.Category)}
                 onValueChange={(v) =>
@@ -329,7 +344,10 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
 
+            <div>
+              <Label>Display Order</Label>
               <Input
                 type="number"
                 min={1}
@@ -338,73 +356,88 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
                   setForm((p) => ({ ...p, DisplayOrder: Number(e.target.value) }))
                 }
               />
-            </CardContent>
+            </div>
+          </CardContent>
 
-            <CardContent className="flex items-center gap-2">
-              <Switch
-                checked={form.IsActive}
-                onCheckedChange={(v) =>
-                  setForm((p) => ({ ...p, IsActive: v }))
-                }
-              />
-              <Label>Active</Label>
-            </CardContent>
-          </Card>
+          <CardContent className="flex items-center gap-2">
+            <Switch
+              checked={form.IsActive}
+              onCheckedChange={(v) =>
+                setForm((p) => ({ ...p, IsActive: v }))
+              }
+            />
+            <Label>Active</Label>
+          </CardContent>
+        </Card>
 
-          {/* PARAMETERS */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between w-full">
-                <CardTitle>Validation Parameters</CardTitle>
-                <Button type="button" variant="outline" onClick={addParam}>
-                  + Add
-                </Button>
-              </div>
-            </CardHeader>
+        {/* PARAMETERS */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle>Validation Parameters</CardTitle>
+              <Button type="button" variant="outline" onClick={addParam}>
+                + Add
+              </Button>
+            </div>
+          </CardHeader>
 
-            <CardContent>
-              {form.ValidationParameters.map((p, i) => (
-                <div key={i} className="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-2">
+          <CardContent>
+            {form.ValidationParameters.map((p, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3 items-end border rounded-lg p-3"
+              >
+                {/* PARAM NAME */}
+                <div className="md:col-span-2">
+                  <Label>Param Name</Label>
                   <Input
                     placeholder="Param Name"
                     value={p.ParamName}
-                    onChange={(e) =>
-                      updateParam(i, "ParamName", e.target.value)
-                    }
+                    onChange={(e) => updateParam(i, "ParamName", e.target.value)}
+                    className="w-full"
                   />
+                </div>
+
+                {/* PARAM VALUE */}
+                <div className="md:col-span-3">
+                  <Label>Param Value</Label>
                   <Input
-                    className="sm:col-span-3"
-                    placeholder="eg : ^[a-zA-Z0-9]+$"
+                    placeholder="eg: ^[a-zA-Z0-9]+$"
                     value={p.ParamValue}
-                    onChange={(e) =>
-                      updateParam(i, "ParamValue", e.target.value)
-                    }
+                    onChange={(e) => updateParam(i, "ParamValue", e.target.value)}
+                    className="w-full"
                   />
+                </div>
+
+                {/* REMOVE BUTTON */}
+                <div className="md:col-span-1 flex md:justify-end">
                   <Button
                     type="button"
                     variant="destructive"
-                    className="w-fit"
+                    className="w-full md:w-auto flex items-center gap-2"
                     onClick={() => removeParam(i)}
                   >
                     <AppIcon name="Trash" />
-                    Remove
+                    <span className="md:hidden">Remove</span>
                   </Button>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </div>
 
-          {/* FOOTER */}
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : (form.Id ? "Update Rule" : "Create Rule")}
-            </Button>
-          </div>
-        </form>
-      </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* FOOTER */}
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : (form.Id ? "Update Rule" : "Create Rule")}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

@@ -1,11 +1,3 @@
-/* =====================================================
-   OPTIMIZED ACTIONS
-   ✔ Only GET_ALL sets data
-   ✔ GET_BY_ID / UPSERT / DELETE do NOT affect list
-   ✔ Same ActionTypes (no breaking change)
-   ✔ Cleaner flow & predictable UI
-===================================================== */
-
 import {
   GET_ALL_FIELDVALIDATIONRULES_REQUEST,
   GET_ALL_FIELDVALIDATIONRULES_SUCCESS,
@@ -23,8 +15,6 @@ import {
   DELETE_FIELDVALIDATIONRULE_SUCCESS,
   DELETE_FIELDVALIDATIONRULE_FAILURE,
 
-  CLEAR_SUCCESS,
-  CLEAR_ERROR,
 
   DELETE_FORMBUILDER_REQUEST,
   DELETE_FORMBUILDER_SUCCESS,
@@ -42,6 +32,18 @@ import {
   GET_FORMBUILDER_BY_ID_SUCCESS,
   GET_FORMBUILDER_BY_ID_FAILURE,
 
+  INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_REQUEST,
+  INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_SUCCESS,
+  INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_FAILURE,
+
+  DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_REQUEST,
+  DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_SUCCESS,
+  DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_FAILURE,
+
+  GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_REQUEST,
+  GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_SUCCESS,
+  GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_FAILURE,
+
 } from "./ActionType";
 
 import ClientAPI from "../../services/ClientApi";
@@ -55,16 +57,8 @@ export const GetAllFieldValidationRules = () => async (dispatch) => {
   dispatch({ type: GET_ALL_FIELDVALIDATIONRULES_REQUEST });
 
   try {
-    const res = await ClientAPI(
-      "/api/FieldValidationRule/GetAllFieldValidationRules",
-      null,
-      "GET",
-      null,
-      "normal"
-    );
-
+    const res = await ClientAPI("/api/FieldValidationRule/GetAllFieldValidationRules", null, "GET", null, "normal");
     const decrypted = CryptoService.decrypt(res?.data);
-
     if (!decrypted?.Status) {
       throw new Error(
         decrypted?.Message || "Failed to fetch field validation rules"
@@ -75,17 +69,11 @@ export const GetAllFieldValidationRules = () => async (dispatch) => {
       typeof decrypted.Result === "string"
         ? JSON.parse(decrypted.Result)
         : decrypted.Result ?? [];
-
-    dispatch({
-      type: GET_ALL_FIELDVALIDATIONRULES_SUCCESS,
-      payload: parsedResult
-    });
-
+    dispatch({ type: GET_ALL_FIELDVALIDATIONRULES_SUCCESS, payload: parsedResult });
     return parsedResult;
   } catch (error) {
     dispatch({
-      type: GET_ALL_FIELDVALIDATIONRULES_FAILURE,
-      payload: error.message || "Failed to fetch field validation rules"
+      type: GET_ALL_FIELDVALIDATIONRULES_FAILURE, payload: error.message || "Failed to fetch field validation rules"
     });
     throw error;
   }
@@ -96,18 +84,9 @@ export const GetAllFieldValidationRules = () => async (dispatch) => {
 ===================================================== */
 export const GetFieldValidationRuleById = (id) => async (dispatch) => {
   dispatch({ type: GET_FIELDVALIDATIONRULE_REQUEST });
-
   try {
     const decryptedId = CryptoService.decrypt(id);
-
-    const res = await ClientAPI(
-      `/api/FieldValidationRule/GetFieldValidationRuleById?Id=${decryptedId}`,
-      null,
-      "GET",
-      null,
-      "normal"
-    );
-
+    const res = await ClientAPI(`/api/FieldValidationRule/GetFieldValidationRuleById?Id=${decryptedId}`, null, "GET", null, "normal");
     dispatch({
       type: GET_FIELDVALIDATIONRULE_SUCCESS,
       payload: res.data
@@ -133,25 +112,14 @@ export const UpsertFieldValidationRule = (payload) => async (dispatch) => {
 
   try {
     const encryptedPayload = await CryptoService.encrypt({ FieldValidationRule: payload });
-
-    const res = await ClientAPI(
-      "/api/FieldValidationRule/UpsertFieldValidationRule",
-      encryptedPayload,
-      "PUT",
-      null,
-      "normal"
-    );
-
+    const res = await ClientAPI("/api/FieldValidationRule/UpsertFieldValidationRule", encryptedPayload, "PUT", null, "normal");
     const decrypted = CryptoService.decrypt(res?.data);
-
     if (!decrypted?.Status) {
       throw new Error(
         decrypted?.Message || "Failed to save field validation rule"
       );
     }
-
     dispatch({ type: UPSERT_FIELDVALIDATIONRULE_SUCCESS });
-
     toast({
       title: "Success",
       description: decrypted?.Message || "Saved successfully"
@@ -183,29 +151,18 @@ export const DeleteFieldValidationRuleById = (id) => async (dispatch) => {
   try {
     const encryptedPayload = await CryptoService.encrypt(id);
 
-    const res = await ClientAPI(
-      "/api/FieldValidationRule/DeleteFieldValidationRuleById",
-      encryptedPayload,
-      "PUT",
-      null,
-      "normal"
-    );
-
+    const res = await ClientAPI("/api/FieldValidationRule/DeleteFieldValidationRuleById", encryptedPayload, "PUT", null, "normal");
     const decrypted = CryptoService.decrypt(res?.data);
-
     if (!decrypted?.Status) {
       throw new Error(
         decrypted?.Message || "Failed to delete field validation rule"
       );
     }
-
     dispatch({ type: DELETE_FIELDVALIDATIONRULE_SUCCESS });
-
     toast({
       title: "Success",
       description: decrypted?.Message || "Deleted successfully"
     });
-
     return decrypted;
   } catch (error) {
     dispatch({
@@ -227,9 +184,6 @@ export const DeleteFieldValidationRuleById = (id) => async (dispatch) => {
 
 
 
-
-
-
 /* ===============================================================
 // FormBuilder Actions
 ================================================================ */
@@ -242,14 +196,7 @@ export const GetFormBuilder = () => async (dispatch) => {
   dispatch({ type: GET_FORMBUILDER_REQUEST });
 
   try {
-     const res = await ClientAPI(
-      "/api/FormBuilder/GetAllFormBuilderHeader",
-      null,
-      "GET",
-      null,
-      "normal"
-    );
-
+    const res = await ClientAPI("/api/FormBuilder/GetAllFormBuilderHeader", null, "GET", null, "normal");
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -262,7 +209,7 @@ export const GetFormBuilder = () => async (dispatch) => {
     } catch (e) {
       parsed = [];
     }
-    dispatch({ type: GET_FORMBUILDER_SUCCESS, payload:parsed });
+    dispatch({ type: GET_FORMBUILDER_SUCCESS, payload: parsed });
   } catch (error) {
     dispatch({
       type: GET_FORMBUILDER_FAILURE,
@@ -270,55 +217,6 @@ export const GetFormBuilder = () => async (dispatch) => {
     });
   }
 };
-
-/* ===============================================================
-// GET Form By ID
-================================================================ */
-export const GetFormBuilderById = (id) => async (dispatch) => {
-  dispatch({ type: GET_FORMBUILDER_BY_ID_REQUEST });
-
-  try {
-    const res = await ClientAPI.get(`/api/formbuilder/FormBuilderHeader/${id}`);
-
-    // Backend returns: data1 = header JSON, data2 = details JSON
-    const headerStr = res?.data?.data?.data1;
-    const detailsStr = res?.data?.data?.data2;
-
-    // SAFELY PARSE HEADER
-    let header = {};
-    try {
-      header = headerStr && headerStr.trim() !== "" 
-        ? JSON.parse(headerStr) 
-        : {};
-    } catch (e) {
-      header = {};
-    }
-
-    // SAFELY PARSE DETAILS
-    let details = [];
-    try {
-      details = detailsStr && detailsStr.trim() !== "" 
-        ? JSON.parse(detailsStr) 
-        : [];
-    } catch (e) {
-      details = [];
-    }
-
-    // MERGE AND RETURN
-    return {
-      ...header,
-      Details: details,
-    };
-  } 
-  catch (error) {
-    dispatch({
-      type: GET_FORMBUILDER_BY_ID_FAILURE,
-      payload: error.response?.data?.message || "Failed to fetch form",
-    });
-    throw error;
-  }
-};
-
 
 /* =====================================================
    UPSERT FORM BUILDER – DOES NOT TOUCH LIST
@@ -329,13 +227,7 @@ export const UpsertFormBuilder = (payload) => async (dispatch) => {
   try {
     const encryptedPayload = await CryptoService.encrypt(payload);
 
-    const res = await ClientAPI(
-      "/api/FormBuilder/UpsertFormBuilderHeader",
-      encryptedPayload,
-      "PUT",
-      null,
-      "normal"
-    );
+    const res = await ClientAPI("/api/FormBuilder/UpsertFormBuilderHeader", encryptedPayload, "PUT", null, "normal");
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -365,7 +257,6 @@ export const UpsertFormBuilder = (payload) => async (dispatch) => {
   }
 };
 
-
 /* ===============================================================
 // DELETE Form
 ================================================================ */
@@ -375,15 +266,9 @@ export const DeleteFormBuilder = (id) => async (dispatch) => {
   try {
     const encryptedPayload = await CryptoService.encrypt(id);
 
-    const res = await ClientAPI(
-      "/api/FormBuilder/DeleteFormBuilderHeaderById",
-      encryptedPayload,
-      "PUT",
-      null,
-      "normal"
-    );
+    const res = await ClientAPI("/api/FormBuilder/DeleteFormBuilderHeaderById", encryptedPayload, "PUT", null, "normal");
 
-   const decrypted = CryptoService.decrypt(res?.data);
+    const decrypted = CryptoService.decrypt(res?.data);
 
     if (!decrypted?.Status) {
       throw new Error(
@@ -408,13 +293,157 @@ export const DeleteFormBuilder = (id) => async (dispatch) => {
   }
 };
 
+/* ===============================================================
+// GET Form By ID
+================================================================ */
+export const GetFormBuilderById = (id) => async (dispatch) => {
+  dispatch({ type: GET_FORMBUILDER_BY_ID_REQUEST });
+
+  try {
+    const encryptedPayload = await CryptoService.encrypt(id);
+    const res = await ClientAPI(`/api/FormBuilder/GetFormBuilderHeaderById?Id=${encryptedPayload}`, null, "GET", null, "normal");
+    const decrypted = CryptoService.decrypt(res?.data);
+    if (!decrypted?.Status) {
+      throw new Error(
+        decrypted?.Message || "Failed to fetch form builder"
+      );
+    }
+    
+    const parsedResult =
+      typeof decrypted.Result === "string"
+        ? JSON.parse(decrypted.Result)
+        : decrypted.Result ?? null;
+    dispatch({ type: GET_FORMBUILDER_BY_ID_SUCCESS, payload: parsedResult });
+    return parsedResult;
+  }
+  catch (error) {
+    dispatch({
+      type: GET_FORMBUILDER_BY_ID_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch form",
+    });
+    throw error;
+  }
+};
 
 
 
 
+/* ===============================================================
+   ClientFormBuilderHeaderMapping Actions
+================================================================ */
 
 /* =====================================================
-   CLEAR FLAGS
+   INSERT CLIENT FORM BUILDER HEADER MAPPING
 ===================================================== */
-export const clearSuccess = () => ({ type: CLEAR_SUCCESS });
-export const clearError = () => ({ type: CLEAR_ERROR });
+export const InsertClientFormBuilderHeaderMapping = (payload) => async (dispatch) => {
+  dispatch({ type: INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_REQUEST });
+
+  try {
+    console.log(payload);
+    const encryptedPayload = await CryptoService.encrypt(payload);
+    const res = await ClientAPI("/api/FormBuilder/InsertClientFormBuilderHeaderMapping", encryptedPayload, "PUT", null, "normal");
+    const decrypted = CryptoService.decrypt(res?.data);
+    if (!decrypted?.Status) {
+      throw new Error(
+        decrypted?.Message || "Failed to insert client form builder header mapping"
+      );
+    }
+    dispatch({ type: INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_SUCCESS });
+    toast({
+      title: "Success",
+      description: decrypted?.Message || "Inserted successfully"
+    });
+
+    return decrypted;
+  } catch (error) {
+    dispatch({
+      type: INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_FAILURE,
+      payload: error.message || "Failed to insert client form builder header mapping"
+    });
+
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive"
+    });
+
+    throw error;
+  }
+};
+
+/* =====================================================
+   DELETE CLIENT FORM BUILDER HEADER MAPPING BY ID
+===================================================== */
+export const DeleteClientFormBuilderHeaderMappingById = (id) => async (dispatch) => {
+  dispatch({ type: DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_REQUEST });
+
+  try {
+    const encryptedPayload = await CryptoService.encrypt(id);
+    const res = await ClientAPI("/api/FormBuilder/DeleteClientFormBuilderHeaderMappingById", encryptedPayload, "PUT", null, "normal");
+    const decrypted = CryptoService.decrypt(res?.data);
+    if (!decrypted?.Status) {
+      throw new Error(
+        decrypted?.Message || "Failed to delete client form builder header mapping"
+      );
+    }
+    dispatch({ type: DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_SUCCESS });
+    toast({
+      title: "Success",
+      description: decrypted?.Message || "Deleted successfully"
+    });
+    return decrypted;
+  } catch (error) {
+    dispatch({
+      type: DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_FAILURE,
+      payload: error.message || "Failed to delete client form builder header mapping"
+    });
+
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive"
+    });
+
+    throw error;
+  }
+};
+
+/* =====================================================
+   GET CLIENT FORM BUILDER HEADER MAPPINGS BY CLIENT ID
+===================================================== */
+export const GetClientFormBuilderHeaderMappingsByClientId = (clientId) => async (dispatch) => {
+  dispatch({ type: GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_REQUEST });
+
+  try {
+    const encryptedClientId = await CryptoService.encrypt(clientId);
+    const res = await ClientAPI(`/api/FormBuilder/GetClientFormBuilderHeaderMappingsByClientId?ClientId=${encryptedClientId}`, null, "GET", null, "normal");
+    const decrypted = CryptoService.decrypt(res?.data);
+    if (!decrypted?.Status) {
+      throw new Error(
+        decrypted?.Message || "Failed to fetch client form builder header mappings"
+      );
+    }
+    const parsedResult =
+      typeof decrypted.Result === "string"
+        ? JSON.parse(decrypted.Result)
+        : decrypted.Result ?? [];
+
+    dispatch({ type: GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_SUCCESS, payload: parsedResult });
+    return parsedResult;
+  } catch (error) {
+    console.log(error);
+    dispatch({
+      type: GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_FAILURE,
+      payload: error.message || "Failed to fetch client form builder header mappings"
+    });
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+

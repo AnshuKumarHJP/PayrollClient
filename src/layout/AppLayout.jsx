@@ -32,10 +32,10 @@ const LayoutContent = () => {
         <Header />
 
         {/* Add padding-top = header height */}
-        <div className="pt-[90px] md:pt-[70px]">
+        <div className="pt-[80px] md:pt-[70px]">
 
           {/* FILTER BAR */}
-          <div className="w-full px-4 py-2 flex flex-wrap gap-4 items-center justify-end backdrop-blur-md">
+          <div className="w-full px-4 py-1 flex flex-wrap gap-4 items-center justify-end backdrop-blur-md">
 
             {/* Month */}
             <div className="w-full sm:w-1/3">

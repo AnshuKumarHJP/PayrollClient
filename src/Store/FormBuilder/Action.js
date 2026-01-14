@@ -111,7 +111,7 @@ export const UpsertFieldValidationRule = (payload) => async (dispatch) => {
   dispatch({ type: UPSERT_FIELDVALIDATIONRULE_REQUEST });
 
   try {
-    const encryptedPayload = await CryptoService.encrypt({ FieldValidationRule: payload });
+    const encryptedPayload = await CryptoService.encrypt(payload);
     const res = await ClientAPI("/api/FieldValidationRule/UpsertFieldValidationRule", encryptedPayload, "PUT", null, "normal");
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {

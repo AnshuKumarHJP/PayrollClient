@@ -32,7 +32,8 @@ const FormInputTypes = ({
   hasError = false
 }) => {
   const type = (f.InputType || f.DataType || "text").toLowerCase();
-  const disabled = Boolean(f.DefaultDisable);
+  // ✅ FIXED
+  const disabled = Boolean(f.Disabled);
 
   const placeholder =
     f.Placeholder && f.Placeholder.trim()

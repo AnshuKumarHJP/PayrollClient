@@ -118,7 +118,7 @@ const sortRows = (rows) => {
 
   /* ---------------- FILTER ---------------- */
   const filtered = useMemo(() => {
-    let rows = [...data];
+    let rows = [...safeData];
 
     if (searchTerm.trim()) {
       const low = searchTerm.toLowerCase();

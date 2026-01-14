@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
+import { Skeleton } from "../Lib/skeleton";
 import Loading from "../Component/Loading";
 import AppIcon from "../Component/AppIcon";
 import CryptoService from '../Security/useCrypto'
@@ -14,6 +15,7 @@ import {
   GetClientFormBuilderHeaderMappingsByClientId,
   GetFormBuilder,
 } from "../Store/FormBuilder/Action";
+import { Modules } from "../Data/StaticData";
 
 /* =========================================================
    COMPONENT
@@ -82,7 +84,45 @@ const InputModule = () => {
      LOADING STATE
   ------------------------------------------------------- */
   if (FormBuilder.isLoading || ClientFormBuilderHeaderMapping.isLoading) {
-    return <Loading />;
+    return (
+      <div className="p-4 sm:p-6">
+        {/* HEADER SKELETON */}
+        <div className="mb-8">
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+
+        {/* MODULE GRID SKELETON */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Card key={index} className="rounded-2xl overflow-hidden">
+              {/* TOP STRIP */}
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 opacity-70" />
+
+              {/* BADGES SKELETON */}
+              <div className="absolute right-2 top-2 space-x-1">
+                <Skeleton className="h-5 w-12" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+
+              <CardHeader className="text-center pb-4 pt-6">
+                {/* ICON SKELETON */}
+                <Skeleton className="h-14 w-14 rounded-2xl mx-auto mb-4" />
+
+                <Skeleton className="h-6 w-32 mx-auto" />
+              </CardHeader>
+
+              <CardContent className="text-center pb-6 px-6">
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mx-auto mb-5" />
+
+                <Skeleton className="h-10 w-full rounded-xl" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   /* -------------------------------------------------------
@@ -105,22 +145,24 @@ const InputModule = () => {
     },
   };
 
-  console.log(mappedForms);
   const handleNavigate = async (Id) => {
     const encryptedId = CryptoService.EncryptWithAES(Id.toString());
     navigate(`/inputs/${encryptedId}`);
 
   }
 
+  console.log(mappedForms);
+
+
   /* -------------------------------------------------------
      RENDER
   ------------------------------------------------------- */
   return (
-    <div className="p-4 sm:p-6">
+    <div className="">
 
       {/* HEADER */}
       <div className="mb-8">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
           Payroll Input Modules
         </h1>
         <p className="text-gray-600 text-sm mt-1">
@@ -141,102 +183,114 @@ const InputModule = () => {
             <motion.div
               key={index}
               variants={cardAnim}
-              whileHover={
-                !isInactive
-                  ? { y: -4, scale: 1.02, transition: { type: "spring", stiffness: 200 } }
-                  : {}
-              }
-              className={isInactive ? "opacity-10 blur-[0.5px] pointer-events-none" : ""}
+              whileHover={!isInactive ? { y: -2, scale: 1.01 } : {}}
+              className={isInactive ? "opacity-30 pointer-events-none" : ""}
             >
               <Card
-                className="
-                  group relative rounded-2xl
-                  overflow-hidden
-                  backdrop-blur-xl
-                  bg-white/70 dark:bg-gray-900/40
-                  border border-gray-200 dark:border-gray-700
-                  shadow-[0_4px_15px_rgba(0,0,0,0.08)]
-                  transition-all duration-300
-                "
+                className=" relative rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-emerald-200/60 dark:border-gray-700 
+                 shadow-sm hover:shadow-md transition-all"
               >
                 {/* TOP STRIP */}
-                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-300 via-emerald-200 to-teal-300 opacity-70" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-400" />
 
-                {/* BADGES */}
-                <div className="absolute right-2 top-2 space-x-1">
-                  <Badge variant="info">{m.Version}</Badge>
-                  <Badge variant={m.IsActive ? "success" : "destructive"}>
-                    {m.IsActive ? "Active" : "In Active"}
-                  </Badge>
+                {/* STATUS */}
+                <div className="absolute right-3 top-3 flex gap-1 text-[10px]">
+                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                    v{m.Version}
+                  </span>
+                  <span
+                    className={`px-2 py-1 font-semibold rounded-full ${m.IsActive
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-600"
+                      }`}
+                  >
+                    {m.IsActive ? "Active" : "Inactive"}
+                  </span>
                 </div>
 
-                <CardHeader className="text-center pb-4 pt-6">
-                  {/* ICON */}
-                  <motion.div
-                    className="flex justify-center mb-4"
-                    whileHover={!isInactive ? { scale: 1.1 } : {}}
-                  >
+                {/* HEADER */}
+                <CardHeader className="pt-5 pb-3 text-center">
+                  <div className="flex justify-center mb-2">
                     <div
-                      className="
-                        h-14 w-14 rounded-2xl
-                        bg-emerald-100/60 dark:bg-emerald-900/40
-                        border border-emerald-300 dark:border-emerald-700
-                        flex items-center justify-center
-                        text-emerald-700 dark:text-emerald-200
-                        transition-all
-                        group-hover:bg-emerald-600 group-hover:text-white
-                        group-hover:border-emerald-600
-                      "
+                      className=" h-10 w-10 rounded-lg  bg-emerald-100  border border-emerald-300 flex items-center justify-center
+                        text-emerald-700"
                     >
-                      <AppIcon name={m.Icon} />
+                      <AppIcon name={m.Icon} size={18} />
                     </div>
-                  </motion.div>
+                  </div>
 
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                  <CardTitle className="text-sm font-semibold text-gray-900">
                     {m.Name}
                   </CardTitle>
+
+                  <div className="mt-1 flex flex-wrap items-center justify-center gap-2 text-[11px] text-gray-500">
+                    {/* MODULE */}
+                    <div className="flex items-center gap-1.5">
+                      <AppIcon name="Layers" size={11} />
+                      <span>Module</span>
+                      <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
+                        {Modules.find((mo) => mo.value === m.ModuleId)?.label || m.ModuleId}
+                      </Badge>
+                    </div>
+
+                    {/* SEPARATOR */}
+                    <span className="opacity-40">|</span>
+
+                    {/* MODE */}
+                    <div className="flex items-center gap-1.5">
+                      <AppIcon name="GitMerge" size={11} />
+                      <span className="font-medium">
+                        {m.IsGroupSaveEnabled ? "Grouped" : "Flat"}
+                      </span>
+                    </div>
+                  </div>
+
                 </CardHeader>
 
-                <CardContent className="text-center pb-6 px-6">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-5 line-clamp-3">
+                {/* CONTENT */}
+                <CardContent className="px-4 pb-4 text-center">
+                  <p className="text-xs text-gray-600 mb-3 line-clamp-2">
                     {m.Description}
                   </p>
 
+                  {/* STATS */}
+                  <div className="grid grid-cols-3 gap-2 mb-3 text-[11px]">
+                    <div className="rounded-md bg-emerald-50 py-2">
+                      <div className="text-emerald-700 font-medium">Fields</div>
+                      <div>{JSON.parse(m.FieldsConfigurations || "[]").length}</div>
+                    </div>
+                    <div className="rounded-md bg-blue-50 py-2">
+                      <div className="text-blue-700 font-medium">Upload</div>
+                      <div>{m.BulkApi ? "Yes" : "No"}</div>
+                    </div>
+                    <div className="rounded-md bg-purple-50 py-2">
+                      <div className="text-purple-700 font-medium">Mode</div>
+                      <div>{m.UpsertApi ? "Upsert" : "Read"}</div>
+                    </div>
+                  </div>
+
+                  {/* ACTION */}
                   {isInactive ? (
                     <Button
                       disabled
-                      className="
-                        w-full py-2.5 text-sm
-                        rounded-xl
-                        bg-gray-400 text-white
-                        cursor-not-allowed
-                        opacity-60
-                      "
+                      size="md"
+                      className="w-full text-xs bg-gray-300 text-gray-600"
                     >
                       Not Available
                     </Button>
                   ) : (
-                    <Link
-                      onClick={() => { handleNavigate(m.Id) }}
+                    <Button
+                      size="md"
+                      onClick={() => handleNavigate(m.Id)}
+                      className=" w-full text-xs  bg-emerald-600 hover:bg-emerald-700  text-white"
                     >
-                      <motion.div whileTap={{ scale: 0.97 }}>
-                        <Button
-                          className="
-                            w-full py-2.5 text-sm
-                            rounded-xl
-                            bg-emerald-600 text-white
-                            hover:bg-emerald-700
-                            transition-all
-                          "
-                        >
-                          Open {m.Name}
-                        </Button>
-                      </motion.div>
-                    </Link>
+                      Open
+                    </Button>
                   )}
                 </CardContent>
               </Card>
             </motion.div>
+
           )
         })}
 

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 import AdvanceTable from "../../Component/AdvanceTable";
 import DynamicForm from "../../Component/DynamicForm";
-import BulkUpload from "../../Component/BulkUpload";
+import BulkUpload from "../BulkUpload/BulkUpload";
 
 import {
   Select,
@@ -27,7 +27,7 @@ const PageBuilder = ({
   rows = [],
   AddMore = false,
   onUpsert,          // SINGLE / EDIT only (UpsertApi)
-  onBulkSuccess = () => {}
+  onBulkSave = () => { }
 }) => {
   const [activeTab, setActiveTab] = useState("single");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -44,7 +44,7 @@ const PageBuilder = ({
     return Template.FieldsConfigurations
       .map((f) => {
         let applicable = [];
-        try { applicable = JSON.parse(f.ApplicableJson || "[]"); } catch {}
+        try { applicable = JSON.parse(f.ApplicableJson || "[]"); } catch { }
         return { ...f, applicable };
       })
       .filter((f) => f.applicable.includes("form"));
@@ -124,6 +124,8 @@ const PageBuilder = ({
     return false;
   };
 
+  // console.log(Template);
+
   return (
     <div>
       {/* TABS */}
@@ -138,17 +140,16 @@ const PageBuilder = ({
                 setIsEditing(false);
                 setEditRecord(null);
               }}
-              className={`pb-2 px-4 text-xs md:text-sm ${
-                activeTab === tab
+              className={`pb-2 px-4 text-xs md:text-sm ${activeTab === tab
                   ? "border-b-2 border-emerald-500 text-emerald-600"
                   : "text-gray-500"
-              }`}
+                }`}
             >
               {tab === "single"
                 ? isEditing ? "Update Entry" : "Single Entry"
                 : tab === "bulk"
-                ? "Bulk Upload"
-                : "View"}
+                  ? "Bulk Upload"
+                  : "View"}
             </button>
           );
         })}
@@ -173,9 +174,12 @@ const PageBuilder = ({
       {activeTab === "bulk" && (
         <BulkUpload
           Template={Template}
-          onSuccess={() => {
-            onBulkSuccess();
-            setActiveTab("view");
+          onSuccess={async (bulkData) => {
+            const ok = await onBulkSave(bulkData);
+            if (ok) {
+              setActiveTab("view");
+            }
+            return ok; // Indicate success to BulkUpload
           }}
         />
       )}

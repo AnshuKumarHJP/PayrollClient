@@ -179,6 +179,8 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
           ...form,
           Id: form.Id || 0 // Use 0 for new records instead of null
         };
+        console.log(payload);
+        
 
         const res = await dispatch(UpsertFieldValidationRule(payload));
 

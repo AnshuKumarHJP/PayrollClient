@@ -215,21 +215,13 @@ const DynamicForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setStatus((s) => ({
-      ...s,
-      submitting: true,
-      apiSuccess: null
-    }));
+    setStatus((s) => ({ ...s, submitting: true, apiSuccess: null }));
 
     const isValid = await validateAll();
 
     // 🚫 STOP HERE IF ANY ERROR EXISTS
     if (!isValid) {
-      setStatus((s) => ({
-        ...s,
-        submitting: false,
-        apiSuccess: false
-      }));
+      setStatus((s) => ({...s,submitting: false, apiSuccess: false}));
       return;
     }
 
@@ -244,17 +236,9 @@ const DynamicForm = ({
       });
 
 
-      setStatus((s) => ({
-        ...s,
-        submitting: false,
-        apiSuccess: ok
-      }));
+      setStatus((s) => ({...s,submitting: false,apiSuccess: ok}));
     } catch {
-      setStatus((s) => ({
-        ...s,
-        submitting: false,
-        apiSuccess: false
-      }));
+      setStatus((s) => ({ ...s, submitting: false, apiSuccess: false }));
     }
   };
 
@@ -267,10 +251,7 @@ const DynamicForm = ({
       const val = forms[i]?.[f.Name];
       const err = errorsArr[i]?.[f.Name];
 
-      const placeholder =
-        f.Placeholder && f.Placeholder.trim()
-          ? f.Placeholder
-          : `Enter ${f.Label}`;
+      const placeholder = f.Placeholder && f.Placeholder.trim() ? f.Placeholder : `Enter ${f.Label}`;
 
       const config = {
         InputType: f.Type,
@@ -294,7 +275,6 @@ const DynamicForm = ({
     },
     [forms, errorsArr, handleValue]
   );
-  console.log(status);
 
   if (rulesLoading) return <Loading />;
 
@@ -328,7 +308,7 @@ const DynamicForm = ({
 
 
       {/* HEADER */}
-      <div className="bg-white shadow-xl rounded-2xl overflow-hidden " >
+      {/* <div className="bg-white shadow-xl rounded-2xl overflow-hidden " > */}
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
          px-4 sm:px-6 py-3 sm:py-5 border-b  bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg mb-4">
@@ -373,9 +353,10 @@ const DynamicForm = ({
             )}
           </div>
         </div>
+        {/* </div> */}
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-6 p-2 md:p-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <AnimatePresence>
             {forms.map((_, i) => (
               <motion.div
@@ -389,7 +370,7 @@ const DynamicForm = ({
                   {AddMore && forms.length > 1 && (
                     <div className="flex justify-between mb-4">
                       <div className="text-sm font-semibold">Entry #{i + 1}</div>
-                      <Button variant="destructive" className="w-fit" size="sm" onClick={() => removeForm(i)}>
+                      <Button variant="destructive" className="w-fit" size="sm" type="button" onClick={() => removeForm(i)}>
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
@@ -446,7 +427,7 @@ const DynamicForm = ({
           </AnimatePresence>
 
           {/* FOOTER BUTTONS */}
-          <div className="flex justify-end gap-3">
+          <Card className="flex justify-end gap-3 border border-emerald-200 p-2">
             <Button variant="outline" onClick={onCancel}>
               Cancel
             </Button>
@@ -460,9 +441,9 @@ const DynamicForm = ({
                 "Submit"
               )}
             </Button>
-          </div>
+          </Card>
         </form>
-      </div>
+      {/* </div> */}
     </motion.div>
   );
 };

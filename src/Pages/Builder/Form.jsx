@@ -63,7 +63,7 @@ const Form = () => {
     async ({ isEdit, recordId, data }) => {
       if (!template?.UpsertApi) return false;
       console.log(data);
-      
+
       try {
         const payload = isEdit ? { ...data, id: recordId } : data;
         // await axios.post(template.UpsertApi, payload);
@@ -76,6 +76,11 @@ const Form = () => {
     },
     [template, getTableData]
   );
+
+  const handleBulkSave = async (bulkData) => {
+    console.log("Bulk save data:", bulkData);
+    return false
+  }
 
   /* ---------------- UI STATES ---------------- */
   if (!decryptDone) return <div className="p-10">Validating link…</div>;
@@ -91,7 +96,7 @@ const Form = () => {
         rows={tableData}
         AddMore
         onUpsert={handleUpsert}
-        onBulkSuccess={getTableData}
+        onBulkSave={handleBulkSave}
       />
     </motion.div>
   );

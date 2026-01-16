@@ -49,7 +49,8 @@ export const menuItems = [
   { key: "mapping-inputs", title: "Mapping Payroll Inputs to Clients", icon: "ArrowRightLeft", PagePath: "../Pages/PayrollInputMapping.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
   // { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  // { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
+  { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/ModeSelection.jsx", PageEditPath: "" },
+  { key: "workflow-config", title: "Workflow Configuration", icon: "Settings", PagePath: "../Pages/Workflow/WorkflowConfigurationList.jsx", PageEditPath: "../Pages/Workflow/WorkflowConfigurationForm.jsx" },
   { key: "config", title: "Configuration Menu", icon: "Settings2", PagePath: "../Pages/ConfigurationPage.jsx", PageEditPath: "../Pages/ConfigurationPage.jsx" },
 ];
 
@@ -88,3 +89,215 @@ export const Modules = [
   { label: "Payroll", value: 4 },
   { label: "Tax", value: 5 },
 ];
+
+// ModeSelectionData
+ export const ModeSelectionData = [
+    {
+      id: "standard",
+      name: "Standard Mode",
+      iconName: "Database", // ✅ AppIcon name
+      description:
+        "Use predefined templates where data already follows system standards.",
+      meaning:
+        "Data must already be in system format. The system validates and processes it immediately.",
+      features: [
+        "Predefined system templates",
+        "Fixed field structure",
+        "Automatic validation",
+        "Fast processing",
+        "Minimal human involvement",
+      ],
+      processing: "System",
+      dataType: "Structured",
+      complexity: "Low",
+      color: "bg-blue-50 border-blue-200",
+    },
+    {
+      id: "flexible",
+      name: "Flexible Mode",
+      iconName: "FileSpreadsheet", // ✅ AppIcon name
+      description:
+        "Upload raw Excel/CSV files in any format. Data will be standardized later.",
+      meaning:
+        "You provide raw or legacy data. An admin or operations user maps and converts it into system standards before processing.",
+      features: [
+        "Accepts raw / client-specific data",
+        "Custom column mapping",
+        "Human review before processing",
+        "Supports legacy formats",
+        "Advanced data transformation",
+      ],
+      processing: "Human + System",
+      dataType: "Raw / Unstructured",
+      complexity: "Medium",
+      color: "bg-green-50 border-green-200",
+    },
+  ];
+
+
+
+
+
+
+  /* =========================================================
+   ✅ STATIC DATA (DROP-IN FOR UI / LOCAL TESTING)
+   =========================================================
+   Use this when:
+   - Backend not ready
+   - You want predictable demo data
+   - UI / UX testing
+*/
+
+/* ----------------------------- ROLES ----------------------------- */
+export const STATIC_ROLES = [
+  { RoleCode: 1, Role_Name: "Admin" },
+  { RoleCode: 2, Role_Name: "HR Manager" },
+  { RoleCode: 3, Role_Name: "Reporting Manager" },
+  { RoleCode: 4, Role_Name: "Finance" },
+  { RoleCode: 5, Role_Name: "Operations" },
+];
+
+/* ----------------------------- WORKFLOW LIST ----------------------------- */
+export const STATIC_WORKFLOWS = [
+  {
+    WorkflowCode: 101,
+    WorkflowName: "Leave Approval Workflow",
+    Description: "Standard leave approval with manager and HR",
+  },
+  {
+    WorkflowCode: 102,
+    WorkflowName: "Expense Reimbursement",
+    Description: "Multi-level approval for expense claims",
+  },
+  {
+    WorkflowCode: 103,
+    WorkflowName: "Employee Onboarding",
+    Description: "New joiner approval and verification flow",
+  },
+];
+
+/* ----------------------------- WORKFLOW DETAILS (EDIT MODE) ----------------------------- */
+export const STATIC_WORKFLOW_DETAILS = {
+  101: {
+    Header: {
+      WorkflowCode: 101,
+      WorkflowName: "Leave Approval Workflow",
+      Description: "Standard leave approval with manager and HR",
+    },
+    Details: [
+      {
+        StepOrder: 1,
+        StepName: "Manager Approval",
+        ApproverRoleCode: 3, // Reporting Manager
+        IsMandatory: 1,
+        Conditions: null,
+        EscalationTo: 2, // HR Manager
+        EscalationHours: 24,
+      },
+      {
+        StepOrder: 2,
+        StepName: "HR Approval",
+        ApproverRoleCode: 2, // HR Manager
+        IsMandatory: 1,
+        Conditions: null,
+        EscalationTo: null,
+        EscalationHours: null,
+      },
+    ],
+  },
+
+  102: {
+    Header: {
+      WorkflowCode: 102,
+      WorkflowName: "Expense Reimbursement",
+      Description: "Multi-level approval for expense claims",
+    },
+    Details: [
+      {
+        StepOrder: 1,
+        StepName: "Manager Review",
+        ApproverRoleCode: 3,
+        IsMandatory: 1,
+        Conditions: `{ "Amount": { "$lt": 5000 } }`,
+        EscalationTo: 2,
+        EscalationHours: 12,
+      },
+      {
+        StepOrder: 2,
+        StepName: "Finance Approval",
+        ApproverRoleCode: 4,
+        IsMandatory: 1,
+        Conditions: `{ "Amount": { "$gte": 5000 } }`,
+        EscalationTo: null,
+        EscalationHours: null,
+      },
+    ],
+  },
+
+  103: {
+    Header: {
+      WorkflowCode: 103,
+      WorkflowName: "Employee Onboarding",
+      Description: "New joiner approval and verification flow",
+    },
+    Details: [
+      {
+        StepOrder: 1,
+        StepName: "HR Verification",
+        ApproverRoleCode: 2,
+        IsMandatory: 1,
+        Conditions: null,
+        EscalationTo: 1,
+        EscalationHours: 24,
+      },
+      {
+        StepOrder: 2,
+        StepName: "IT Asset Approval",
+        ApproverRoleCode: 5,
+        IsMandatory: 0,
+        Conditions: `{ "Department": "IT" }`,
+        EscalationTo: null,
+        EscalationHours: null,
+      },
+    ],
+  },
+};
+
+/* =========================================================
+   🔁 HOW TO USE (TEMP REPLACEMENT)
+   ========================================================= */
+
+/**
+ * Replace API calls like:
+ *   AxiosInstance.post("/workflow")
+ *
+ * With:
+ *   setWorkflows(STATIC_WORKFLOWS)
+ */
+
+/**
+ * Replace:
+ *   AxiosInstance.post(`/workflow/${id}`)
+ *
+ * With:
+ *   const data = STATIC_WORKFLOW_DETAILS[id];
+ *   setWorkflowName(data.Header.WorkflowName);
+ *   setDescription(data.Header.Description);
+ *   setSteps(data.Details);
+ */
+
+/**
+ * Replace role API:
+ *   setRoles(STATIC_ROLES)
+ */
+
+/* =========================================================
+   🧠 BUSINESS MEANING (IMPORTANT)
+   =========================================================
+   - Workflow is generic
+   - Steps are ROLE-based
+   - Runtime engine resolves:
+ *     Role → Actual Users
+ *
+ * UI stays stable even if employees change
+ */

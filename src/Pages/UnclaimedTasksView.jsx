@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from "react";
+import React,{ useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
 import { Button } from "../Lib/button";
 import { Input } from "../Lib/input";
@@ -84,6 +84,14 @@ const UnclaimedTasksView = () => {
     return unclaimedTasks.filter(t => t.priority === 'high').length;
   }, [unclaimedTasks]);
 
+  const getDaysUntilDue = useCallback((dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }, []);
+
   const dueSoonCount = useMemo(() => {
     return unclaimedTasks.filter(t => getDaysUntilDue(t.dueDate) <= 2).length;
   }, [unclaimedTasks]);
@@ -129,14 +137,6 @@ const UnclaimedTasksView = () => {
       });
     }
   }, [toast]);
-
-  const getDaysUntilDue = useCallback((dueDate) => {
-    const today = new Date();
-    const due = new Date(dueDate);
-    const diffTime = due - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  }, []);
 
   const getUrgencyColor = useCallback((dueDate) => {
     const days = getDaysUntilDue(dueDate);
@@ -351,35 +351,37 @@ const UnclaimedTasksView = () => {
                                 Assign
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Assign Task to Team Member</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <p className="font-medium">{task.title}</p>
-                                  <p className="text-sm text-gray-600">{task.description}</p>
+                            <DialogContent
+                              header={<DialogTitle>Assign Task to Team Member</DialogTitle>}
+                              body={
+                                <div className="space-y-4">
+                                  <div>
+                                    <p className="font-medium">{task.title}</p>
+                                    <p className="text-sm text-gray-600">{task.description}</p>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="assignUser">Assign to:</Label>
+                                    <Select value={assignToUser} onValueChange={setAssignToUser}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select team member" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {availableUsers.map(user => (
+                                          <SelectItem key={user.id} value={user.id.toString()}>
+                                            <div className="flex items-center justify-between w-full">
+                                              <span>{user.name} - {user.role}</span>
+                                              <Badge variant="outline" className="ml-2">
+                                                {user.workload} tasks
+                                              </Badge>
+                                            </div>
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
                                 </div>
-                                <div>
-                                  <Label htmlFor="assignUser">Assign to:</Label>
-                                  <Select value={assignToUser} onValueChange={setAssignToUser}>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select team member" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {availableUsers.map(user => (
-                                        <SelectItem key={user.id} value={user.id.toString()}>
-                                          <div className="flex items-center justify-between w-full">
-                                            <span>{user.name} - {user.role}</span>
-                                            <Badge variant="outline" className="ml-2">
-                                              {user.workload} tasks
-                                            </Badge>
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                              }
+                              footer={
                                 <div className="flex gap-2">
                                   <Button
                                     onClick={() => handleAssignToUser(task.id, assignToUser)}
@@ -387,12 +389,12 @@ const UnclaimedTasksView = () => {
                                   >
                                     Assign Task
                                   </Button>
-                                  <Button variant="outline" onClick={() => setSelectedTask(null)}>
+                                  <Button variant="outline" onClick={() =>{ setSelectedTask(null)}}>
                                     Cancel
                                   </Button>
                                 </div>
-                              </div>
-                            </DialogContent>
+                              }
+                            />
                           </Dialog>
                         </div>
                       </TableCell>

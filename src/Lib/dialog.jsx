@@ -43,7 +43,6 @@ export const DialogContent = React.forwardRef(
           {...props}
           className={cn(
             `
-    w-full     /* ← INCREASED WIDTH HERE */
     rounded-lg sm:rounded-xl
     border border-white/20
     bg-white backdrop-blur-[20px]

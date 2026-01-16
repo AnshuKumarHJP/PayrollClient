@@ -26,7 +26,6 @@ import {
 } from "../Store/FormBuilder/Action";
 import AppIcon from "../Component/AppIcon";
 import { SkeletonCard } from "../Skeleton/Skeletons";
-import ClientDropdown from "../Component/ClientDropdown";
 
 const PayrollInputMapping = () => {
   const dispatch = useDispatch();
@@ -44,8 +43,10 @@ const PayrollInputMapping = () => {
   const [selectedClientCode, setSelectedClientCode] = useState(
     sessionStorage.getItem("activeClient") || ""
   );
+    const [selectedClientContracCode, setSelectedClientContracCode] = useState(
+    sessionStorage.getItem("activeClientContract") || ""
+  );
 
-  const ClientContractId = 0;
   const TeamId = 0;
 
   /* ===================== SELECTED CLIENT ===================== */
@@ -99,6 +100,7 @@ const PayrollInputMapping = () => {
   /* ===================== HANDLERS ===================== */
   const handleClientChange = useCallback((Id) => {
     setSelectedClientCode(Id);
+    setSelectedClientContracCode(Id);
     lastFetchedClientIdRef.current = null; // reset guard on client change
   }, []);
 
@@ -109,14 +111,16 @@ const PayrollInputMapping = () => {
       dispatch(
         InsertClientFormBuilderHeaderMapping({
           ClientId: selectedClientId,
-          ClientContractId,
+          ClientContractId : selectedClientContracCode,
           TeamId,
           FormBuilderId: formBuilderId,
           IsActive: true,
         })
-      );
+      ).then(() => {
+        dispatch(GetClientFormBuilderHeaderMappingsByClientId(selectedClientId));
+      });
     },
-    [dispatch, selectedClientId]
+    [dispatch, selectedClientId, selectedClientContracCode]
   );
 
   const handleUnmap = useCallback(
@@ -131,7 +135,9 @@ const PayrollInputMapping = () => {
 
       if (!existing) return;
 
-      dispatch(DeleteClientFormBuilderHeaderMappingById(existing.Id));
+      dispatch(DeleteClientFormBuilderHeaderMappingById(existing.Id)).then(() => {
+        dispatch(GetClientFormBuilderHeaderMappingsByClientId(selectedClientId));
+      });
     },
     [dispatch, mappings, selectedClientId]
   );
@@ -150,24 +156,7 @@ const PayrollInputMapping = () => {
       </div>
 
       {/* CLIENT SELECT */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-            <Users size={16} /> Select Client
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="">
-          <ClientDropdown
-            value={sessionStorage.getItem("activeClient") || ""}
-            onChange={(c) => { handleClientChange }}
-            placeholder="Select Client"
-            className="w-full"
-            UserClient={true}
-            FstindexSelected={true}
-          />
-        </CardContent>
-      </Card>
-
+    
       {selectedClientId && (
         <>
           {/* ===================== MAPPED ===================== */}

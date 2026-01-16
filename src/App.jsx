@@ -5,16 +5,11 @@ import AppLayout from "./layout/AppLayout";
 import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import ImportHistory from "./Pages/ImportHistory";
-import TemplateList from "./Pages/Builder/TemplateList";
-import TemplateEdit from "./Pages/Builder/TemplateEdit";
 import WorkflowDashboard from "./Pages/WorkflowDashboard";
 import WorkflowTasks from "./Pages/WorkflowTasks";
 import TaskDetailView from "./Pages/TaskDetailView";
 import ApproveRejectScreen from "./Pages/ApproveRejectScreen";
 import AuditLogView from "./Pages/AuditLogView";
-import ModeSelection from "./Pages/ModeSelection";
-import ColumnMappingUI from "./Pages/ColumnMappingUI";
-import MappedTemplatePreview from "./Pages/MappedTemplatePreview";
 import OpsDashboard from "./Pages/OpsDashboard";
 import UnclaimedTasksView from "./Pages/UnclaimedTasksView";
 import TaskActionScreen from "./Pages/TaskActionScreen";
@@ -31,6 +26,7 @@ import InputModule from "./Pages/InputModule";
 import Loading from "./Component/Loading";
 import UnknownPage from "./Routes/UnknownPage";
 import SessionExpire from "./Routes/SessionExpire";
+import ModeSelection from "./Pages/ModeSelection";
 
 
 
@@ -74,23 +70,14 @@ const router = createBrowserRouter([
       {path: "config", element: <Configuration /> },
       
       { path: "employee", element: <Employee /> },
-      // Configurable Input Templates
-      {
-        path: "modes",
-        element: <ModeSelection />,
-      },
-      {
-        path: "modes/mapping",
-        element: <ColumnMappingUI />,
-      },
-      {
-        path: "modes/preview",
-        element: <MappedTemplatePreview />,
-      },
       // Multi-Step Verification Workflow
       {
         path: "workflow",
         element: <WorkflowDashboard />,
+      },
+        {
+        path: "workflow/mode",
+        element: <ModeSelection />,
       },
       {
         path: "workflow/tasks",

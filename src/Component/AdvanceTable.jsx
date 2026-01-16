@@ -61,7 +61,7 @@ const AdvanceTable = ({
   columnGroups = [],
   data = [],
   renderActions,
-  renderActionsWidth=90,
+  renderActionsWidth = 90,
   stickyRight = false,
   isLoading = false,
   icon,
@@ -88,37 +88,37 @@ const AdvanceTable = ({
   });
 
   /* ---------------- SORT TOGGLE ---------------- */
-const toggleSort = (key) => {
-  setSortConfig((prev) => {
-    if (!prev || prev.key !== key) {
-      return { key, direction: "asc" };
-    }
-    if (prev.direction === "asc") {
-      return { key, direction: "desc" };
-    }
-    return null; // reset (no sort)
-  });
-};
+  const toggleSort = (key) => {
+    setSortConfig((prev) => {
+      if (!prev || prev.key !== key) {
+        return { key, direction: "asc" };
+      }
+      if (prev.direction === "asc") {
+        return { key, direction: "desc" };
+      }
+      return null; // reset (no sort)
+    });
+  };
 
-/* ---------------- SORT ROWS ---------------- */
-const sortRows = (rows) => {
-  if (!sortConfig) return rows;
+  /* ---------------- SORT ROWS ---------------- */
+  const sortRows = (rows) => {
+    if (!sortConfig) return rows;
 
-  const { key, direction } = sortConfig;
+    const { key, direction } = sortConfig;
 
-  return [...rows].sort((a, b) => {
-    const A = normalizeValue(getValue(a, key));
-    const B = normalizeValue(getValue(b, key));
+    return [...rows].sort((a, b) => {
+      const A = normalizeValue(getValue(a, key));
+      const B = normalizeValue(getValue(b, key));
 
-    if (A < B) return direction === "asc" ? -1 : 1;
-    if (A > B) return direction === "asc" ? 1 : -1;
-    return 0;
-  });
-};
+      if (A < B) return direction === "asc" ? -1 : 1;
+      if (A > B) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
 
   /* ---------------- FILTER ---------------- */
   const filtered = useMemo(() => {
-    let rows = [...safeData];
+    let rows = [...data];
 
     if (searchTerm.trim()) {
       const low = searchTerm.toLowerCase();
@@ -350,7 +350,7 @@ const sortRows = (rows) => {
                               paddingLeft: "10px"
                             }}
                           >
-                            #
+                            {/* # */}
                           </TableCell>
                         )}
 
@@ -368,13 +368,15 @@ const sortRows = (rows) => {
                           <TableHead
                             onMouseEnter={() => setHoveredCol("__actions__")}
                             onMouseLeave={() => setHoveredCol(null)}
-                            style={{ padding: "5px",width: renderActionsWidth }}
+                            style={{ padding: "5px", width: renderActionsWidth }}
                             className={`
-                          border-l border-r border-gray-300 text-center
-                          ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
-                        `}
+                        md:sticky right-0 border-gray-300
+                        text-center px-3 z-10
+                        transition-colors
+                        ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
+                      `}
                           >
-                            Actions
+                            {/* Actions */}
                           </TableHead>
                         )}
                       </TableRow>
@@ -470,7 +472,7 @@ const sortRows = (rows) => {
                         <TableHead
                           onMouseEnter={() => setHoveredCol("__actions__")}
                           onMouseLeave={() => setHoveredCol(null)}
-                          style={{ padding: "5px",width: renderActionsWidth }}
+                          style={{ padding: "5px", width: renderActionsWidth }}
                           className={`
                         md:sticky right-0 border-l border-r border-gray-300
                         text-center px-3 z-10
@@ -560,7 +562,7 @@ const sortRows = (rows) => {
                             <TableCell
                               onMouseEnter={() => setHoveredCol("__actions__")}
                               onMouseLeave={() => setHoveredCol(null)}
-                              style={{ padding: "5px",width: renderActionsWidth }}
+                              style={{ padding: "5px", width: renderActionsWidth }}
                               className={`
                             md:sticky right-0 bg-white z-10 
                             border-l border-r border-gray-200 

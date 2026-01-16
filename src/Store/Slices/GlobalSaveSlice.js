@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   SelectedClient: "",
+  SelectedClientContract: "",
   UserCode: "",
   isAuthenticated: false,
 };
@@ -14,6 +15,9 @@ const GlobalSaveSlice = createSlice({
     setSelectedClient: (state, action) => {
       state.SelectedClient = action.payload;
     },
+    setSelectedClientContract: (state, action) => {
+      state.SelectedClientContract = action.payload;
+    },
     setUserCode: (state, action) => {
       state.UserCode = action.payload;
     },
@@ -24,5 +28,5 @@ const GlobalSaveSlice = createSlice({
   },
 });
 
-export const { setUserCode, setSelectedClient,setIsAuthenticated,resetGlobalSaveStore } = GlobalSaveSlice.actions;
+export const { setUserCode, setSelectedClient,setSelectedClientContract,setIsAuthenticated,resetGlobalSaveStore } = GlobalSaveSlice.actions;
 export default GlobalSaveSlice.reducer;

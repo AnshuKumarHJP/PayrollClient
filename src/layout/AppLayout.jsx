@@ -9,10 +9,11 @@ import MonthYearSelector from "../Component/MonthYearSelector";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedMonth } from "../Store/Slices/GlobalSlice";
-import { setSelectedClient } from "../Store/Slices/GlobalSaveSlice";
+import { setSelectedClient, setSelectedClientContract } from "../Store/Slices/GlobalSaveSlice";
 
 import Header from "./StickyHeader";
 import NavigatorBinder from "../Component/NavigatorBinder";
+import ClientContractDropdown from "../Component/ClientContractDropdown";
 
 const LayoutContent = () => {
   const dispatch = useDispatch();
@@ -54,6 +55,17 @@ const LayoutContent = () => {
               <ClientDropdown
                 value={sessionStorage.getItem("activeClient") || ""}
                 onChange={(c) => dispatch(setSelectedClient(c))}
+                placeholder="Select Client"
+                className="w-full"
+                UserClient={true}
+                FstindexSelected={true}
+              />
+            </div>
+             {/* ClientContractDropdown */}
+            <div className="w-full sm:w-[300px]">
+              <ClientContractDropdown
+                value={sessionStorage.getItem("activeClientContract") || ""}
+                onChange={(c) => dispatch(setSelectedClientContract(c))}
                 placeholder="Select Client"
                 className="w-full"
                 UserClient={true}

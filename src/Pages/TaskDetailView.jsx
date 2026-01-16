@@ -64,6 +64,19 @@ const TaskDetailView = () => {
     alert(`Task ${actionType} action would be processed with comments: ${comments}`);
   }, [comments]);
 
+  const taskInfo = useMemo(() => {
+    if (!task) return null;
+    const statusInfo = statusConfig[task.status];
+    const priorityInfo = priorityConfig[task.priority];
+    const validationPercentage = Math.round((task.validationResults.checks.filter(check => check.status === 'valid').length / task.validationResults.checks.length) * 100);
+    return {
+      statusInfo,
+      priorityInfo,
+      StatusIcon: statusInfo.icon,
+      validationPercentage
+    };
+  }, [task]);
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
@@ -97,19 +110,6 @@ const TaskDetailView = () => {
       </div>
     );
   }
-
-  const taskInfo = useMemo(() => {
-    if (!task) return null;
-    const statusInfo = statusConfig[task.status];
-    const priorityInfo = priorityConfig[task.priority];
-    const validationPercentage = Math.round((task.validationResults.checks.filter(check => check.status === 'valid').length / task.validationResults.checks.length) * 100);
-    return {
-      statusInfo,
-      priorityInfo,
-      StatusIcon: statusInfo.icon,
-      validationPercentage
-    };
-  }, [task]);
 
   return (
     <div className="p-2">

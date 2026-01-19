@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import BulkUploadTable from "./BulkUploadTable";
 
 export default function BulkUpload({ Template, onSuccess, onCancel }) {
-  const selectedClient = sessionStorage.getItem("activeClient");
+  const selectedClient = useSelector((state) => state.Auth?.Common?.SelectedClient || "");
 
   const { validate, loading: rulesLoading } = useValidationRules(Template);
 

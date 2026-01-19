@@ -6,6 +6,7 @@ import { Textarea } from "../../Lib/textarea";
 import { Dialog, DialogContent, DialogTitle } from "../../Lib/dialog";
 import { useToast } from "../../Lib/use-toast";
 import RoleSelect from "../../Component/RoleSelect";
+import { Switch } from "../../Lib/switch";
 
 function StepFormModal({
   isOpen,
@@ -24,6 +25,8 @@ function StepFormModal({
   const [conditions, setConditions] = useState("");
   const [escalationTo, setEscalationTo] = useState("");
   const [escalationHours, setEscalationHours] = useState("");
+  const [DisplayOrder, setDisplayOrder] = useState(1);
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     setStepOrder(initial?.StepOrder ?? "");
@@ -33,6 +36,8 @@ function StepFormModal({
     setConditions(initial?.Conditions ?? "");
     setEscalationTo(initial?.EscalationTo ?? "");
     setEscalationHours(initial?.EscalationHours ?? "");
+    setDisplayOrder(initial?.DisplayOrder ?? 1);
+    setIsActive(initial?.IsActive ?? true);
   }, [initial]);
 
   const validateAndSave = () => {
@@ -106,6 +111,8 @@ function StepFormModal({
       EscalationHours: escalationHours
         ? Number(escalationHours)
         : "",
+      DisplayOrder: DisplayOrder,
+      IsActive: isActive,
     });
   };
 
@@ -160,6 +167,26 @@ function StepFormModal({
                   placeholder="e.g. 24"
                   onChange={(e) => setEscalationHours(e.target.value)}
                 />
+              </div>
+
+              <div>
+                <Label>Display Order</Label>
+                <Input
+                  type="number"
+                  value={DisplayOrder}
+                  placeholder="e.g. 1"
+                  onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={isActive}
+                  onCheckedChange={setIsActive}
+                />
+                <Label>Active</Label>
               </div>
             </div>
 

@@ -6,8 +6,8 @@ import {
   SelectContent,
   SelectItem,
 } from "../Lib/select";
-// import { fetchClientContract } from "../../api/services/ClientContractervices";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setSelectedClientContract } from "../Store/Auth/AuhtSlice";
 
 const ClientContractDropdown = ({
   value,
@@ -18,9 +18,11 @@ const ClientContractDropdown = ({
   FstindexSelected = false,
   UserClient = false,
 }) => {
+  const dispatch = useDispatch();
   const [ClientContract, setClientContract] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedValue, setSelectedValue] = useState(value ? String(value) : sessionStorage.getItem("activeClientContract") || "");
+  const selectedClientContract = useSelector((state) => state.Auth?.Common?.SelectedClientContract || "");
+  const [selectedValue, setSelectedValue] = useState(value ? String(value) : selectedClientContract || "");
 
   const storeClientContract = useSelector(
     (state) => state.Auth?.LogResponce?.data?.ClientContractList || []
@@ -55,25 +57,23 @@ const ClientContractDropdown = ({
   useEffect(() => {
     if (loading || ClientContract.length === 0) return;
 
-    const saved = sessionStorage.getItem("activeClientContract");
-
-    if (saved) {
-      setSelectedValue(saved);
-      onChange(saved);
+    if (selectedClientContract) {
+      setSelectedValue(selectedClientContract);
+      onChange(selectedClientContract);
     } else if (FstindexSelected) {
       const firstId = String(ClientContract[0].Id);
       setSelectedValue(firstId);
-      sessionStorage.setItem("activeClientContract", firstId);
+      dispatch(setSelectedClientContract(firstId));
       onChange(firstId);
     }
-  }, [loading, ClientContract, FstindexSelected, onChange]);
+  }, [loading, ClientContract, FstindexSelected, onChange, selectedClientContract, dispatch]);
 
   /* =========================
      HANDLE CHANGE
   ========================= */
   const handleSelectChange = (val) => {
     setSelectedValue(val);
-    sessionStorage.setItem("activeClientContract", val);
+    dispatch(setSelectedClientContract(val));
     onChange(val);
   };
 
@@ -94,12 +94,12 @@ const ClientContractDropdown = ({
           </div>
         )}
 
-        {ClientContract.map((client) => (
+        {ClientContract.map((ClientContract) => (
           <SelectItem
-            key={client.Id}
-            value={String(client.Id)}   // 🔥 STRING
+            key={ClientContract.Id}
+            value={String(ClientContract.Id)}   // 🔥 STRING
           >
-            {client.Name}
+            {ClientContract.Name} [ {ClientContract?.Code} ]
           </SelectItem>
         ))}
       </SelectContent>

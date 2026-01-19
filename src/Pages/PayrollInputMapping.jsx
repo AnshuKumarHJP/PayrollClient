@@ -40,12 +40,9 @@ const PayrollInputMapping = () => {
   const mappings = ClientFormBuilderHeaderMapping?.data || [];
 
   /* ===================== LOCAL STATE ===================== */
-  const [selectedClientCode, setSelectedClientCode] = useState(
-    sessionStorage.getItem("activeClient") || ""
-  );
-    const [selectedClientContracCode, setSelectedClientContracCode] = useState(
-    sessionStorage.getItem("activeClientContract") || ""
-  );
+  const selectedClientCode = useSelector((state) => state.Auth?.Common?.SelectedClient || "");
+  const selectedClientContractCode = useSelector((state) => state.Auth?.Common?.SelectedClientContract || "");
+  const [selectedClientContracCode, setSelectedClientContracCode] = useState(selectedClientContractCode);
 
   const TeamId = 0;
 
@@ -99,10 +96,10 @@ const PayrollInputMapping = () => {
 
   /* ===================== HANDLERS ===================== */
   const handleClientChange = useCallback((Id) => {
-    setSelectedClientCode(Id);
-    setSelectedClientContracCode(Id);
+    dispatch(setSelectedClient(Id));
+    dispatch(setSelectedClientContract(Id));
     lastFetchedClientIdRef.current = null; // reset guard on client change
-  }, []);
+  }, [dispatch]);
 
   const handleMap = useCallback(
     (formBuilderId) => {

@@ -8,8 +8,7 @@ import ClientDropdown from "../Component/ClientDropdown";
 import MonthYearSelector from "../Component/MonthYearSelector";
 
 import { useSelector, useDispatch } from "react-redux";
-import { setSelectedMonth } from "../Store/Slices/GlobalSlice";
-import { setSelectedClient, setSelectedClientContract } from "../Store/Slices/GlobalSaveSlice";
+import { setSelectedMonth,setSelectedClient, setSelectedClientContract } from "../Store/Auth/AuhtSlice";
 
 import Header from "./StickyHeader";
 import NavigatorBinder from "../Component/NavigatorBinder";
@@ -17,7 +16,7 @@ import ClientContractDropdown from "../Component/ClientContractDropdown";
 
 const LayoutContent = () => {
   const dispatch = useDispatch();
-  const { GlobalStore } = useSelector((state) => state);
+  const { Auth } = useSelector((state) => state);
 
   // console.log(LogResponce);
 
@@ -41,7 +40,7 @@ const LayoutContent = () => {
             {/* Month */}
             <div className="w-full sm:w-1/3">
               <MonthYearSelector
-                value={GlobalStore?.SelectedMonth}
+                value={Auth?.Common?.SelectedMonth}
                 onChange={(m) => dispatch(setSelectedMonth(m))}
                 className="w-full"
                 showMonthGrid={false}
@@ -53,7 +52,7 @@ const LayoutContent = () => {
             {/* Client */}
             <div className="w-full sm:w-[300px]">
               <ClientDropdown
-                value={sessionStorage.getItem("activeClient") || ""}
+                value={Auth?.Common?.SelectedClient || ""}
                 onChange={(c) => dispatch(setSelectedClient(c))}
                 placeholder="Select Client"
                 className="w-full"
@@ -64,7 +63,7 @@ const LayoutContent = () => {
              {/* ClientContractDropdown */}
             <div className="w-full sm:w-[300px]">
               <ClientContractDropdown
-                value={sessionStorage.getItem("activeClientContract") || ""}
+                value={Auth?.Common?.SelectedClientContract || ""}
                 onChange={(c) => dispatch(setSelectedClientContract(c))}
                 placeholder="Select Client"
                 className="w-full"

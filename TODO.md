@@ -1,8 +1,8 @@
-# TODO: Update Client Dropdown Components for SessionStorage
+# TODO: Update activeClient and activeClientContract to use Auth storage instead of sessionStorage
 
-- [x] Update ClientDropdown.jsx to store selected client's name in sessionStorage alongside the ID
-- [x] Update ClientContractDropdown.jsx to store selected client's name in sessionStorage alongside the ID
-- [x] Fix instant update of selected value in dropdowns by making selectedValue a state variable
-- [x] Fix TypeScript errors by removing duplicate selectedValue declarations
-- [x] Update PayrollInputMapping.jsx to refresh mappings list after map or unmap operations
-- [x] Add modal to save mode selection to DB with active client/contract from sessionStorage in ModeSelection.jsx
+- [x] Update src/Component/ClientContractDropdown.jsx to use Redux store for activeClientContract
+- [x] Update src/Component/ClientDropdown.jsx to use Redux store for activeClient
+- [x] Update src/Pages/PayrollInputMapping.jsx to use Redux store
+- [x] Update src/Pages/ModeSelection.jsx to use Redux store
+- [x] Update src/Pages/InputModule.jsx to use Redux store
+- [x] Update src/Pages/BulkUpload/BulkUpload.jsx to use Redux store

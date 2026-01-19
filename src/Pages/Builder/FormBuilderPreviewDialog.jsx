@@ -23,7 +23,7 @@ const FormBuilderPreviewDialog = ({
   isActive,
   version,
   fields,
-  formatValidationDisplay,
+  FieldValidationRule,
 }) => {
   return (
     <Modal
@@ -154,12 +154,13 @@ const FormBuilderPreviewDialog = ({
                     {/* FILE INPUT */}
                     {field.Type === "file" && <FileInput disabled />}
                     {/* VALIDATION */}
-                    {(field.ValidationRuleLabel || field.ValidationRuleId) && (field.ValidationRuleLabel || field.ValidationRuleId) !== "none" && (
-                      <div className="text-xs text-gray-500">
-                        Validation :{" "}
-                        <Badge size="xs" variant="info"> {formatValidationDisplay(field.ValidationRuleLabel || field.ValidationRuleId)}</Badge>
-                      </div>
-                    )}
+                    <div className="text-xs text-gray-500">
+                      Validation :{" "}
+                      {(() => {
+                        const validationRule = FieldValidationRule?.data?.find(rule => rule.Id === field.ValidationRuleId);
+                        return <Badge size="xs" variant="teal">{validationRule?.RuleName || "None"}</Badge>;
+                      })()}
+                    </div>
                   </div>
                 ))
               )}

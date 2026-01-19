@@ -33,7 +33,7 @@ const InputModule = () => {
   const formBuilders = Array.isArray(FormBuilder?.data) ? FormBuilder.data : [];
   const mappings = Array.isArray(ClientFormBuilderHeaderMapping?.data) ? ClientFormBuilderHeaderMapping.data : [];
 
-  const selectedClientId = sessionStorage.getItem("activeClient") || null;
+  const selectedClientId =  useSelector((state) => state.Auth?.Common?.SelectedClient || "");
 
   const lastFetchedClientRef = useRef(null);
 

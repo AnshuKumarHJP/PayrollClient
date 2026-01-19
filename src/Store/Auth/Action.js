@@ -6,6 +6,7 @@ import {
   GET_AUTH_FAILURE
 } from "./ActionType";
 import { toast } from "../../Lib/use-toast";
+import { setSelectedRole } from "./AuhtSlice";
 
 const getAuthRequest = () => ({ type: GET_AUTH_REQUEST });
 const getAuthSuccess = (data) => ({ type: GET_AUTH_SUCCESS, payload: data });
@@ -97,12 +98,10 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
     // Push clean data to reducer
     dispatch(getAuthSuccess(extracted));
 
-    // Set default active role if not already set
+    // Set default active role
     if (extracted.UIRoles && extracted.UIRoles.length > 0) {
       const firstRoleCode = extracted.UIRoles[0].Role.Code;
-      if (!sessionStorage.getItem("activeRole")) {
-        sessionStorage.setItem("activeRole", firstRoleCode);
-      }
+      dispatch(setSelectedRole(firstRoleCode));
     }
 
   } catch (error) {

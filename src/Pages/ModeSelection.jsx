@@ -18,9 +18,10 @@ const ModeSelection = () => {
 
   const selectedModeData = ModeSelectionData?.find((m) => m.id === selectedMode);
 
+  const activeClient = useSelector((state) => state.Auth?.Common?.SelectedClient || "");
+  const activeClientContract = useSelector((state) => state.Auth?.Common?.SelectedClientContract || "");
+
   const handleProceed = () => {
-    const activeClient = sessionStorage.getItem("activeClient");
-    const activeClientContract = sessionStorage.getItem("activeClientContract");
 
     if (!selectedMode) {
       toast({

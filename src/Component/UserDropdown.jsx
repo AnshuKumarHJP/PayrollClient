@@ -13,7 +13,7 @@ import { useToast } from "../Lib/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetGlobalStore } from "../Store/Slices/GlobalSlice";
-import { resetGlobalSaveStore } from "../Store/Slices/GlobalSaveSlice";
+import { setSelectedRole } from "../Store/Auth/AuhtSlice";
 import { Switch } from "../Lib/switch";
 import AppIcon from "./AppIcon";
 import { persistor } from "../Store/Store";
@@ -30,6 +30,7 @@ const UserDropdown = () => {
   const auth = useSelector((s) => s.Auth?.LogResponce);
   const authLoading = auth?.isLoading;
   const Log = auth?.data || {};
+  const selectedRole = useSelector((state) => state.Auth?.Common?.SelectedRole || "");
 
   /* =====================================================
        UI Roles List (Static for Dropdown Display)
@@ -52,41 +53,50 @@ const UserDropdown = () => {
         Active Role State
      ===================================================== */
   const [activeRole, setActiveRole] = useState(
-    sessionStorage.getItem("activeRole") || roles?.[0]?.Code
+    selectedRole || roles?.[0]?.Code
   );
+
+  // Sync activeRole with selectedRole from store
+  useEffect(() => {
+    if (selectedRole) {
+      setActiveRole(selectedRole);
+    }
+  }, [selectedRole]);
 
   // Set default active role when roles first load
   useEffect(() => {
     if (roles.length > 0) {
-      const saved = sessionStorage.getItem("activeRole");
       const firstRole = roles[0]?.Code;
 
-      if (!saved && firstRole) {
-        sessionStorage.setItem("activeRole", firstRole);
+      if (!selectedRole && firstRole) {
+        dispatch(setSelectedRole(firstRole));
         setActiveRole(firstRole);
       }
     }
-  }, [roles]);
+  }, [roles, selectedRole, dispatch]);
 
   /* =====================================================
         HANDLE ROLE SWITCH
      ===================================================== */
+
+     
   const handleRoleSwitch = async (role) => {
     try {
       const payload = {
-        IsCompanyHierarchy: false,
+        IsCompanyHierarchy:false,
         RoleCode: role?.Code,
         RoleId: role?.Id
       };
-
       const accessToken = auth?.data?.Token;
-
       const apiResponse = await ClientApi(
         "/api/Security/UpdateRoleInSession",
         payload,
         "PUT",
-        accessToken
+        accessToken,
+        "security"
       );
+
+     // ("/api/FieldValidationRule/UpsertFieldValidationRule", encryptedPayload, "PUT", null, "normal");
 
       // Backend unauthorized (business 200 false)
       if (!apiResponse || apiResponse?.data?.Status !== true) {
@@ -117,7 +127,7 @@ const UserDropdown = () => {
 
       // DO NOT reorder UI list → keep UI stable
       setActiveRole(role.Code);
-      sessionStorage.setItem("activeRole", role.Code);
+      dispatch(setSelectedRole(role.Code));
       navigate("/")
       toast({
         title: "Role switched",
@@ -141,7 +151,6 @@ const UserDropdown = () => {
     try {
       dispatch({ type: "RESET_AUTH" });
       dispatch(resetGlobalStore());
-      dispatch(resetGlobalSaveStore());
 
       sessionStorage.clear();
       localStorage.clear();

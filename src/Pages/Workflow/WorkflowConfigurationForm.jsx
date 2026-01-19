@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
 import { Input } from "../../Lib/input";
 import { Label } from "../../Lib/label";
 import { Textarea } from "../../Lib/textarea";
+import { Switch } from "../../Lib/switch";
 import { useToast } from "../../Lib/use-toast";
 import AppIcon from "../../Component/AppIcon";
 import RoleSelect from "../../Component/RoleSelect";
@@ -24,6 +25,8 @@ const defaultForm = {
   WorkflowCode: null,
   WorkflowName: "",
   Description: "",
+  DisplayOrder: 1,
+  IsActive: true,
   Steps: [
     {
       StepOrder: 1,
@@ -31,6 +34,8 @@ const defaultForm = {
       ApproverRoleCode: "",
       EscalationTo: "",
       EscalationHours: "",
+      DisplayOrder: 1,
+      IsActive: true,
     },
   ],
 };
@@ -57,13 +62,21 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
       WorkflowCode: workflow.Header.WorkflowCode ?? null,
       WorkflowName: workflow.Header.WorkflowName ?? "",
       Description: workflow.Header.Description ?? "",
-      Steps: workflow.Details ?? [
+      DisplayOrder: workflow.Header.DisplayOrder ?? 1,
+      IsActive: workflow.Header.IsActive ?? true,
+      Steps: workflow.Details?.map(step => ({
+        ...step,
+        DisplayOrder: step.DisplayOrder ?? 1,
+        IsActive: step.IsActive ?? true,
+      })) ?? [
         {
           StepOrder: 1,
           StepName: "",
           ApproverRoleCode: "",
           EscalationTo: "",
           EscalationHours: "",
+          DisplayOrder: 1,
+          IsActive: true,
         },
       ],
     });
@@ -290,6 +303,16 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
                 onChange={handleChange}
               />
             </div>
+            <div>
+              <Label>Display Order</Label>
+              <Input
+                name="DisplayOrder"
+                type="number"
+                placeholder="Enter display order"
+                value={form.DisplayOrder}
+                onChange={(e) => setForm({ ...form, DisplayOrder: Number(e.target.value) })}
+              />
+            </div>
             <div className="md:col-span-2">
               <Label>Description</Label>
               <Textarea
@@ -298,6 +321,15 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
                 value={form.Description}
                 onChange={handleChange}
               />
+            </div>
+            <div className="flex gap-4 md:col-span-2">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={form.IsActive}
+                  onCheckedChange={(v) => setForm({ ...form, IsActive: v })}
+                />
+                <Label>Active</Label>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -77,7 +77,8 @@ function StickyHeader() {
   const { isMenuOpen } = GlobalStore;
   const LogResponce = useSelector((state) => state.Auth?.LogResponce?.data);
   const CurrentUserRole = LogResponce?.UIRoles || [];
-  const activeRole = sessionStorage.getItem("activeRole") || (CurrentUserRole.length > 0 ? CurrentUserRole[0].Role.Code : null);
+  const selectedRole = useSelector((state) => state.Auth?.Common?.SelectedRole || "");
+  const activeRole = selectedRole || (CurrentUserRole.length > 0 ? CurrentUserRole[0].Role.Code : null);
   const [filteredMenu, setFilteredMenu] = useState([]);
   const { isMobile } = useScreen();
   const ModuleCode = "APPI_PAYROLL";

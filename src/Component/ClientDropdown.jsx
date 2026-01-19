@@ -7,7 +7,8 @@ import {
   SelectItem,
 } from "../Lib/select";
 import { fetchClients } from "../../api/services/clientServices";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setSelectedClient } from "../Store/Auth/AuhtSlice";
 
 const ClientDropdown = ({
   value,
@@ -18,9 +19,11 @@ const ClientDropdown = ({
   FstindexSelected = false,
   UserClient = false,
 }) => {
+  const dispatch = useDispatch();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedValue, setSelectedValue] = useState(value ? String(value) : sessionStorage.getItem("activeClient") || "");
+  const selectedClient = useSelector((state) => state.Auth?.Common?.SelectedClient || "");
+  const [selectedValue, setSelectedValue] = useState(value ? String(value) : selectedClient || "");
 
   const storeClients = useSelector(
     (state) => state.Auth?.LogResponce?.data?.ClientList || []
@@ -55,29 +58,23 @@ const ClientDropdown = ({
   useEffect(() => {
     if (loading || clients.length === 0) return;
 
-    const saved = sessionStorage.getItem("activeClient");
-
-    if (saved) {
-      setSelectedValue(saved);
-      onChange(saved);
+    if (selectedClient) {
+      setSelectedValue(selectedClient);
+      onChange(selectedClient);
     } else if (FstindexSelected) {
       const firstId = String(clients[0].Id);
       setSelectedValue(firstId);
-      sessionStorage.setItem("activeClient", firstId);
+      dispatch(setSelectedClient(firstId));
       onChange(firstId);
     }
-  }, [loading, clients, FstindexSelected, onChange]);
+  }, [loading, clients, FstindexSelected, onChange, selectedClient, dispatch]);
 
   /* =========================
      HANDLE CHANGE
   ========================= */
   const handleSelectChange = (val) => {
     setSelectedValue(val);
-    sessionStorage.setItem("activeClient", val);
-    const selectedClient = clients.find(client => String(client.Id) === val);
-    if (selectedClient) {
-      sessionStorage.setItem("activeClientName", selectedClient.Name);
-    }
+    dispatch(setSelectedClient(val));
     onChange(val);
   };
 
@@ -103,7 +100,7 @@ const ClientDropdown = ({
             key={client.Id}
             value={String(client.Id)}   // 🔥 STRING
           >
-            {client.Name}
+            {client.Name} [ {client.Code} ]
           </SelectItem>
         ))}
       </SelectContent>

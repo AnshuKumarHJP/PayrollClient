@@ -1,3 +1,4 @@
+import { createSlice } from '@reduxjs/toolkit';
 import {
   GET_AUTH_REQUEST,
   GET_AUTH_SUCCESS,
@@ -6,26 +7,52 @@ import {
 
 const initialState = {
   LogResponce: { data: [], isLoading: false, error: null, Success: null },
+  Common: { SelectedRole:"",SelectedClient: "", SelectedClientContract: "", SelectedMonth: "" }
 };
 
-export const Auth_Reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case GET_AUTH_REQUEST:
-      return {
-        ...state,
-        LogResponce: { ...state.LogResponce, isLoading: true, error: null, Success: null },
-      };
-
-    case GET_AUTH_SUCCESS:
-      return {...state, LogResponce: { ...state.LogResponce, isLoading: false,data: action.payload,error: null,Success: true,},
-      };
-
-    case GET_AUTH_FAILURE:
-      return {...state,LogResponce: {...state.LogResponce, isLoading: false, error: action.payload, Success: false,},
-      };
-    case "RESET_AUTH":
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    setSelectedClient: (state, action) => {
+      state.Common.SelectedClient = action.payload;
+    },
+    setSelectedClientContract: (state, action) => {
+      state.Common.SelectedClientContract = action.payload;
+    },
+    setSelectedMonth: (state, action) => {
+      state.Common.SelectedMonth = action.payload;
+    },
+    setSelectedRole: (state, action) => {
+      state.Common.SelectedRole = action.payload;
+    },
+    resetAuth: (state) => {
+      return initialState;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(GET_AUTH_REQUEST, (state) => {
+        state.LogResponce.isLoading = true;
+        state.LogResponce.error = null;
+        state.LogResponce.Success = null;
+      })
+      .addCase(GET_AUTH_SUCCESS, (state, action) => {
+        state.LogResponce.isLoading = false;
+        state.LogResponce.data = action.payload;
+        state.LogResponce.error = null;
+        state.LogResponce.Success = true;
+      })
+      .addCase(GET_AUTH_FAILURE, (state, action) => {
+        state.LogResponce.isLoading = false;
+        state.LogResponce.error = action.payload;
+        state.LogResponce.Success = false;
+      })
+      .addCase("RESET_AUTH", (state) => {
         return initialState;
-    default:
-      return state;
+      });
   }
-};
+});
+
+export const { setSelectedClient, setSelectedClientContract,setSelectedMonth,setSelectedRole, resetAuth } = authSlice.actions;
+export default authSlice.reducer;

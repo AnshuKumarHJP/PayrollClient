@@ -5,7 +5,6 @@ import "./SessionExpire.css";
 import { useDispatch } from "react-redux";
 import { persistor } from "../Store/Store";
 import { resetGlobalStore } from "../Store/Slices/GlobalSlice";
-import { resetGlobalSaveStore } from "../Store/Slices/GlobalSaveSlice";
 // import Footer from "../Layout/Footer";
 
 const SessionExpire = () => {
@@ -16,7 +15,6 @@ const SessionExpire = () => {
 
     dispatch({ type: "RESET_AUTH" });
     dispatch(resetGlobalStore());
-    dispatch(resetGlobalSaveStore());
     localStorage.clear();
     sessionStorage.clear();
    if (persistor) {

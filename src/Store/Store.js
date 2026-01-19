@@ -17,8 +17,7 @@ import CryptoJS from "crypto-js";
 
 // Slices
 import GlobalReducer from "./Slices/GlobalSlice";
-import GlobalSaveReducer from "./Slices/GlobalSaveSlice";
-import { Auth_Reducer } from "./Auth/AuhtSlice";
+import authReducer from "./Auth/AuhtSlice";
 import { FormBuilder_Reducer } from "./FormBuilder/FormBuilderSlice";
 
 // =============================================================
@@ -56,28 +55,17 @@ const encryptDecryptTransform = createTransform(
 // PERSIST CONFIGS (Session Storage)
 // =============================================================
 
-const globalSavePersistConfig = {
-  key: "GlobalSaveStore",
-  storage: storageSession,       // ✅ FIXED
-  whitelist: ["SelectedClient", "UserCode"],
-  transforms: [encryptDecryptTransform],
-};
-
 const authPersistConfig = {
-  key: "loginResponce",
+  key: "_",
   storage: storageSession,       // ✅ FIXED
-  whitelist: ["LogResponce"],
+  whitelist: ["LogResponce","Common"],
   transforms: [encryptDecryptTransform],
 };
 
-const persistedGlobalSaveReducer = persistReducer(
-  globalSavePersistConfig,
-  GlobalSaveReducer
-);
 
 const persistedAuthReducer = persistReducer(
   authPersistConfig,
-  Auth_Reducer
+  authReducer
 );
 
 // =============================================================
@@ -86,7 +74,6 @@ const persistedAuthReducer = persistReducer(
 
 const rootReducer = combineReducers({
   GlobalStore: GlobalReducer,
-  // GlobalSaveStore: persistedGlobalSaveReducer,  // Enable if needed
   Auth: persistedAuthReducer,
   FormBuilderStore: FormBuilder_Reducer,
 });

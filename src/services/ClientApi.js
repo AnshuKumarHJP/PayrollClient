@@ -1,7 +1,6 @@
 import axios from "axios";
 import { persistor, store } from "../Store/Store";
 import { resetGlobalStore } from "../Store/Slices/GlobalSlice";
-import { resetGlobalSaveStore } from "../Store/Slices/GlobalSaveSlice";
 import { navigateTo } from "./navigationService";
 
 /* ----------------------------------------------------
@@ -13,7 +12,6 @@ async function handleUnauthorized() {
 
     dispatch({ type: "RESET_AUTH" });
     dispatch(resetGlobalStore());
-    dispatch(resetGlobalSaveStore());
 
     sessionStorage.clear();
     localStorage.clear();
@@ -130,7 +128,7 @@ export default function ClientApi(
         url: Baseurl,
         data: payload?.data ?? payload, // string OR object
         headers,
-        transformRequest: [(data) => data], // 🚫 disable auto stringify
+       // transformRequest: [(data) => data], // 🚫 disable auto stringify
       })
         .then(checkStatus)
         .catch(checkStatus);

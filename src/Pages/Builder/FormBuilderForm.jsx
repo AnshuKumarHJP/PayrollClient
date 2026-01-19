@@ -641,7 +641,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           isActive={formHeader.IsActive}
           version={formHeader.Version}
           fields={fields}
-          formatValidationDisplay={(v) => v || "0"}
+          FieldValidationRule={FieldValidationRule}
         />
       </div>
     </>

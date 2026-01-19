@@ -27,17 +27,7 @@ const defaultForm = {
   Description: "",
   DisplayOrder: 1,
   IsActive: true,
-  Steps: [
-    {
-      StepOrder: 1,
-      StepName: "",
-      ApproverRoleCode: "",
-      EscalationTo: "",
-      EscalationHours: "",
-      DisplayOrder: 1,
-      IsActive: true,
-    },
-  ],
+  Steps: [],
 };
 
 const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
@@ -69,16 +59,16 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
         DisplayOrder: step.DisplayOrder ?? 1,
         IsActive: step.IsActive ?? true,
       })) ?? [
-        {
-          StepOrder: 1,
-          StepName: "",
-          ApproverRoleCode: "",
-          EscalationTo: "",
-          EscalationHours: "",
-          DisplayOrder: 1,
-          IsActive: true,
-        },
-      ],
+          {
+            StepOrder: 1,
+            StepName: "",
+            ApproverRoleCode: "",
+            EscalationTo: "",
+            EscalationHours: "",
+            DisplayOrder: 1,
+            IsActive: true,
+          },
+        ],
     });
   }, [id]);
 
@@ -93,24 +83,6 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
   const addStep = useCallback(() => {
     setEditingStep(null);
     setIsModalOpen(true);
-  }, []);
-
-  const updateStep = useCallback((index, key, value) => {
-    setForm((p) => {
-      const steps = [...p.Steps];
-      steps[index] = { ...steps[index], [key]: value };
-      return { ...p, Steps: steps };
-    });
-  }, []);
-
-  const removeStep = useCallback((index) => {
-    setForm((p) => ({
-      ...p,
-      Steps: p.Steps.filter((_, i) => i !== index).map((step, i) => ({
-        ...step,
-        StepOrder: i + 1,
-      })),
-    }));
   }, []);
 
   const moveStepUp = useCallback((index) => {
@@ -141,6 +113,7 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
   const errors = useMemo(() => {
     const e = [];
     if (!form.WorkflowName.trim()) e.push("Workflow Name is required");
+    if (form.Steps.length === 0) e.push("At least one step is required");
 
     form.Steps.forEach((step, i) => {
       if (!step.StepName.trim()) {
@@ -265,94 +238,96 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
   return (
     <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between border-b bg-gradient-to-r from-blue-400 to-indigo-400">
-        <div>
-          <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
-            <AppIcon name={"Settings"} size={30} /> Workflow Configuration
-          </h2>
-          <p className="text-green-100 text-xs sm:text-sm">
-            Configure workflow processes and approval steps
-          </p>
+      <form onSubmit={handleSubmit}>
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between border-b bg-gradient-to-r from-blue-400 to-indigo-400">
+          <div>
+            <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
+              <AppIcon name={"Settings"} size={30} /> Workflow Configuration
+            </h2>
+            <p className="text-green-100 text-xs sm:text-sm">
+              Configure workflow processes and approval steps
+            </p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="submit">
+              {form.WorkflowCode ? "Update Workflow" : "Create Workflow"}
+            </Button>
+            <Button type="button" variant="outline" onClick={addStep}>
+              <AppIcon name="Plus" className="w-4 h-4 mr-2" />
+              Add Step
+            </Button>
+          </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button type="submit">
-            {form.WorkflowCode ? "Update Workflow" : "Create Workflow"}
-          </Button>
-           <Button type="button" variant="outline" onClick={addStep}>
-                <AppIcon name="Plus" className="w-4 h-4 mr-2" />
-                Add Step
-              </Button>
-        </div>
-      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 p-4 sm:p-6">
-        {/* BASIC INFO */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {form.WorkflowCode ? "Edit Workflow" : "Create Workflow"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Workflow Name</Label>
-              <Input
-                name="WorkflowName"
-                placeholder="Enter workflow name"
-                value={form.WorkflowName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <Label>Display Order</Label>
-              <Input
-                name="DisplayOrder"
-                type="number"
-                placeholder="Enter display order"
-                value={form.DisplayOrder}
-                onChange={(e) => setForm({ ...form, DisplayOrder: Number(e.target.value) })}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Label>Description</Label>
-              <Textarea
-                name="Description"
-                placeholder="Enter workflow description"
-                value={form.Description}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex gap-4 md:col-span-2">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={form.IsActive}
-                  onCheckedChange={(v) => setForm({ ...form, IsActive: v })}
+        <div className="space-y-6 p-4 sm:p-6">
+          {/* BASIC INFO */}
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {form.WorkflowCode ? "Edit Workflow" : "Create Workflow"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Workflow Name</Label>
+                <Input
+                  name="WorkflowName"
+                  placeholder="Enter workflow name"
+                  value={form.WorkflowName}
+                  onChange={handleChange}
                 />
-                <Label>Active</Label>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div>
+                <Label>Display Order</Label>
+                <Input
+                  name="DisplayOrder"
+                  type="number"
+                  placeholder="Enter display order"
+                  value={form.DisplayOrder}
+                  onChange={(e) => setForm({ ...form, DisplayOrder: Number(e.target.value) })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label>Description</Label>
+                <Textarea
+                  name="Description"
+                  placeholder="Enter workflow description"
+                  value={form.Description}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex gap-4 md:col-span-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.IsActive}
+                    onCheckedChange={(v) => setForm({ ...form, IsActive: v })}
+                  />
+                  <Label>Active</Label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* STEPS */}
-        <div className="space-y-2">
-          {form.Steps.map((step, i) => (
-            <StepCard
-              key={step.StepOrder}
-              step={step}
-              onEdit={() => openEditModal(step)}
-              onDelete={() => handleDeleteStep(step.StepOrder)}
-              onMoveUp={() => moveStepUp(i)}
-              onMoveDown={() => moveStepDown(i)}
-              isFirst={i === 0}
-              isLast={i === form.Steps.length - 1}
-              getRoleName={getRoleName}
-            />
-          ))}
+          {/* STEPS */}
+          <div className="space-y-2">
+            {form.Steps.length > 0 && form.Steps.map((step, i) => (
+              <StepCard
+                key={step.StepOrder}
+                step={step}
+                onEdit={() => openEditModal(step)}
+                onDelete={() => handleDeleteStep(step.StepOrder)}
+                onMoveUp={() => moveStepUp(i)}
+                onMoveDown={() => moveStepDown(i)}
+                isFirst={i === 0}
+                isLast={i === form.Steps.length - 1}
+                getRoleName={getRoleName}
+              />
+            ))}
+          </div>
+
+          {/* FOOTER */}
+
         </div>
-
-        {/* FOOTER */}
-
       </form>
 
       {/* STEP FORM MODAL */}

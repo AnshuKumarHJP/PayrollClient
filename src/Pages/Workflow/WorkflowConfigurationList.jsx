@@ -21,6 +21,12 @@ const columns = [
     label: "Description",
     minWidth: 300,
   },
+  {
+    key:"IsActive",
+    label:"Active",
+    render: (v) => v ? "Yes" :"No",
+    minWidth:100
+  }
 ];
 
 const WorkflowConfigurationList = ({ onAddEditMode }) => {

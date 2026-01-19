@@ -128,7 +128,7 @@ export default function ClientApi(
         url: Baseurl,
         data: payload?.data ?? payload, // string OR object
         headers,
-       // transformRequest: [(data) => data], // 🚫 disable auto stringify
+       transformRequest: [(data) => data], // 🚫 disable auto stringify
       })
         .then(checkStatus)
         .catch(checkStatus);

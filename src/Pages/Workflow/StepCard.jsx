@@ -39,9 +39,9 @@ function StepCard({ step, onEdit, onDelete, onMoveUp, onMoveDown, isFirst, isLas
         {(step.Conditions || step.EscalationTo || step.EscalationHours) && (
           <div className="mt-3 pt-3 border-t border-border">
             <div className="text-xs text-muted-foreground space-y-1">
-              {step.Conditions && <div>Conditions: {step.Conditions}</div>}
-              {step.EscalationTo && <div>Escalation to Role: {getRoleName(step.EscalationTo)}</div>}
-              {step.EscalationHours && <div>Escalation after: {step.EscalationHours} hours</div>}
+              {step.Conditions && <div>Conditions : {step.Conditions}</div>}
+              {step.EscalationTo && <div>Escalation to Role : {getRoleName(step.EscalationTo)}</div>}
+              {step.EscalationHours && <div>Escalation after : {step.EscalationHours} hours</div>}
             </div>
           </div>
         )}

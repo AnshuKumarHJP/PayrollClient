@@ -222,10 +222,11 @@ const UserDropdown = () => {
 
           <div className="text-center space-y-2">
             <p className="text-sm font-medium">{session?.PersonName}</p>
+            <p className="text-sm">{session?.EmailId}</p>
             <p className="text-xs text-muted-foreground">
               Logged in at:{" "}
-              {session?.hfLastLogin
-                ? new Date(session.hfLastLogin).toLocaleString("en-IN", {
+              {session?.LastCheckedOn
+                ? new Date(session.LastCheckedOn).toLocaleString("en-IN", {
                   year: "numeric",
                   month: "short",
                   day: "2-digit",

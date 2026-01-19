@@ -20,7 +20,6 @@ import AppIcon from "../../Component/AppIcon";
 import Loading from '../../Component/Loading'
 
 import { useToast } from "../../Lib/use-toast";
-import Swal from 'sweetalert2';
 
 // Field Dialog Component
 import FieldDialog from "./BuilderComponents/FieldDialog";
@@ -38,7 +37,7 @@ import {
 
 // Static Data
 import { Modules } from "../../Data/StaticData";
-import { SweetSuccess } from "../../Component/SweetAlert";
+import { SweetSuccess, SweetConfirm } from "../../Component/SweetAlert";
 
 
 // ------------------------------------------------
@@ -255,22 +254,15 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   // DELETE FIELD
   // ------------------------------------------------
   const deleteField = (id) => {
-    Swal.fire({
+    SweetConfirm({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
+      onConfirm: () => {
         setFields(fields.filter((f) => f.id !== id));
-        Swal.fire(
-          'Deleted!',
-          'Field has been deleted.',
-          'success'
-        );
+        SweetSuccess({
+          title: 'Deleted!',
+          text: 'Field has been deleted.'
+        });
       }
     });
   };

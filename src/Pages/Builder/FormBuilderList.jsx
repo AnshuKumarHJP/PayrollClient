@@ -8,7 +8,7 @@ import { GetFormBuilder, DeleteFormBuilder } from "../../Store/FormBuilder/Actio
 import { useToast } from "../../Lib/use-toast";
 import AdvanceTable from "../../Component/AdvanceTable";
 import AppIcon from "../../Component/AppIcon";
-import Swal from "sweetalert2"
+import { SweetConfirm, SweetSuccess } from "../../Component/SweetAlert";
 
 const FormBuilderList = ({ onAddEditMode }) => {
   const navigate = useNavigate();
@@ -90,24 +90,17 @@ const FormBuilderList = ({ onAddEditMode }) => {
   };
 
   const handleDelete = async (HeaderCode) => {
-    Swal.fire({
+    SweetConfirm({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
+      onConfirm: async () => {
         try {
           await dispatch(DeleteFormBuilder(HeaderCode));
           dispatch(GetFormBuilder()); // Refresh list
-          Swal.fire(
-            'Deleted!',
-            'Form has been deleted.',
-            'success'
-          );
+          SweetSuccess({
+            title: 'Deleted!',
+            text: 'Form has been deleted.'
+          });
         } catch (err) {
           toast({
             title: 'Error',

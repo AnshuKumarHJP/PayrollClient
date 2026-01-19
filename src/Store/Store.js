@@ -1,4 +1,3 @@
-// store.js
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import {
   persistReducer,
@@ -12,7 +11,7 @@ import {
   REGISTER
 } from "redux-persist";
 
-import storageSession from "redux-persist/lib/storage/session"; // ✅ FIXED
+import storageSession from "redux-persist/lib/storage/session"; //  FIXED
 import CryptoJS from "crypto-js";
 
 // Slices
@@ -24,7 +23,8 @@ import { FormBuilder_Reducer } from "./FormBuilder/FormBuilderSlice";
 // ENCRYPTION TRANSFORM
 // =============================================================
 
-const secretKey = "MY_SECRET_KEY_123";
+// const secretKey = "MY_SECRET_KEY_123";
+const secretKey = import.meta.env.VITE_HFK;
 
 const encryptDecryptTransform = createTransform(
   (inboundState) => {
@@ -57,7 +57,7 @@ const encryptDecryptTransform = createTransform(
 
 const authPersistConfig = {
   key: "_",
-  storage: storageSession,       // ✅ FIXED
+  storage: storageSession,       //  FIXED
   whitelist: ["LogResponce","Common"],
   transforms: [encryptDecryptTransform],
 };

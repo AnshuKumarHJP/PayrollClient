@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
-import { Label } from "../Lib/label";
+import { Input } from "../Library/Input";
+import { Label } from "../Library/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Lib/table";
 import { Badge } from "../Lib/badge";

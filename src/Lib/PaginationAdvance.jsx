@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Library/Select";
 
 const PaginationAdvance = ({
   count = 1,

@@ -12,7 +12,8 @@ const getAuthRequest = () => ({ type: GET_AUTH_REQUEST });
 const getAuthSuccess = (data) => ({ type: GET_AUTH_SUCCESS, payload: data });
 const getAuthFailure = (error) => ({ type: GET_AUTH_FAILURE, payload: error });
 
-export const AuthenticateUser = (formData) => async (dispatch) => {
+export const AuthenticateUser = (formData, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch(getAuthRequest());
 
   const apiPayload = {
@@ -26,6 +27,7 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
       UserType: 1,
       PermissibleDeviceType: 0,
       TwoWayAuthType: 0,
+      SSOProviderId: 0,
       SSOProviderId: 0,
       PermissibleNetworkId: 0,
       PermissibleGeoLocationId: 0,
@@ -71,7 +73,9 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
       "/api/Security/AuthenticateUser",
       apiPayload,
       "POST",
-      ""
+      "",
+      "security",
+      signal || controller.signal
     );
 
     const encryptedResult = res?.data?.Result;
@@ -118,5 +122,7 @@ export const AuthenticateUser = (formData) => async (dispatch) => {
       errorMessage = error.response.data;
     }
     dispatch(getAuthFailure(errorMessage));
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };

@@ -1,8 +1,8 @@
 // src/layout/LayoutContent.jsx
 import { Outlet } from "react-router";
-import { Toaster } from "@/Lib/toaster";
-import { Toaster as Sonner } from "@/Lib/sonner";
 import { TooltipProvider } from "@/Lib/tooltip";
+
+import { Toaster } from "@/Library/Toaster";
 
 import ClientDropdown from "../Component/ClientDropdown";
 import MonthYearSelector from "../Component/MonthYearSelector";
@@ -23,10 +23,9 @@ const LayoutContent = () => {
   return (
     <TooltipProvider>
       <Toaster />
-      <Sonner />
        <NavigatorBinder />
 
-      <div className="min-h-screen bg-emerald-50 w-full overflow-x-hidden">
+      <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
         {/* FIXED HEADER */}
         <Header />

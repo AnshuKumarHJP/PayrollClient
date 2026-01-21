@@ -1,5 +1,5 @@
 import { Mail } from "lucide-react";
-import { Card } from "../../Lib/card";
+import { Card } from "../../Library/Card";
 import { ScrollArea } from "@/Lib/scroll-area";
 
 import React from 'react'

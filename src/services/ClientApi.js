@@ -31,6 +31,11 @@ async function handleUnauthorized() {
    RESPONSE CHECKER
 ---------------------------------------------------- */
 export async function checkStatus(res) {
+  // ✅ ignore aborted requests
+  if (res?.name === "CanceledError") {
+    return Promise.reject(res);
+  }
+
   // ---------- SUCCESS ----------
   if (res?.status >= 200 && res?.status < 300) {
     const data = res?.data;
@@ -68,34 +73,34 @@ export async function checkStatus(res) {
 }
 
 /* ----------------------------------------------------
-   MAIN API WRAPPER
+   MAIN API WRAPPER (WITH ABORT SUPPORT)
 ---------------------------------------------------- */
 export default function ClientApi(
   url,
   payload,
   httpMethod,
   accessToken,
-  apiType
+  apiType,
+  signal // 👈 ADD THIS
 ) {
   // ---------- BASE URL RESOLUTION ----------
   let finalBaseUrl = "";
   let NORMAL_API_URL = import.meta.env.VITE_PAYROLL_API_BASE_URL;
   let SECURITY_API_URL = import.meta.env.VITE_SECURITY_API_BASE_URL;
 
-  if (NORMAL_API_URL === undefined) {
-    return console.error("VITE_NORMAL_API_URL is not defined in environment variables.");
-  }
-
-  if (SECURITY_API_URL === undefined) {
-    return console.error("VITE_SECURITY_API_URL is not defined in environment variables.");
+  if (!NORMAL_API_URL || !SECURITY_API_URL) {
+    console.error("API base URLs are not defined");
+    return null;
   }
 
   if (apiType === "security") {
-    finalBaseUrl = SECURITY_API_URL
+    finalBaseUrl = SECURITY_API_URL;
   } else if (apiType === "normal") {
-    finalBaseUrl = NORMAL_API_URL
+    finalBaseUrl = NORMAL_API_URL;
   } else {
-    finalBaseUrl = url.includes("/api/Security/") ? SECURITY_API_URL : NORMAL_API_URL
+    finalBaseUrl = url.includes("/api/Security/")
+      ? SECURITY_API_URL
+      : NORMAL_API_URL;
   }
 
   const Baseurl = `${finalBaseUrl}${url}`;
@@ -108,34 +113,38 @@ export default function ClientApi(
     token: accessToken || token || "",
   };
 
-   switch (httpMethod) {
+  const config = {
+    headers,
+    signal, // 🔥 KEY LINE
+  };
+
+  switch (httpMethod) {
     case "GET":
-      return axios
-        .get(Baseurl, { headers })
-        .then(checkStatus)
-        .catch(checkStatus);
+      return axios.get(Baseurl, config).then(checkStatus).catch(checkStatus);
 
     case "POST":
       return axios
-        .post(Baseurl, payload?.data ?? payload, { headers })
+        .post(Baseurl, payload?.data ?? payload, config)
         .then(checkStatus)
         .catch(checkStatus);
 
     case "PUT":
-      // 🔥 SUPPORTS RAW STRING OR OBJECT
       return axios({
         method: "PUT",
         url: Baseurl,
-        data: payload?.data ?? payload, // string OR object
+        data: payload?.data ?? payload,
         headers,
-       transformRequest: [(data) => data], // 🚫 disable auto stringify
+        signal, // 🔥 KEY LINE
+        transformRequest: [
+          (data) => (typeof data === "string" ? data : JSON.stringify(data)),
+        ],
       })
         .then(checkStatus)
         .catch(checkStatus);
 
     case "DELETE":
       return axios
-        .delete(Baseurl, { headers })
+        .delete(Baseurl, config)
         .then(checkStatus)
         .catch(checkStatus);
 
@@ -144,4 +153,3 @@ export default function ClientApi(
       return null;
   }
 }
-

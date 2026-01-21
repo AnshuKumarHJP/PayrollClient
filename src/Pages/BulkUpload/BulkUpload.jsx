@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 
-import { Card, CardContent } from "../../Lib/card";
+import { Card, CardContent } from "../../Library/Card";
 import { Button } from "../../Lib/button";
 import { Alert, AlertDescription } from "../../Lib/alert";
 

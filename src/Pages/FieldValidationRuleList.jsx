@@ -1,37 +1,30 @@
-/* =====================================================
-   CLEAN & OPTIMIZED – FieldValidationRuleList
-   ✔ Stable renders
-   ✔ Predictable refresh (only GET_ALL)
-   ✔ Memoized handlers & columns
-   ✔ Uses reusable badges
-===================================================== */
-
 import React, { useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "../Lib/use-toast";
 
 import {
   GetAllFieldValidationRules,
-  DeleteFieldValidationRuleById
+  DeleteFieldValidationRuleById,
 } from "../Store/FormBuilder/Action";
 
-import AdvanceTable from "../Component/AdvanceTable";
+import DataGrid from "../Library/Table/DataGrid";
 import Loading from "../Component/Loading";
-import { Button } from "../Lib/button";
+import Button from "../Library/Button";
 import AppIcon from "../Component/AppIcon";
-import { Badge } from "../Lib/badge";
+import { Badge } from "../Library/Badge";
 
 import { ValidationTypes, Categories } from "../Data/StaticData";
 import { ActiveBadge, SeverityBadge } from "../Component/HealperComponents";
 import { SweetConfirm } from "../Component/SweetAlert";
 
-/* ----------------------------------------------------
-   VALIDATION PARAMS CELL (PURE)
----------------------------------------------------- */
+/* =====================================================
+   VALIDATION PARAMETERS CELL (PURE + SAFE)
+===================================================== */
 const ValidationParamsCell = React.memo(({ value }) => {
   if (!value) return <span className="text-gray-400">—</span>;
 
   let params = value;
+
   if (typeof value === "string") {
     try {
       params = JSON.parse(value);
@@ -40,13 +33,14 @@ const ValidationParamsCell = React.memo(({ value }) => {
     }
   }
 
-  if (!Array.isArray(params) || params.length === 0)
+  if (!Array.isArray(params) || params.length === 0) {
     return <span className="text-gray-400">—</span>;
+  }
 
   return (
     <div className="flex flex-wrap gap-1">
       {params.map((p, i) => (
-        <Badge key={i} size="xs">
+        <Badge key={i} size="sm" variant="success">
           {p.ParamName} : {p.ParamValue}
         </Badge>
       ))}
@@ -54,9 +48,9 @@ const ValidationParamsCell = React.memo(({ value }) => {
   );
 });
 
-/* ----------------------------------------------------
+/* =====================================================
    MAIN COMPONENT
----------------------------------------------------- */
+===================================================== */
 const FieldValidationRuleList = ({ onAddEditMode }) => {
   const dispatch = useDispatch();
   const { toast } = useToast();
@@ -65,36 +59,33 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     data = [],
     isLoading,
     error,
-    Success
   } = useSelector(
     (state) => state.FormBuilderStore.FieldValidationRule || {}
   );
 
-  /* ---------------- FETCH ON MOUNT ---------------- */
+  /* ================= FETCH ON MOUNT ================= */
   useEffect(() => {
     dispatch(GetAllFieldValidationRules());
   }, [dispatch]);
 
-  /* ---------------- ERROR TOAST ---------------- */
+  /* ================= ERROR HANDLING ================= */
   useEffect(() => {
     if (error) {
       toast({
         title: "Error",
         description: error,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   }, [error, toast]);
 
-  /* ---------------- ACTION HANDLERS ---------------- */
+  /* ================= ACTION HANDLERS ================= */
   const handleCreateNew = useCallback(() => {
     onAddEditMode?.(true, { type: "add" });
   }, [onAddEditMode]);
 
   const handleEdit = useCallback(
-    (id) => {
-      onAddEditMode?.(true, { id, type: "edit" });
-    },
+    (id) => onAddEditMode?.(true, { id, type: "edit" }),
     [onAddEditMode]
   );
 
@@ -102,18 +93,18 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     (id) => {
       SweetConfirm({
         title: "Delete Field Validation Rule",
-        text: "Are you sure you want to delete this field validation rule?",
+        text: "Are you sure you want to delete this rule?",
         onConfirm: async () => {
           await dispatch(DeleteFieldValidationRuleById(id));
-          dispatch(GetAllFieldValidationRules()); // explicit refresh
-        }
+          dispatch(GetAllFieldValidationRules());
+        },
       });
     },
     [dispatch]
   );
 
-  /* ---------------- ACTION COLUMN ---------------- */
-  const RenderAction = useCallback(
+  /* ================= ACTION CELL ================= */
+  const renderActionCell = useCallback(
     (row) => (
       <div className="flex gap-2">
         <Button
@@ -135,57 +126,122 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     [handleEdit, handleDelete]
   );
 
-  /* ---------------- COLUMNS (STATIC) ---------------- */
-  const columns = useMemo(
+  /* ================= COLUMN DEFINITIONS ================= */
+  const columnDefs = useMemo(
     () => [
-      { key: "RuleCode", label: "Rule Code", sticky: true },
-      { key: "RuleName", label: "Rule Name" },
-      { key: "RuleDescription", label: "Description" },
       {
-        key: "ValidationParameters",
-        label: "Validation Parameters",
-        width: 260,
-        render: (v) => <ValidationParamsCell value={v} />
-      },
-      { key: "TargetEntity", label: "Target Entity" },
-      { key: "TargetField", label: "Target Field" },
-      {
-        key: "ValidationType",
-        label: "Validation Type",
-        width: 100,
-        render: (v) =>
-          ValidationTypes.find((t) => t.value === Number(v))?.label ?? v
+        headerName: "",
+        width: 20,                        // compact & clean
+        checkboxSelection: true,          // row checkbox
+        headerCheckboxSelection: true,    // select-all checkbox
+        pinned: "left",                   // always visible
+        suppressMenu: true,               // no column menu
+        sortable: false,                  // checkbox column should not sort
+        filter: false,                    // checkbox column should not filter
+        resizable: false,                 // fixed width = stable layout
+        lockPosition: true,               // prevent drag
       },
       {
-        key: "Severity",
-        label: "Severity",
-        width: 100,
-        render: (v) => <SeverityBadge value={v} />
+        field: "RuleCode",
+        colId: "RuleCode",
+        headerName: "Rule Code",
+        pinned: "left",
+        minWidth: 140,
       },
       {
-        key: "Category",
-        label: "Category",
-        width: 120,
-        render: (v) =>
-          Categories.find((c) => c.value === Number(v))?.label ?? v
+        field: "RuleName",
+        colId: "RuleName",
+        headerName: "Rule Name",
+        flex: 1,
+        minWidth: 200,
       },
       {
-        key: "IsActive",
-        label: "Status",
-        width: 100,
-        render: (v) => <ActiveBadge value={v} />
+        field: "RuleDescription",
+        colId: "RuleDescription",
+        headerName: "Description",
+        minWidth: 220,
+        tooltipField: "RuleDescription",
       },
       {
-        key: "DisplayOrder",
-        label: "Display Order",
+        field: "ValidationParameters",
+        colId: "ValidationParameters",
+        headerName: "Validation Parameters",
+        minWidth: 240,
+        cellRenderer: ValidationParamsCell,
+        valueFormatter: (p) =>
+          p.value ? JSON.stringify(p.value) : "-",
+      },
+      {
+        field: "TargetEntity",
+        colId: "TargetEntity",
+        headerName: "Target Entity",
+        minWidth: 160,
+      },
+      {
+        field: "TargetField",
+        colId: "TargetField",
+        headerName: "Target Field",
+        minWidth: 160,
+      },
+      {
+        field: "ValidationType",
+        colId: "ValidationType",
+        headerName: "Validation Type",
+        minWidth: 160,
+        valueFormatter: (p) =>
+          ValidationTypes.find(
+            (t) => t.value === Number(p.value)
+          )?.label ?? p.value,
+      },
+      {
+        field: "Severity",
+        colId: "Severity",
+        headerName: "Severity",
+        minWidth: 120,
+        cellRenderer: SeverityBadge,
+        valueFormatter: (p) => String(p.value ?? "-"),
+      },
+      {
+        field: "Category",
+        colId: "Category",
+        headerName: "Category",
+        minWidth: 150,
+        valueFormatter: (p) =>
+          Categories.find((c) => c.value === Number(p.value))?.label ?? p.value,
+      },
+      {
+        field: "IsActive",
+        colId: "IsActive",
+        headerName: "Status",
+        minWidth: 120,
+        cellRenderer: ActiveBadge,
+        valueFormatter: (p) =>
+          p.value ? "Active" : "Inactive",
+      },
+      {
+        field: "DisplayOrder",
+        colId: "DisplayOrder",
+        headerName: "Display Order",
         type: "number",
-        width: 120
-      }
+        minWidth: 120,
+        sort: "asc",
+      },
+      {
+        // colId: "Actions",
+        headerName: "Actions",
+        pinned: "right",
+        minWidth: 50,
+        cellRenderer: (p) => renderActionCell(p.data),
+        sortable: false,
+        filter: false,
+        suppressMenu: true,
+        suppressColumnsToolPanel: true,
+        suppressExport: true,
+      },
     ],
-    []
+    [renderActionCell]
   );
 
-  /* ---------------- DATA (STABLE) ---------------- */
   const tableData = useMemo(
     () => (Array.isArray(data) ? data : []),
     [data]
@@ -196,20 +252,23 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
   return (
     <div>
       <div className="flex justify-end mb-2">
-        <Button variant="default" onClick={handleCreateNew}>
+        <Button variant="default"
+          className="flex"
+          onClick={handleCreateNew}>
           <AppIcon name="Plus" />
           Add New Field Validation Rule
         </Button>
       </div>
 
-      <AdvanceTable
-        title="Field Validation Rules"
-        icon="ShieldCheck"
-        columns={columns}
-        data={tableData}
-        renderActions={RenderAction}
-        isLoading={isLoading}
-        showIndex={true}
+      <DataGrid
+        rowData={tableData}
+        columnDefs={columnDefs}
+        height={500}
+        gridIcon="ShieldCheck"
+        gridTitle="Field Validation Rules"
+        enableRowSelection="multiple"
+        pagination
+        paginationPageSize={10}
       />
     </div>
   );

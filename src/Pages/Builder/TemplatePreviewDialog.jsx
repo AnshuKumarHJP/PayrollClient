@@ -1,10 +1,10 @@
 import { useState } from "react";
 import Modal from "../../Component/Modal";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
 import { Button } from "../../Lib/button";
-import { Input } from "../../Lib/input";
-import { Label } from "../../Lib/label";
+import { Input } from "../../Library/Input";
+import { Label } from "../../Library/Label";
 import {
   Select,
   SelectContent,

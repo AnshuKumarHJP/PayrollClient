@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { useDispatch, useSelector } from "react-redux";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
 import { Alert, AlertDescription } from "../Lib/alert";

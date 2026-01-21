@@ -1,5 +1,5 @@
-import { Input } from "../../../Lib/input";
-import { Label } from "../../../Lib/label";
+import { Input } from "../../../Library/Input";
+import { Label } from "../../../Library/Label";
 
 const FieldBasicInputs = ({ fieldForm, setFieldForm }) => {
   const inputs = [

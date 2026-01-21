@@ -1,6 +1,6 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Card } from '../Lib/card';
+import { Card } from '../Library/Card';
 
 const PieChartComponent = ({
   data,

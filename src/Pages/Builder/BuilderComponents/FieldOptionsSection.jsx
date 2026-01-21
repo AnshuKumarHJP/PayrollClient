@@ -1,5 +1,5 @@
-import { Input } from "../../../Lib/input";
-import { Label } from "../../../Lib/label";
+import { Input } from "../../../Library/Input";
+import { Label } from "../../../Library/Label";
 
 const FieldOptionsSection = ({ fieldForm, setFieldForm }) => {
   if (fieldForm.Type !== "select" && fieldForm.Type !== "multi-select") return null;

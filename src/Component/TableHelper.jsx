@@ -126,7 +126,7 @@ export const getColStyle = (
 // -------------------------------------------------------------
 // TEXT ELLIPSIS WRAPPER
 // -------------------------------------------------------------
-export const EllipsisCell = ({ width = 150, children }) => (
+export const EllipsisCell = ({ width = 200, children }) => (
   <div
     style={{
       maxWidth: width,

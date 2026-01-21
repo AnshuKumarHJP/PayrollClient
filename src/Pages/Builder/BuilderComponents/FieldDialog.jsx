@@ -13,7 +13,7 @@ import FieldApplicableSelect from "./FieldApplicableSelect";
 import FieldRequiredCheckbox from "./FieldRequiredCheckbox";
 import AppIcon from "../../../Component/AppIcon";
 import Modal from "../../../Component/Modal";
-import { CardContent } from "../../../Lib/card";
+import { CardContent } from "../../../Library/Card";
 
 // ------------------------------------------------
 // PROCESS FIELD DETAILS (VALIDATION & FILTERING)

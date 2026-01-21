@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Button } from "../../Lib/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
-import { Input } from "../../Lib/input";
-import { Label } from "../../Lib/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
+import { Input } from "../../Library/Input";
+import { Label } from "../../Library/Label";
 import { Textarea } from "../../Lib/textarea";
-import { Switch } from "../../Lib/switch";
+import { Switch } from "../../Library/Switch";
 import { useToast } from "../../Lib/use-toast";
 import AppIcon from "../../Component/AppIcon";
 import RoleSelect from "../../Component/RoleSelect";

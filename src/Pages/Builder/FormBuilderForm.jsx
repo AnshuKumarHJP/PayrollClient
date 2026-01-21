@@ -5,13 +5,13 @@ import {
   CardHeader,
   CardContent,
   CardTitle,
-} from "../../Lib/card";
+} from "../../Library/Card";
 
 import { Button } from "../../Lib/button";
-import { Input } from "../../Lib/input";
-import { Label } from "../../Lib/label";
+import { Input } from "../../Library/Input";
+import { Label } from "../../Library/Label";
 import { Textarea } from "../../Lib/textarea";
-import { Switch } from "../../Lib/switch";
+import { Switch } from "../../Library/Switch";
 import { Badge } from "../../Lib/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
 

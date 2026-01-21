@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../Lib/select";
-import { Switch } from "../Lib/switch";
-import { Input } from "../Lib/input";
+import { Switch } from "../Library/Switch";
+import { Input } from "../Library/Input";
 import { Button } from "../Lib/button";
 import { cn } from "../Lib/utils";
 import { toast } from "../Lib/use-toast";

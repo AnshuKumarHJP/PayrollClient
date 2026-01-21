@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
 import {
   Select,
@@ -62,7 +62,12 @@ const PayrollInputMapping = () => {
 
   /* ===================== LOAD FORM BUILDERS (ONCE) ===================== */
   useEffect(() => {
-    dispatch(GetFormBuilder());
+    const controller = new AbortController();
+    dispatch(GetFormBuilder(controller.signal));
+    return () => {
+      controller.abort(); // 🔥 API CANCELLED HERE
+    };
+
   }, [dispatch]);
 
   /* ===================== LOAD MAPPINGS (ONCE PER CLIENT) ===================== */
@@ -94,13 +99,6 @@ const PayrollInputMapping = () => {
     [formBuilders, mappedTemplateIds]
   );
 
-  /* ===================== HANDLERS ===================== */
-  const handleClientChange = useCallback((Id) => {
-    dispatch(setSelectedClient(Id));
-    dispatch(setSelectedClientContract(Id));
-    lastFetchedClientIdRef.current = null; // reset guard on client change
-  }, [dispatch]);
-
   const handleMap = useCallback(
     (formBuilderId) => {
       if (!selectedClientId) return;
@@ -108,7 +106,7 @@ const PayrollInputMapping = () => {
       dispatch(
         InsertClientFormBuilderHeaderMapping({
           ClientId: selectedClientId,
-          ClientContractId : selectedClientContracCode,
+          ClientContractId: selectedClientContracCode,
           TeamId,
           FormBuilderId: formBuilderId,
           IsActive: true,
@@ -153,7 +151,7 @@ const PayrollInputMapping = () => {
       </div>
 
       {/* CLIENT SELECT */}
-    
+
       {selectedClientId && (
         <>
           {/* ===================== MAPPED ===================== */}

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
 import { Skeleton } from "../Lib/skeleton";

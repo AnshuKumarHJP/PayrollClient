@@ -9,7 +9,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Input } from "../Lib/input";
+import { Input } from "../Library/Input";
 import { Button } from "../Lib/button";
 import {
   Select,
@@ -19,9 +19,9 @@ import {
   SelectValue
 } from "../Lib/select";
 import { Textarea } from "../Lib/textarea";
-import { Switch } from "../Lib/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
-import { Label } from "../Lib/label";
+import { Switch } from "../Library/Switch";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
+import { Label } from "../Library/Label";
 import { useToast } from "../Lib/use-toast";
 
 import {

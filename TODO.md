@@ -1,8 +1,8 @@
-# TODO: Update activeClient and activeClientContract to use Auth storage instead of sessionStorage
-
-- [x] Update src/Component/ClientContractDropdown.jsx to use Redux store for activeClientContract
-- [x] Update src/Component/ClientDropdown.jsx to use Redux store for activeClient
-- [x] Update src/Pages/PayrollInputMapping.jsx to use Redux store
-- [x] Update src/Pages/ModeSelection.jsx to use Redux store
-- [x] Update src/Pages/InputModule.jsx to use Redux store
-- [x] Update src/Pages/BulkUpload/BulkUpload.jsx to use Redux store
+- Add necessary imports for toolbar components (DropdownSelect, AppIcon, Density, DownloadTypes, export functions, DropdownMenu, Button, Switch)
+- Add state for visibleCols and sizeMode
+- Compute flat cols array from grouped columns
+- Define exportFile function using ExportHelper
+- Update toolbar structure to include columns dropdown, density dropdown, export dropdown
+- Apply sizeClass to table based on sizeMode
+- Filter groups and columns in rendering based on visibleCols
+- Update group header colSpan dynamically

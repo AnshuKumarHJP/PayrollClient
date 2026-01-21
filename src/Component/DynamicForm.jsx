@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Card } from "../Lib/card";
+import { Card } from "../Library/Card";
 import { Button } from "../Lib/button";
-import { Label } from "../Lib/label";
+import { Label } from "../Library/Label";
 import { Alert, AlertDescription } from "../Lib/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Lib/tabs";
 import { Loader2, XCircle, CheckCircle, Plus, Trash } from "lucide-react";

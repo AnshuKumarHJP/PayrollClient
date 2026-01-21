@@ -1,5 +1,5 @@
 import { Download, ExternalLink, FileText } from "lucide-react";
-import { Card } from "../../Lib/card";
+import { Card } from "../../Library/Card";
 import React from 'react'
 
 const HRPoliciesCard = () => {

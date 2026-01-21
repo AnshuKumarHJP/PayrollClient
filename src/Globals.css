@@ -1,0 +1,461 @@
+/* =========================================================
+   DESIGN SYSTEM – COLORS + TYPOGRAPHY + ICONS (ALL IN ONE)
+   ========================================================= */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- FONTS & ICONS ---------- */
+
+/* =========================
+   CUSTOM SCROLLBAR (global)
+   ========================= */
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Chrome / Edge / Safari */
+::-webkit-scrollbar {
+    width: var(--scrollbar-w);
+    height: var(--scrollbar-w);
+}
+
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: var(--scrollbar-radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+}
+
+/* ---------- CSS VARIABLES ---------- */
+@layer base {
+    :root {
+        /* ================= COLORS ================= */
+
+        /* Primary */
+        --primary-50: #ecebff;
+        --primary-100: #d6d4ff;
+        --primary-200: #b0adff;
+        --primary-300: #8a86ff;
+        --primary-400: #5c56ff;
+        --primary-500: #130f40;
+        --primary-600: #100d38;
+        --primary-700: #0d0a2e;
+        --primary-800: #090724;
+        --primary-900: #050416;
+
+        /* Dark Gray */
+        --dark-gray-50: #efeff3;
+        --dark-gray-100: #d7d7df;
+        --dark-gray-200: #b6b6c6;
+        --dark-gray-300: #9494ad;
+        --dark-gray-400: #5c5c7a;
+        --dark-gray-500: #31314d;
+        --dark-gray-600: #2b2b44;
+        --dark-gray-700: #24243a;
+        --dark-gray-800: #1c1c2d;
+        --dark-gray-900: #14141f;
+
+        /* Gray */
+        --gray-50: #f2f2f4;
+        --gray-100: #e1e1e6;
+        --gray-200: #c7c7d1;
+        --gray-300: #adaebb;
+        --gray-400: #7c7d93;
+        --gray-500: #59596c;
+        --gray-600: #4f4f61;
+        --gray-700: #424252;
+        --gray-800: #33333f;
+        --gray-900: #24242c;
+
+        /* Light Gray */
+        --light-gray-50: #fafafa;
+        --light-gray-100: #f0f0f1;
+        --light-gray-200: #e0e0e2;
+        --light-gray-300: #cfcfd3;
+        --light-gray-400: #b8b8bd;
+        --light-gray-500: #a8a8ad;
+        --light-gray-600: #96969b;
+        --light-gray-700: #7d7d82;
+        --light-gray-800: #626266;
+        --light-gray-900: #454548;
+
+        /* Stroke Gray */
+        --stroke-gray-50: #ffffff;
+        --stroke-gray-100: #f7f7f7;
+        --stroke-gray-200: #ededed;
+        --stroke-gray-300: #e0e0e0;
+        --stroke-gray-400: #d2d2d2;
+        --stroke-gray-500: #dadada;
+        --stroke-gray-600: #c2c2c2;
+        --stroke-gray-700: #a6a6a6;
+        --stroke-gray-800: #7e7e7e;
+        --stroke-gray-900: #555555;
+
+        /* Status */
+        --warning-500: #ffb54d;
+        --success-500: #25b480;
+        --danger-500: #fe6c6c;
+
+        --white: #ffffff;
+        --black: #000000;
+
+        /* ================= TYPOGRAPHY ================= */
+
+        --font-primary: "DM Sans", system-ui, sans-serif;
+
+        --h1: 28px;
+        --h2: 24px;
+        --h3: 22px;
+        --h4: 20px;
+        --h5: 18px;
+        --h6: 16px;
+
+        --p-lead: 16px;
+        --p: 14px;
+        --p-small: 13px;
+        --tiny: 12px;
+        --p11: 11px;
+        --p10: 10px;
+
+        --fw-regular: 400;
+        --fw-medium: 500;
+
+        --menu-active: #9747FF;
+
+        /* ---- Switch Sizes ---- */
+        --switch-sm-w: 36px;
+        --switch-sm-h: 18px;
+        --switch-sm-thumb: 14px;
+
+        --switch-md-w: 44px;
+        --switch-md-h: 24px;
+        --switch-md-thumb: 18px;
+
+        --switch-lg-w: 56px;
+        --switch-lg-h: 30px;
+        --switch-lg-thumb: 22px;
+
+        /* ---- Slider Sizes ---- */
+        --slider-sm-h: 4px;
+        --slider-md-h: 6px;
+        --slider-lg-h: 8px;
+
+        --slider-thumb-sm: 12px;
+        --slider-thumb-md: 16px;
+        --slider-thumb-lg: 20px;
+
+        /* ---- Variants ---- */
+        --variant-primary: var(--primary-500);
+        --variant-success: var(--success-500);
+        --variant-danger: var(--danger-500);
+        --variant-muted: var(--stroke-gray-300);
+
+        /* ---- Control Sizes ---- */
+        --control-sm: 14px;
+        --control-md: 16px;
+        --control-lg: 20px;
+
+        --control-radius-sm: 4px;
+        --control-radius-md: 5px;
+        --control-radius-lg: 6px;
+
+        /* ---- Variants ---- */
+        --control-primary: var(--primary-500);
+        --control-success: var(--success-500);
+        --control-danger: var(--danger-500);
+        --control-muted: var(--stroke-gray-400);
+        --control-bg: var(--white);
+
+        /* ---- Badge Sizes ---- */
+        --badge-xs: 14px;
+        --badge-sm: 18px;
+        --badge-md: 22px;
+        --badge-lg: 26px;
+
+        --badge-radius: 999px;
+
+        /* ---- Badge Variants ---- */
+        --badge-info-bg: #eef2ff;
+        --badge-info-text: var(--primary-500);
+
+        --badge-success-bg: #94e9c1;
+        --badge-success-text: var(--success-100);
+
+        --badge-warning-bg: #fff6e8;
+        --badge-warning-text: #ff9f1c;
+
+        --badge-danger-bg: #ffecec;
+        --badge-danger-text: var(--danger-500);
+
+        --badge-muted-bg: #f2f2f4;
+        --badge-muted-text: #7c7d93;
+
+        /* ---- Tab Sizes ---- */
+        --tab-sm-h: 32px;
+        --tab-md-h: 36px;
+        --tab-lg-h: 40px;
+
+        --tab-radius: 8px;
+
+        /* ---- Header Variants ---- */
+        --tab-header-default-bg: transparent;
+        --tab-header-pill-bg: #f2f2f4;
+        --tab-header-outline-bg: transparent;
+        --tab-header-outline-border: var(--stroke-gray-400);
+
+        /* ---- Active / Inactive ---- */
+        --tab-active-bg: var(--primary-500);
+        --tab-active-text: var(--white);
+
+        --tab-inactive-bg: transparent;
+        --tab-inactive-text: var(--gray-500);
+
+        /* ---- Alert Sizes ---- */
+        --alert-sm-px: 10px;
+        --alert-md-px: 12px;
+        --alert-lg-px: 14px;
+
+        --alert-radius: 8px;
+
+        /* ---- Alert Variants ---- */
+        --alert-info-bg: #eef2ff;
+        --alert-info-text: var(--primary-500);
+        --alert-info-border: #c7d2fe;
+
+        --alert-success-bg: #e9f8f1;
+        --alert-success-text: var(--success-500);
+        --alert-success-border: #9fe3c5;
+
+        --alert-warning-bg: #fff6e8;
+        --alert-warning-text: #ff9f1c;
+        --alert-warning-border: #ffd9a3;
+
+        --alert-danger-bg: #ffecec;
+        --alert-danger-text: var(--danger-500);
+        --alert-danger-border: #ffb3b3;
+
+        /* =========================
+       TOAST – CORE
+       ========================= */
+
+        /* Sizes */
+        --toast-sm-p: 10px;
+        --toast-md-p: 14px;
+        --toast-lg-p: 18px;
+
+        /* Radius */
+        --toast-radius: 10px;
+
+        /* Background */
+        --toast-bg: var(--white);
+
+        /* Text */
+        --toast-title-color: #111827;
+        --toast-desc-color: #6b7280;
+
+        /* Shadow */
+        --toast-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.18);
+
+        /* =========================
+       TOAST – VARIANTS
+       ========================= */
+
+        /* Info */
+        --toast-info-border: var(--primary-500);
+        --toast-info-bg: var(--white);
+        --toast-info-icon: var(--primary-500);
+
+        /* Success */
+        --toast-success-border: var(--success-500);
+        --toast-success-bg: var(--white);
+        --toast-success-icon: var(--success-500);
+
+        /* Warning */
+        --toast-warning-border: #ff9f1c;
+        --toast-warning-bg: var(--white);
+        --toast-warning-icon: #ff9f1c;
+
+        /* Danger */
+        --toast-danger-border: var(--danger-500);
+        --toast-danger-bg: var(--white);
+        --toast-danger-icon: var(--danger-500);
+        /* ---- Tooltip ---- */
+        --tooltip-bg: var(--black);
+        --tooltip-text: var(--white);
+        --tooltip-radius: 6px;
+        --tooltip-px: 10px;
+        --tooltip-py: 6px;
+        --tooltip-font: 12px;
+
+        /* Arrow size */
+        --tooltip-arrow: 6px;
+
+        /* ---- Popover ---- */
+        --popover-bg: var(--white);
+        --popover-border: var(--stroke-gray-300);
+        --popover-radius: 10px;
+
+        --popover-sm-p: 10px;
+        --popover-md-p: 14px;
+        --popover-lg-p: 18px;
+
+        --popover-title: 14px;
+        --popover-text: 12px;
+
+        /* ---- Scrollbar ---- */
+        --scrollbar-w: 6px;
+        --scrollbar-track: transparent;
+        --scrollbar-thumb: #cfcfd3;
+        --scrollbar-thumb-hover: #b8b8bd;
+        --scrollbar-radius: 999px;
+
+        /* Overlay */
+        --modal-overlay-bg: rgba(0, 0, 0, 0.55);
+
+        /* Modal */
+        --modal-bg: var(--white);
+        --modal-radius: 12px;
+
+        /* Padding */
+        --modal-sm-p: 12px;
+        --modal-md-p: 16px;
+        --modal-lg-p: 20px;
+
+        /* Widths */
+        --modal-xs-w: 90vw;
+        --modal-sm-w: 360px;
+        --modal-md-w: 520px;
+        --modal-lg-w: 720px;
+        --modal-xl-w: 960px;
+
+        /* Header / Footer */
+        --modal-title: 16px;
+        --modal-text: 13px;
+
+
+        /* Overlay */
+        --drawer-overlay-bg: rgba(0, 0, 0, 0.55);
+
+        /* Drawer */
+        --drawer-bg: var(--white);
+        --drawer-radius: 12px;
+
+        /* Padding */
+        --drawer-sm-p: 12px;
+        --drawer-md-p: 16px;
+        --drawer-lg-p: 20px;
+
+        /* Width / Height */
+        --drawer-sm-w: 320px;
+        --drawer-md-w: 420px;
+        --drawer-lg-w: 560px;
+
+        --drawer-bottom-h: 70vh;
+
+        /* Typography */
+        --drawer-title: 16px;
+        --drawer-text: 13px;
+
+    }
+}
+
+/* ---------- UTILITY CLASSES ---------- */
+@layer utilities {
+    .h1 {
+        @apply font-primary text-h1 font-medium;
+    }
+
+    .h2 {
+        @apply font-primary text-h2 font-medium;
+    }
+
+    .h3 {
+        @apply font-primary text-h3 font-medium;
+    }
+
+    .h4 {
+        @apply font-primary text-h4 font-medium;
+    }
+
+    .h5 {
+        @apply font-primary text-h5 font-medium;
+    }
+
+    .h6 {
+        @apply font-primary text-h6 font-medium;
+    }
+
+    .p-lead {
+        @apply font-primary text-lead font-normal;
+    }
+
+    .p {
+        @apply font-primary text-p font-normal;
+    }
+
+    .p-bold {
+        @apply font-primary text-p font-medium;
+    }
+
+    .p-small {
+        @apply font-primary text-small font-normal;
+    }
+
+    .p-small-bold {
+        @apply font-primary text-small font-medium;
+    }
+
+    .tiny {
+        @apply font-primary text-tiny font-normal;
+    }
+
+    .tiny-bold {
+        @apply font-primary text-tiny font-medium;
+    }
+
+    .p11 {
+        @apply font-primary text-p11 font-normal;
+    }
+
+    .p11-bold {
+        @apply font-primary text-p11 font-medium;
+    }
+
+    .p10 {
+        @apply font-primary text-p10 font-normal;
+    }
+
+    .p10-bold {
+        @apply font-primary text-p10 font-medium;
+    }
+
+
+    .tw-sticky {
+        @apply sticky bg-white z-50;
+    }
+
+    .tw-sticky-left {
+        @apply left-0;
+    }
+
+    .tw-sticky-right {
+        @apply right-0;
+    }
+
+    .tw-col-min {
+        @apply min-w-[140px] sm:min-w-[160px];
+    }
+}
+

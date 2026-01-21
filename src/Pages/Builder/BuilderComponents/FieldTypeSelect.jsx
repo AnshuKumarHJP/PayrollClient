@@ -1,4 +1,4 @@
-import { Label } from "../../../Lib/label";
+import { Label } from "../../../Library/Label";
 import {
   Select,
   SelectContent,

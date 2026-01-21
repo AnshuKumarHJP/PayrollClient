@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
 import { Badge } from "../Lib/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Lib/tabs";

@@ -1,7 +1,7 @@
 import React from 'react'
 import StatCard from './StatCard'
-import { Calendar } from '../../Lib/calendar'
-import { Card } from '../../Lib/card'
+import { Calendar } from '../../Library/Calendar'
+import { Card } from '../../Library/Card'
 import {
   LineChartComponent,
   BarChartComponent,

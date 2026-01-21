@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis } from 'recharts';
-import { Card } from '../Lib/card';
+import { Card } from '../Library/Card';
 
 const ScatterChartComponent = ({
   data,

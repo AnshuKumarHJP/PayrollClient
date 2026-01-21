@@ -7,14 +7,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from "../Lib/dropdown-menu";
+} from "@/Library/DropdownMenu";
 import { Loader2 } from "lucide-react";
 import { useToast } from "../Lib/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetGlobalStore } from "../Store/Slices/GlobalSlice";
 import { setSelectedRole } from "../Store/Auth/AuhtSlice";
-import { Switch } from "../Lib/switch";
+import { Switch } from "../Library/Switch";
 import AppIcon from "./AppIcon";
 import { persistor } from "../Store/Store";
 import { moveToFirstAsync } from "../services/HealperFunction";

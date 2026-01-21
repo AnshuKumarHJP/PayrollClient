@@ -1,6 +1,6 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Card } from '../Lib/card';
+import { Card } from '../Library/Card';
 
 const AreaChartComponent = ({
   data,

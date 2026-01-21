@@ -234,7 +234,7 @@ const Configuration = () => {
         </div>
 
         {/* CONTENT AREA */}
-        <Activity>
+        <Activity key={activeMenu}>
 
           {/* DESKTOP */}
           <div

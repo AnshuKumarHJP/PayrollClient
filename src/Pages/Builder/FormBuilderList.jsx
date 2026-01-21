@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Card, CardContent } from "../../Lib/card";
+import { Card, CardContent } from "../../Library/Card";
 import { Button } from "../../Lib/button";
 import { Badge } from "../../Lib/badge";
 import { GetFormBuilder, DeleteFormBuilder } from "../../Store/FormBuilder/Action";
@@ -18,10 +18,14 @@ const FormBuilderList = ({ onAddEditMode }) => {
   const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     if (!hasLoadedRef.current) {
       hasLoadedRef.current = true;
-      dispatch(GetFormBuilder());
+      dispatch(GetFormBuilder(controller.signal));
     }
+    return () => {
+      controller.abort(); // 🔥 API CANCELLED HERE
+    };
   }, [dispatch]);
 
   const getStatusBadge = (active) => {
@@ -94,9 +98,11 @@ const FormBuilderList = ({ onAddEditMode }) => {
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       onConfirm: async () => {
+        const controller = new AbortController();
+        const refreshController = new AbortController();
         try {
-          await dispatch(DeleteFormBuilder(HeaderCode));
-          dispatch(GetFormBuilder()); // Refresh list
+          await dispatch(DeleteFormBuilder(HeaderCode, controller.signal));
+          dispatch(GetFormBuilder(refreshController.signal)); // Refresh list
           SweetSuccess({
             title: 'Deleted!',
             text: 'Form has been deleted.'
@@ -107,6 +113,9 @@ const FormBuilderList = ({ onAddEditMode }) => {
             description: 'Failed to delete form. Please try again.',
             variant: 'destructive',
           });
+        } finally {
+          controller.abort(); // 🔥 API CANCELLED HERE
+          refreshController.abort(); // 🔥 API CANCELLED HERE
         }
       }
     });
@@ -149,7 +158,10 @@ const FormBuilderList = ({ onAddEditMode }) => {
             <AppIcon name="FileText" className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Forms</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => dispatch(GetForms())}>
+            <Button onClick={() => {
+              const controller = new AbortController();
+              dispatch(GetFormBuilder(controller.signal));
+            }}>
               Try Again
             </Button>
           </div>

@@ -1,7 +1,7 @@
 import { Badge } from "@/Lib/badge";
 import { ScrollArea } from "@/Lib/scroll-area";
 import { Dot } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
 
 export default function RequestsCard() {
     const requests = [

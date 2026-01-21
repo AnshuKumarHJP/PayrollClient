@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 // Pages / Layout
 import AppLayout from "./layout/AppLayout";
 
@@ -76,7 +77,8 @@ const router = createBrowserRouter([
       { path: "config/:tab", element: Load(Configuration) },
       { path: "config", element: Load(Configuration) },
 
-      { path: "employee", element: Load(Employee) },
+      { path: "employee", element: Load(Home) },
+      // { path: "employee", element: Load(Employee) },
       // Multi-Step Verification Workflow
       {
         path: "workflow",

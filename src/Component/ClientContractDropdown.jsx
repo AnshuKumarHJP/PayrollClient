@@ -5,7 +5,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../Lib/select";
+} from "@/Library/Select";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedClientContract } from "../Store/Auth/AuhtSlice";
 

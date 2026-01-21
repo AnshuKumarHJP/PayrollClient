@@ -1,7 +1,7 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
 
 export default function AttendanceCard() {
     const data = [

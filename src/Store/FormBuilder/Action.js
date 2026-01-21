@@ -53,11 +53,12 @@ import CryptoService from "../../Security/useCrypto";
 /* =====================================================
    GET ALL – ONLY PLACE WHERE LIST DATA IS SET
 ===================================================== */
-export const GetAllFieldValidationRules = () => async (dispatch) => {
+export const GetAllFieldValidationRules = (signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: GET_ALL_FIELDVALIDATIONRULES_REQUEST });
 
   try {
-    const res = await ClientAPI("/api/FieldValidationRule/GetAllFieldValidationRules", null, "GET", null, "normal");
+    const res = await ClientAPI("/api/FieldValidationRule/GetAllFieldValidationRules", null, "GET", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -76,17 +77,20 @@ export const GetAllFieldValidationRules = () => async (dispatch) => {
       type: GET_ALL_FIELDVALIDATIONRULES_FAILURE, payload: error.message || "Failed to fetch field validation rules"
     });
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* =====================================================
    GET BY ID – DOES NOT TOUCH LIST
 ===================================================== */
-export const GetFieldValidationRuleById = (id) => async (dispatch) => {
+export const GetFieldValidationRuleById = (id, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: GET_FIELDVALIDATIONRULE_REQUEST });
   try {
     const decryptedId = CryptoService.decrypt(id);
-    const res = await ClientAPI(`/api/FieldValidationRule/GetFieldValidationRuleById?Id=${decryptedId}`, null, "GET", null, "normal");
+    const res = await ClientAPI(`/api/FieldValidationRule/GetFieldValidationRuleById?Id=${decryptedId}`, null, "GET", null, "normal", signal || controller.signal);
     dispatch({
       type: GET_FIELDVALIDATIONRULE_SUCCESS,
       payload: res.data
@@ -101,18 +105,21 @@ export const GetFieldValidationRuleById = (id) => async (dispatch) => {
         "Failed to fetch field validation rule"
     });
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* =====================================================
    UPSERT – DOES NOT TOUCH LIST
 ===================================================== */
-export const UpsertFieldValidationRule = (payload) => async (dispatch) => {
+export const UpsertFieldValidationRule = (payload, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: UPSERT_FIELDVALIDATIONRULE_REQUEST });
 
   try {
     const encryptedPayload = await CryptoService.encrypt(payload);
-    const res = await ClientAPI("/api/FieldValidationRule/UpsertFieldValidationRule", encryptedPayload, "PUT", null, "normal");
+    const res = await ClientAPI("/api/FieldValidationRule/UpsertFieldValidationRule", encryptedPayload, "PUT", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -139,19 +146,22 @@ export const UpsertFieldValidationRule = (payload) => async (dispatch) => {
     });
 
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* =====================================================
    DELETE – DOES NOT TOUCH LIST
 ===================================================== */
-export const DeleteFieldValidationRuleById = (id) => async (dispatch) => {
+export const DeleteFieldValidationRuleById = (id, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: DELETE_FIELDVALIDATIONRULE_REQUEST });
 
   try {
     const encryptedPayload = await CryptoService.encrypt(id);
 
-    const res = await ClientAPI("/api/FieldValidationRule/DeleteFieldValidationRuleById", encryptedPayload, "PUT", null, "normal");
+    const res = await ClientAPI("/api/FieldValidationRule/DeleteFieldValidationRuleById", encryptedPayload, "PUT", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -177,6 +187,8 @@ export const DeleteFieldValidationRuleById = (id) => async (dispatch) => {
     });
 
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
@@ -192,11 +204,12 @@ export const DeleteFieldValidationRuleById = (id) => async (dispatch) => {
 /* ===============================================================
 // GET ALL Forms
 ================================================================ */
-export const GetFormBuilder = () => async (dispatch) => {
+export const GetFormBuilder = (signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: GET_FORMBUILDER_REQUEST });
 
   try {
-    const res = await ClientAPI("/api/FormBuilder/GetAllFormBuilderHeader", null, "GET", null, "normal");
+    const res = await ClientAPI("/api/FormBuilder/GetAllFormBuilderHeader", null, "GET", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -215,19 +228,22 @@ export const GetFormBuilder = () => async (dispatch) => {
       type: GET_FORMBUILDER_FAILURE,
       payload: error.response?.data?.message || "Failed to fetch forms",
     });
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* =====================================================
    UPSERT FORM BUILDER – DOES NOT TOUCH LIST
 ===================================================== */
-export const UpsertFormBuilder = (payload) => async (dispatch) => {
+export const UpsertFormBuilder = (payload, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: UPSERT__FORMBUILDER_REQUEST });
 
   try {
     const encryptedPayload = await CryptoService.encrypt(payload);
 
-    const res = await ClientAPI("/api/FormBuilder/UpsertFormBuilderHeader", encryptedPayload, "PUT", null, "normal");
+    const res = await ClientAPI("/api/FormBuilder/UpsertFormBuilderHeader", encryptedPayload, "PUT", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -254,19 +270,22 @@ export const UpsertFormBuilder = (payload) => async (dispatch) => {
     });
 
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* ===============================================================
 // DELETE Form
 ================================================================ */
-export const DeleteFormBuilder = (id) => async (dispatch) => {
+export const DeleteFormBuilder = (id, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: DELETE_FORMBUILDER_REQUEST });
 
   try {
     const encryptedPayload = await CryptoService.encrypt(id);
 
-    const res = await ClientAPI("/api/FormBuilder/DeleteFormBuilderHeaderById", encryptedPayload, "PUT", null, "normal");
+    const res = await ClientAPI("/api/FormBuilder/DeleteFormBuilderHeaderById", encryptedPayload, "PUT", null, "normal", signal || controller.signal);
 
     const decrypted = CryptoService.decrypt(res?.data);
 
@@ -290,25 +309,28 @@ export const DeleteFormBuilder = (id) => async (dispatch) => {
     dispatch({ type: DELETE_FORMBUILDER_FAILURE, payload: msg });
 
     toast({ title: "Error", description: msg, variant: "destructive" });
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* ===============================================================
 // GET Form By ID
 ================================================================ */
-export const GetFormBuilderById = (id) => async (dispatch) => {
+export const GetFormBuilderById = (id, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: GET_FORMBUILDER_BY_ID_REQUEST });
 
   try {
     const encryptedPayload = await CryptoService.encrypt(id);
-    const res = await ClientAPI(`/api/FormBuilder/GetFormBuilderHeaderById?Id=${encryptedPayload}`, null, "GET", null, "normal");
+    const res = await ClientAPI(`/api/FormBuilder/GetFormBuilderHeaderById?Id=${encryptedPayload}`, null, "GET", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
         decrypted?.Message || "Failed to fetch form builder"
       );
     }
-    
+
     const parsedResult =
       typeof decrypted.Result === "string"
         ? JSON.parse(decrypted.Result)
@@ -322,6 +344,8 @@ export const GetFormBuilderById = (id) => async (dispatch) => {
       payload: error.response?.data?.message || "Failed to fetch form",
     });
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
@@ -335,13 +359,14 @@ export const GetFormBuilderById = (id) => async (dispatch) => {
 /* =====================================================
    INSERT CLIENT FORM BUILDER HEADER MAPPING
 ===================================================== */
-export const InsertClientFormBuilderHeaderMapping = (payload) => async (dispatch) => {
+export const InsertClientFormBuilderHeaderMapping = (payload, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_REQUEST });
 
   try {
     console.log(payload);
     const encryptedPayload = await CryptoService.encrypt(payload);
-    const res = await ClientAPI("/api/FormBuilder/InsertClientFormBuilderHeaderMapping", encryptedPayload, "PUT", null, "normal");
+    const res = await ClientAPI("/api/FormBuilder/InsertClientFormBuilderHeaderMapping", encryptedPayload, "PUT", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -368,18 +393,21 @@ export const InsertClientFormBuilderHeaderMapping = (payload) => async (dispatch
     });
 
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* =====================================================
    DELETE CLIENT FORM BUILDER HEADER MAPPING BY ID
 ===================================================== */
-export const DeleteClientFormBuilderHeaderMappingById = (id) => async (dispatch) => {
+export const DeleteClientFormBuilderHeaderMappingById = (id, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_REQUEST });
 
   try {
     const encryptedPayload = await CryptoService.encrypt(id);
-    const res = await ClientAPI("/api/FormBuilder/DeleteClientFormBuilderHeaderMappingById", encryptedPayload, "PUT", null, "normal");
+    const res = await ClientAPI("/api/FormBuilder/DeleteClientFormBuilderHeaderMappingById", encryptedPayload, "PUT", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -405,18 +433,21 @@ export const DeleteClientFormBuilderHeaderMappingById = (id) => async (dispatch)
     });
 
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 
 /* =====================================================
    GET CLIENT FORM BUILDER HEADER MAPPINGS BY CLIENT ID
 ===================================================== */
-export const GetClientFormBuilderHeaderMappingsByClientId = (clientId) => async (dispatch) => {
+export const GetClientFormBuilderHeaderMappingsByClientId = (clientId, signal) => async (dispatch) => {
+  const controller = new AbortController();
   dispatch({ type: GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_REQUEST });
 
   try {
     const encryptedClientId = await CryptoService.encrypt(clientId);
-    const res = await ClientAPI(`/api/FormBuilder/GetClientFormBuilderHeaderMappingsByClientId?ClientId=${encryptedClientId}`, null, "GET", null, "normal");
+    const res = await ClientAPI(`/api/FormBuilder/GetClientFormBuilderHeaderMappingsByClientId?ClientId=${encryptedClientId}`, null, "GET", null, "normal", signal || controller.signal);
     const decrypted = CryptoService.decrypt(res?.data);
     if (!decrypted?.Status) {
       throw new Error(
@@ -437,6 +468,8 @@ export const GetClientFormBuilderHeaderMappingsByClientId = (clientId) => async 
       payload: error.message || "Failed to fetch client form builder header mappings"
     });
     throw error;
+  } finally {
+    controller.abort(); // 🔥 API CANCELLED HERE
   }
 };
 

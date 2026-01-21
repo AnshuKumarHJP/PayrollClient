@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
-import { Label } from "../Lib/label";
+import { Input } from "../Library/Input";
+import { Label } from "../Library/Label";
+import { Badge } from "../Lib/badge";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,7 @@ import {
 } from "../Lib/dialog";
 import { Plus, Edit, Trash2, Settings2 } from "lucide-react";
 import AdvanceTable from "../Component/AdvanceTable";
+import AppIcon from "../Component/AppIcon";
 
 const blank = {
   key: "",
@@ -19,13 +21,13 @@ const blank = {
   PageEditPath: "",
 };
 const configItemsNew = [
-  { key: "role", title: "Role", icon: "Users", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "menu-setting", title: "Menu Setting", icon: "Menu", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx" },
-  { key: "config", title: "Add Configuration Menu", icon: "Settings2", PagePath: "../Pages/ConfigurationPage.jsx", PageEditPath: "../Pages/ConfigurationPage.jsx" },
+  { key: "role", title: "Role", icon: "Users", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx",DisplayOrder:1,IsActive:true },
+  { key: "menu-setting", title: "Menu Setting", icon: "Menu", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx",DisplayOrder:2,IsActive:true },
+  { key: "templates", title: "Form / Excel Templates", icon: "FileText", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx",DisplayOrder:3,IsActive:true },
+  { key: "payroll-period", title: "Payroll Period", icon: "Calendar", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx",DisplayOrder:4,IsActive:true },
+  { key: "inputs-config", title: "Inputs Configuration", icon: "Database", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx",DisplayOrder:5,IsActive:true },
+  { key: "client-setup", title: "Client Setup", icon: "Building", PagePath: "../Pages/Builder/TemplateList.jsx", PageEditPath: "../Pages/Builder/TemplateEdit.jsx",DisplayOrder:6,IsActive:true },
+  { key: "config", title: "Add Configuration Menu", icon: "Settings2", PagePath: "../Pages/ConfigurationPage.jsx", PageEditPath: "../Pages/ConfigurationPage.jsx",DisplayOrder:7,IsActive:true },
 ];
 
 const ConfigurationPage = () => {
@@ -71,11 +73,19 @@ const ConfigurationPage = () => {
   );
 
   const columns = [
-    { key: "key", label: "Key" },
+    // { key: "key", label: "Key" },
     { key: "title", label: "Title" },
-    { key: "icon", label: "Icon" },
-    { key: "PagePath", label: "Page Path" },
-    { key: "PageEditPath", label: "Edit Path" },
+    { key: "icon", label: "Icon",
+      width:100,
+       render: (value) => <AppIcon name={value} className="text-emerald-600" />
+     },
+    { key: "PagePath", label: "Page Path",width:250 },
+    { key: "PageEditPath", label: "Edit Path",width:250 },
+    { key: "DisplayOrder", label: "Display Order",width:100 },
+    { key: "IsActive", label: "Active",width:100,
+       render: (value) => <Badge size="xs" variant={`${value ?'success' :'destructive'}`}>{value ? "Active":'In Active'}</Badge>
+
+     },
   ];
 
   const renderActions = (_, index) => (

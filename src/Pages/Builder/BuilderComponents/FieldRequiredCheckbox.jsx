@@ -1,5 +1,5 @@
-import { Label } from "../../../Lib/label";
-import { Switch } from "../../../Lib/switch";
+import { Label } from "../../../Library/Label";
+import { Switch } from "../../../Library/Switch";
 
 const FieldRequiredCheckbox = ({ fieldForm, setFieldForm }) => {
   return (

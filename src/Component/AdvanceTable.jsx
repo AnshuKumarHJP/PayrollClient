@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
+import { Input } from "../Library/Input";
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ import {
   ResizeHandle,
   normalizeValue
 } from "./TableHelper";
-import { Switch } from "../Lib/switch";
+import { Switch } from "../Library/Switch";
 import AppIcon from "./AppIcon";
 import { Density, DownloadTypes } from "../Data/StaticData";
 import DropdownSelect from "./DropdownSelect";

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../../Lib/button";
-import { Input } from "../../Lib/input";
-import { Label } from "../../Lib/label";
+import { Input } from "../../Library/Input";
+import { Label } from "../../Library/Label";
 import { Textarea } from "../../Lib/textarea";
 import { Dialog, DialogContent, DialogTitle } from "../../Lib/dialog";
 import { useToast } from "../../Lib/use-toast";
 import RoleSelect from "../../Component/RoleSelect";
-import { Switch } from "../../Lib/switch";
+import { Switch } from "../../Library/Switch";
 
 function StepFormModal({
   isOpen,

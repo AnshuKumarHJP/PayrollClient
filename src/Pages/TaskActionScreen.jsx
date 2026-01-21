@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Lib/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Button } from "../Lib/button";
-import { Input } from "../Lib/input";
-import { Label } from "../Lib/label";
+import { Input } from "../Library/Input";
+import { Label } from "../Library/Label";
 import { Textarea } from "../Lib/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
 import { Badge } from "../Lib/badge";

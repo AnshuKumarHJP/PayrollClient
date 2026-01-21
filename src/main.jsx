@@ -1,7 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import './index.css';
+// import './index.css';
+import './Globals.css';
 import App from './App.jsx';
 import { persistor, store } from './Store/Store.js'
 import { PersistGate } from 'redux-persist/integration/react';

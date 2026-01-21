@@ -1,22 +1,38 @@
 import { useDispatch } from "react-redux";
 import { setISMenuOpen } from "../Store/Slices/GlobalSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import FullLogo from "../Image/hfactor-logo-dark.png";
 import AppIcon from "../Component/AppIcon";
 
-// ⭐ Animation
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const ACTIVE_COLOR = "#9747FF";
 
 const MobileMenu = ({ menu }) => {
   const dispatch = useDispatch();
-  const [openMenu, setOpenMenu] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [openMenu, setOpenMenu] = useState(null);
 
   const closeMenu = () => dispatch(setISMenuOpen(false));
 
+  /* ---------------- ACTIVE HELPERS ---------------- */
+  const isActive = (item) => {
+    if (item.link && location.pathname === item.link) return true;
+    if (item.children?.length) {
+      return item.children.some(
+        (child) => child.link === location.pathname
+      );
+    }
+    return false;
+  };
+
   const handleMenuClick = (item) => {
-    if (item.children && item.children.length > 0) {
+    if (item.children?.length) {
       setOpenMenu(openMenu === item.label ? null : item.label);
     } else if (item.link) {
       navigate(item.link);
@@ -24,89 +40,129 @@ const MobileMenu = ({ menu }) => {
     }
   };
 
-  // ⭐ Submenu Animation (accordion)
+  /* ---------------- ANIMATIONS ---------------- */
   const submenuVariants = {
-    hidden: { opacity: 0, height: 0 },
+    hidden: { height: 0, opacity: 0 },
     show: {
-      opacity: 1,
       height: "auto",
-      transition: { duration: 0.25 }
+      opacity: 1,
+      transition: { duration: 0.25 },
     },
     exit: {
-      opacity: 0,
       height: 0,
-      transition: { duration: 0.2 }
-    }
+      opacity: 0,
+      transition: { duration: 0.2 },
+    },
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 40 }}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.25 }}
-      className="bg-emerald-200 rounded-3xl shadow-sm p-4 mt-2"
+      className="
+        bg-white
+        border border-stroke-gray-300
+        rounded-2xl
+        shadow-md
+        p-4
+        mt-2
+      "
     >
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-3">
         <img src={FullLogo} className="h-8" alt="logo" />
-        <AppIcon name="X" onClick={closeMenu} className="cursor-pointer" />
+        <AppIcon
+          name="X"
+          className="cursor-pointer text-gray-600"
+          onClick={closeMenu}
+        />
       </div>
 
-      {/* Menu List */}
-      <div className="mt-3">
+      {/* MENU LIST */}
+      <div className="space-y-1">
         {menu.map((item) => {
+          const hasChildren = item.children?.length > 0;
           const isOpen = openMenu === item.label;
-          const hasChildren = item.children && item.children.length > 0;
+          const active = isActive(item);
 
           return (
-            <div key={item.label} className="mb-2">
-              {/* MAIN MENU BUTTON */}
+            <div key={item.label}>
+              {/* MAIN MENU */}
               <button
                 onClick={() => handleMenuClick(item)}
-                className="flex w-full justify-between p-2 rounded-lg hover:bg-emerald-300 transition-all"
+                className={cn(
+                  `
+                  w-full flex items-center justify-between
+                  px-3 py-2 rounded-lg
+                  transition-colors
+                  `,
+                  active
+                    ? "text-[color:#9747FF] bg-primary-50"
+                    : "text-gray-700 hover:bg-light-gray-100"
+                )}
               >
-                <div className="flex items-center gap-2 text-[12px]">
-                  <AppIcon name={item.icon} className="h-4" />
-                  {item.label}
+                <div className="flex items-center gap-2 text-p11 font-medium">
+                  <AppIcon name={item.icon} size={16} />
+                  <span>{item.label}</span>
                 </div>
 
                 {hasChildren && (
                   <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
+                    className={cn(
+                      active
+                        ? "text-[color:#9747FF]"
+                        : "text-gray-500"
+                    )}
                   >
-                    <AppIcon name="ChevronDown" />
+                    <ChevronDown size={16} />
                   </motion.div>
                 )}
               </button>
 
-              {/* SUBMENU */}
+              {/* SUB MENU */}
               <AnimatePresence>
-                {isOpen && hasChildren && (
+                {hasChildren && isOpen && (
                   <motion.div
                     variants={submenuVariants}
                     initial="hidden"
                     animate="show"
                     exit="exit"
-                    className="ml-6 flex flex-col gap-2 bg-emerald-100 p-2 rounded-lg overflow-hidden"
+                    className="
+                      ml-4 mt-1
+                      flex flex-col gap-1
+                      overflow-hidden
+                    "
                   >
-                    {item.children.map((sub) => (
-                      <motion.div
-                        key={sub.label}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
+                    {item.children.map((sub) => {
+                      const subActive =
+                        location.pathname === sub.link;
+
+                      return (
                         <Link
+                          key={sub.label}
                           to={sub.link}
                           onClick={closeMenu}
-                          className="p-2 rounded-lg hover:bg-emerald-300 text-[12px]"
+                          className={cn(
+                            `
+                            flex items-center gap-2
+                            px-3 py-2 rounded-md
+                            text-p11
+                            transition-colors
+                            `,
+                            subActive
+                              ? "text-[color:#9747FF] bg-primary-50"
+                              : "text-gray-600 hover:bg-light-gray-100"
+                          )}
                         >
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
                           {sub.label}
                         </Link>
-                      </motion.div>
-                    ))}
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>

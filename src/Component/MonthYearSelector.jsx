@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Card } from "../Lib/card";
+import { Card } from "../Library/Card";
 
 import {
   Select,
@@ -7,7 +7,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../Lib/select";
+} from "@/Library/Select";
 
 // ⭐ ADD FRAMER MOTION
 import { motion, AnimatePresence } from "framer-motion";

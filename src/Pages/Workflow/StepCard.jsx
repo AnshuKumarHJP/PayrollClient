@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowUp, ArrowDown, Edit, Trash2 } from "lucide-react";
-import { Card, CardContent } from "../../Lib/card";
+import { Card, CardContent } from "../../Library/Card";
 import { Badge, IconButton } from "../../Component/CommonComponents";
 
 

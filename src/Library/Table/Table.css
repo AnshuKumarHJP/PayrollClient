@@ -1,0 +1,278 @@
+/* =========================================================
+   AG GRID – FULL PRODUCTION CSS (ALPINE)
+   Version: FINAL (Centered Checkbox Fix)
+   Purpose:
+   - Enterprise / product-grade UI
+   - Pixel-perfect checkbox (row + header)
+   - Subtle hover & selection
+   - No blue focus borders
+   - Easy future customization
+   ========================================================= */
+
+
+/* =========================================================
+   1. DESIGN TOKENS (CHANGE HERE IN FUTURE)
+   WHY:
+   - Single source of truth for theming
+   - Easy brand / dark mode later
+   ========================================================= */
+.ag-theme-alpine {
+  --ag-font-family: Inter, system-ui, sans-serif;
+  --ag-font-size: 13px;
+
+  /* Base colors */
+  --ag-background-color: #ffffff;
+  --ag-foreground-color: #1f2937;
+
+  /* Borders */
+  --ag-border-color: #e5e7eb;
+  --ag-row-border-color: #eef0f3;
+
+  /* Header */
+  --ag-header-background-color: #d4dbdd;
+  --ag-header-foreground-color: #15181c;
+
+  /* Hover & selection */
+  --ag-row-hover-color: #f1f5ff;              /* subtle professional hover */
+  --ag-selected-row-background-color: #eef2ff;
+
+  /* Checkbox */
+  --ag-checkbox-brand: #4f46e5;
+  --ag-checkbox-border: #cbd5e1;
+}
+
+
+/* =========================================================
+   2. HEADER
+   WHY:
+   - Clean separation
+   - No heavy borders
+   ========================================================= */
+.ag-theme-alpine .ag-header {
+  border-bottom: 1px solid var(--ag-border-color);
+}
+
+.ag-theme-alpine .ag-header-cell {
+  padding: 12px 14px;
+  font-weight: 600;
+  border-right: 1px solid #f1f2f4;
+}
+
+.ag-theme-alpine .ag-header-cell:last-child {
+  border-right: none;
+}
+
+
+/* =========================================================
+   3. ROWS & CELLS
+   WHY:
+   - Flat, modern table layout
+   ========================================================= */
+.ag-theme-alpine .ag-row {
+  border-bottom: 1px solid var(--ag-row-border-color);
+}
+
+.ag-theme-alpine .ag-cell {
+  padding: 8px 14px;
+  border-right: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+}
+
+.ag-theme-alpine .ag-cell:last-child {
+  border-right: none;
+}
+
+
+/* =========================================================
+   4. ROW HOVER & SELECTION
+   WHY:
+   - Clear feedback without being aggressive
+   ========================================================= */
+.ag-theme-alpine .ag-row-hover {
+  background-color: var(--ag-row-hover-color) !important;
+}
+
+.ag-theme-alpine .ag-row-selected {
+  background-color: var(--ag-selected-row-background-color) !important;
+}
+
+.ag-theme-alpine .ag-row-selected.ag-row-hover {
+  background-color: #e6ebff !important;
+}
+
+/* Prevent border jump on hover */
+.ag-theme-alpine .ag-row-hover .ag-cell {
+  border-color: var(--ag-border-color) !important;
+}
+
+
+/* =========================================================
+   5. REMOVE DEFAULT BLUE CELL FOCUS
+   WHY:
+   - Default AG Grid focus looks unprofessional
+   ========================================================= */
+.ag-theme-alpine .ag-cell-focus,
+.ag-theme-alpine .ag-cell-range-selected,
+.ag-theme-alpine .ag-cell-range-selected-1,
+.ag-theme-alpine .ag-cell-range-selected-2,
+.ag-theme-alpine .ag-cell-range-selected-3,
+.ag-theme-alpine .ag-cell-range-selected-4 {
+  outline: none !important;
+  border-color: var(--ag-border-color) !important;
+}
+
+
+/* =========================================================
+   6. CHECKBOX – FINAL PIXEL-PERFECT VERSION
+   WHY:
+   - ✔ and − are perfectly centered
+   - Header & row checkboxes look identical
+   - No font / margin hacks
+   ========================================================= */
+
+/* Base checkbox */
+.ag-theme-alpine .ag-checkbox-input-wrapper {
+  position: relative;                 /* required for absolute centering */
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--ag-checkbox-border);
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Hover feedback */
+.ag-theme-alpine .ag-checkbox-input-wrapper:hover {
+  border-color: var(--ag-checkbox-brand);
+}
+
+/* Checked */
+.ag-theme-alpine .ag-checkbox-input-wrapper.ag-checked {
+  background-color: var(--ag-checkbox-brand);
+  border-color: var(--ag-checkbox-brand);
+}
+
+/* ✔ CHECK MARK (ABSOLUTE CENTER) */
+.ag-theme-alpine .ag-checkbox-input-wrapper.ag-checked::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 4px;
+  border-left: 1.8px solid #ffffff;
+  border-bottom: 1.8px solid #ffffff;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  top: 50%;
+  left: 50%;
+}
+
+/* INDETERMINATE (HEADER −) */
+.ag-theme-alpine .ag-checkbox-input-wrapper.ag-indeterminate {
+  background-color: var(--ag-checkbox-brand);
+  border-color: var(--ag-checkbox-brand);
+}
+
+/* − HYPHEN (ABSOLUTE CENTER) */
+.ag-theme-alpine .ag-checkbox-input-wrapper.ag-indeterminate::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background-color: #ffffff;
+  border-radius: 1px;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+}
+
+/* Header checkbox alignment */
+.ag-theme-alpine .ag-header-cell .ag-checkbox-input-wrapper {
+  margin: 0 auto;
+}
+
+/* Remove native AG Grid checkbox input */
+.ag-theme-alpine .ag-checkbox-input-wrapper input {
+  display: none;
+}
+
+
+/* =========================================================
+   7. ICONS (SORT / FILTER)
+   WHY:
+   - Reduce visual noise
+   ========================================================= */
+.ag-theme-alpine .ag-icon {
+  color: #9ca3af;
+}
+
+.ag-theme-alpine .ag-icon:hover {
+  color: #374151;
+}
+
+
+/* =========================================================
+   8. PAGINATION
+   WHY:
+   - Looks like a product footer
+   ========================================================= */
+.ag-theme-alpine .ag-paging-panel {
+  border-top: 1px solid var(--ag-border-color);
+  background-color: #fafafa;
+  padding: 10px 14px;
+}
+
+.ag-theme-alpine .ag-paging-button {
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.ag-theme-alpine .ag-paging-button.ag-paging-button-selected {
+  background: var(--ag-checkbox-brand);
+  color: #ffffff;
+  border-color: var(--ag-checkbox-brand);
+}
+
+
+/* =========================================================
+   9. SCROLLBAR
+   WHY:
+   - Modern but subtle
+   ========================================================= */
+.ag-theme-alpine ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ag-theme-alpine ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.ag-theme-alpine ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+
+/* =========================================================
+   10. RESPONSIVE
+   WHY:
+   - Better density on small screens
+   ========================================================= */
+@media (max-width: 768px) {
+  .ag-theme-alpine .ag-header-cell,
+  .ag-theme-alpine .ag-cell {
+    padding: 6px 10px;
+  }
+  /* .ag-paging-description{
+    display: none;
+  }
+  .ag-paging-row-summary-panel{
+    display: none;
+  } */
+}

@@ -7,11 +7,11 @@ import {
   DeleteFieldValidationRuleById,
 } from "../Store/FormBuilder/Action";
 
-import DataGrid from "../Library/Table/DataGrid";
 import Loading from "../Component/Loading";
 import Button from "../Library/Button";
 import AppIcon from "../Component/AppIcon";
 import { Badge } from "../Library/Badge";
+import AdvanceTable from "../Library/Table/AdvanceTable";
 
 import { ValidationTypes, Categories } from "../Data/StaticData";
 import { ActiveBadge, SeverityBadge } from "../Component/HealperComponents";
@@ -102,18 +102,16 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     (row) => (
       <div className="flex items-center justify-center gap-3 h-full pl-2">
         <Button
-          variant="ghost"
-          size="icon"
-         // className="text-amber-600"       // 👈 icon-only size
+          variant="warning"
+          size="sm"
           onClick={() => handleEdit(row.Id)}
         >
           <AppIcon name="Edit" />
         </Button>
 
         <Button
-          variant="ghost"
-          size="icon"
-          //className="text-red-600"
+          variant="danger"
+          size="sm"
           onClick={() => handleDelete(row.Id)}
         >
           <AppIcon name="Trash" />
@@ -123,151 +121,56 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     [handleEdit, handleDelete]
   );
 
-
-  /* ================= COLUMN DEFINITIONS ================= */
-  const columnDefs = useMemo(
+  // * ---------------- COLUMNS (STATIC) ---------------- */
+  const columns = useMemo(
     () => [
-      /* ===== SELECTION (CHECKBOX) COLUMN ===== */
-      // {
-      //   colId: "__select__",
-      //   headerName: "",
-      //   width: 48,
-      //   minWidth: 48,
-      //   maxWidth: 48,
-      //   checkboxSelection: true,
-      //   headerCheckboxSelection: true,
-      //   pinned: "left",
-      //   lockPosition: true,
-
-      //   sortable: false,
-      //   filter: false,
-      //   resizable: false,
-      //   suppressMenu: true,
-
-      //   suppressColumnsToolPanel: true,
-      //   suppressExport: true,
-      // },
-       {
-        colId: "SLNO",
-        headerName: "#",
-        pinned: "left",
-        minWidth: 40,
-        maxWidth: 40,
-        valueGetter: (params) => params.node.rowIndex + 1,
-        cellClass: "text-center font-medium",
-        sortable: false,
-        filter: false,
-        suppressMenu: true,
-      },
-
+      { key: "RuleCode", label: "Rule Code", sticky: true },
+      { key: "RuleName", label: "Rule Name" },
+      { key: "RuleDescription", label: "Description" },
       {
-        field: "RuleCode",
-        colId: "RuleCode",
-        headerName: "Rule Code",
-        pinned: "left",
-        flex:1
+        key: "ValidationParameters",
+        label: "Validation Parameters",
+        width: 260,
+        render: (v) => <ValidationParamsCell value={v} />
+      },
+      { key: "TargetEntity", label: "Target Entity" },
+      { key: "TargetField", label: "Target Field" },
+      {
+        key: "ValidationType",
+        label: "Validation Type",
+        width: 100,
+        render: (v) =>
+          ValidationTypes.find((t) => t.value === Number(v))?.label ?? v
       },
       {
-        field: "RuleName",
-        colId: "RuleName",
-        headerName: "Rule Name",
-        flex: 1,
-        minWidth: 200,
+        key: "Severity",
+        label: "Severity",
+        width: 100,
+        render: (v) => <SeverityBadge value={v} />
       },
       {
-        field: "RuleDescription",
-        colId: "RuleDescription",
-        headerName: "Description",
-        minWidth: 220,
-        tooltipField: "RuleDescription",
+        key: "Category",
+        label: "Category",
+        width: 120,
+        render: (v) =>
+          Categories.find((c) => c.value === Number(v))?.label ?? v
       },
       {
-        field: "ValidationParameters",
-        colId: "ValidationParameters",
-        headerName: "Validation Parameters",
-        tooltipField: "ValidationParameters",
-
-        minWidth: 240,
-        cellRenderer: ValidationParamsCell,
-        valueFormatter: (p) =>
-          p.value ? JSON.stringify(p.value) : "-",
+        key: "IsActive",
+        label: "Status",
+        width: 100,
+        render: (v) => <ActiveBadge value={v} />
       },
       {
-        field: "TargetEntity",
-        colId: "TargetEntity",
-        headerName: "Target Entity",
-        minWidth: 160,
-      },
-      {
-        field: "TargetField",
-        colId: "TargetField",
-        headerName: "Target Field",
-        minWidth: 160,
-      },
-      {
-        field: "ValidationType",
-        colId: "ValidationType",
-        headerName: "Validation Type",
-        minWidth: 160,
-        valueFormatter: (p) =>
-          ValidationTypes.find(
-            (t) => t.value === Number(p.value)
-          )?.label ?? p.value,
-      },
-      {
-        field: "Severity",
-        colId: "Severity",
-        headerName: "Severity",
-        minWidth: 120,
-        cellRenderer: SeverityBadge,
-        valueFormatter: (p) => String(p.value ?? "-"),
-      },
-      {
-        field: "Category",
-        colId: "Category",
-        headerName: "Category",
-        minWidth: 150,
-        valueFormatter: (p) =>
-          Categories.find(
-            (c) => c.value === Number(p.value)
-          )?.label ?? p.value,
-      },
-      {
-        field: "IsActive",
-        colId: "IsActive",
-        headerName: "Status",
-        minWidth: 120,
-        cellRenderer: ActiveBadge,
-        valueFormatter: (p) =>
-          p.value ? "Active" : "Inactive",
-      },
-      {
-        field: "DisplayOrder",
-        colId: "DisplayOrder",
-        headerName: "Display Order",
+        key: "DisplayOrder",
+        label: "Display Order",
         type: "number",
-        minWidth: 120,
-        sort: "asc",
-      },
-
-      /* ===== ACTIONS COLUMN ===== */
-      {
-        colId: "__actions__",
-        headerName: "Actions",
-        pinned: "right",
-        width: 90,
-        minWidth: 90,
-        maxWidth: 90,
-        cellRenderer: (p) => renderActionCell(p.data),
-        // sortable: false,
-        // filter: false,
-        // suppressMenu: true,
-        // suppressColumnsToolPanel: true,
-        // suppressExport: true,
-      },
+        width: 120
+      }
     ],
-    [renderActionCell]
+    []
   );
+
 
   const tableData = useMemo(
     () => (Array.isArray(data) ? data : []),
@@ -290,30 +193,17 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
 
       </div>
 
-      <DataGrid
-        rowData={tableData}
-        columnDefs={columnDefs}
-        height={500}
-        gridIcon="ShieldCheck"
-        gridTitle="Field Validation Rules"
-        enableRowSelection="multiple"
-        pagination
-        paginationPageSize={10}
-        paginationPageSizeSelector={[5, 10, 20, 50]}
-        
+      <AdvanceTable
+        title="Field Validation Rules"
+        icon="ShieldCheck"
+        columns={columns}
+        data={tableData}
+        renderActions={renderActionCell}
+        isLoading={isLoading}
+        showIndex={true}
       />
     </div>
   );
 };
 
 export default FieldValidationRuleList;
-
-/* =====================================================
-   NOTE FOR FUTURE YOU
------------------------------------------------------
-- Checkbox column MUST be fixed width (48px)
-- Never make checkbox flexible
-- Always suppress export & column tools
-- cellRenderer = UI only
-- valueFormatter = export / clipboard truth
-===================================================== */

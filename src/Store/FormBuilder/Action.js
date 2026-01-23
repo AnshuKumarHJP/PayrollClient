@@ -232,7 +232,7 @@ export const GetFormBuilder = (signal) => async (dispatch) => {
     });
     toast({
       title: "Error",
-      description: error.response?.data?.message,
+      description: error.response?.data?.message  || "Failed to fetch forms",
       variant: "danger"
     });
   } finally {

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import Button from "../Library/Button";
-import { Input } from "../Library/Input";
+import { Card, CardContent, CardHeader, CardTitle } from "../Card";
+import Button from "../Button";
+import { Input } from "../Input";
 import {
   Table,
   TableBody,
@@ -9,14 +9,14 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "../Library/table";
+} from "../table";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem
-} from "../Library/DropdownMenu";
-import PaginationAdvance from "../Library/Table/PaginationAdvance";
+} from "../DropdownMenu";
+import PaginationAdvance from "./PaginationAdvance";
 import { motion } from "framer-motion";
 import {
   computeLeftOffsets,
@@ -26,11 +26,11 @@ import {
   ResizeHandle,
   normalizeValue
 } from "./TableHelper";
-import { Switch } from "../Library/Switch";
-import AppIcon from "./AppIcon";
-import { Density, DownloadTypes } from "../Data/StaticData";
-import DropdownSelect from "./DropdownSelect";
-import Tableskeleton from "../Skeleton/Tableskeleton";
+import { Switch } from "../Switch";
+import AppIcon from "../../Component/AppIcon";
+import { Density, DownloadTypes } from "../../Data/StaticData";
+import DropdownSelect from "../../Component/DropdownSelect";
+import Tableskeleton from "../../Skeleton/Tableskeleton";
 
 
 /* ---------------- SAFE HELPERS ---------------- */

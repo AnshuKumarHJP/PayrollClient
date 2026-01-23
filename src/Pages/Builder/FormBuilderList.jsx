@@ -6,7 +6,7 @@ import { Button } from "../../Library/Button";
 import { Badge } from "../../Library/Badge";
 import { GetFormBuilder, DeleteFormBuilder } from "../../Store/FormBuilder/Action";
 import { useToast } from "../../Library/use-toast";
-import AdvanceTable from "../../Component/AdvanceTable";
+import AdvanceTable from "../../Library/Table/AdvanceTable";
 import AppIcon from "../../Component/AppIcon";
 import { SweetConfirm, SweetSuccess } from "../../Component/SweetAlert";
 

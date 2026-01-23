@@ -1,8 +1,15 @@
-- Add necessary imports for toolbar components (DropdownSelect, AppIcon, Density, DownloadTypes, export functions, DropdownMenu, Button, Switch)
-- Add state for visibleCols and sizeMode
-- Compute flat cols array from grouped columns
-- Define exportFile function using ExportHelper
-- Update toolbar structure to include columns dropdown, density dropdown, export dropdown
-- Apply sizeClass to table based on sizeMode
-- Filter groups and columns in rendering based on visibleCols
-- Update group header colSpan dynamically
+# TODO: Update Button Imports and Fix text-white Bug
+
+- [x] Update src/Pages/Workflow/WorkflowConfigurationForm.jsx
+- [x] Update src/Pages/Workflow/StepFormModal.jsx
+- [x] Update src/Pages/Workflow/WorkflowConfigurationList.jsx
+- [x] Update src/Pages/BulkUpload/BulkUpload.jsx
+- [x] Update src/Pages/Builder/TemplatePreviewDialog.jsx
+- [x] Update src/Pages/Builder/PageBuilder.jsx
+- [ ] Update src/Pages/Builder/FormBuilderPreviewDialog.jsx
+- [x] Update src/Pages/Builder/FormBuilderList.jsx
+- [x] Update src/Pages/Builder/FormBuilderForm.jsx
+- [x] Update src/Pages/Builder/ExcelTemplatePreview.jsx
+- [ ] Update src/Library/Table/GenericTable.jsx
+- [ ] Update src/Pages/Builder/BuilderComponents/FieldDialog.jsx (useToast import)
+- [x] Fix text-white bug in Button component

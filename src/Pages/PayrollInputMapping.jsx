@@ -1,22 +1,13 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import { Button } from "../Lib/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../Lib/select";
-import { Badge } from "../Lib/badge";
+import  Button  from "../Library/Button";
+import { Badge } from "../Library/Badge";
 import { Modules } from "../Data/StaticData";
 import {
   CheckCircle,
-  Users,
   FileText,
   Link,
-  Unlink,
 } from "lucide-react";
 import {
   InsertClientFormBuilderHeaderMapping,
@@ -202,10 +193,10 @@ const PayrollInputMapping = () => {
 
                         <Button
                           size="sm"
-                          variant="destructive"
+                          variant="danger"
                           onClick={() => handleUnmap(t.Id)}
+                          icon={<AppIcon name={"Unlink"} size={14} />}
                         >
-                          <Unlink size={14} className="mr-1" />
                           Unmap
                         </Button>
                       </div>
@@ -239,7 +230,7 @@ const PayrollInputMapping = () => {
                   {availableTemplates.map((t) => (
                     <div
                       key={t.Id}
-                      className="border rounded-lg p-3 sm:p-4 bg-gray-50 hover:bg-blue-50 transition-colors flex flex-col gap-3"
+                      className="border rounded-lg p-3 sm:p-4 bg-blue-50 hover:bg-blue-100/70 transition-colors flex flex-col gap-3"
                     >
                       <div className="flex justify-between items-start gap-2">
                         <h4 className="font-medium text-gray-800 flex items-center gap-2 text-sm sm:text-base">
@@ -265,11 +256,12 @@ const PayrollInputMapping = () => {
 
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="successSoft"
                           onClick={() => handleMap(t.Id)}
                           className="text-xs sm:text-sm"
+                          icon={ <AppIcon name={"Link"} size={14} />}
                         >
-                          <Link size={14} className="mr-1" />
+                         
                           <span className="hidden sm:inline">
                             Map to Client
                           </span>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../Lib/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../Library/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger
 } from "@/Library/DropdownMenu";
 import { Loader2 } from "lucide-react";
-import { useToast } from "../Lib/use-toast";
+import { useToast } from "../Library/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetGlobalStore } from "../Store/Slices/GlobalSlice";
@@ -103,7 +103,7 @@ const UserDropdown = () => {
         toast({
           title: "Access Denied",
           description: apiResponse?.data?.Message || "Unauthorized action",
-          variant: "destructive",
+          variant: "danger",
         });
         return;
       }
@@ -132,6 +132,7 @@ const UserDropdown = () => {
       toast({
         title: "Role switched",
         description: `Active role changed to ${role.Code}`,
+        variant:"success"
       });
 
     } catch (err) {
@@ -139,7 +140,7 @@ const UserDropdown = () => {
       toast({
         title: "Error switching role",
         description: "Network or server issue",
-        variant: "destructive",
+        variant: "danger",
       });
     }
   };
@@ -163,6 +164,7 @@ const UserDropdown = () => {
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
+        variant:"success"
       });
 
       navigate("/login");

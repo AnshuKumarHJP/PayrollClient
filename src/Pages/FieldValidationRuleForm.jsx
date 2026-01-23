@@ -1,28 +1,21 @@
-/* =====================================================
-   FieldValidationRuleForm
-   ✔ Single form for ADD + UPDATE
-   ✔ Id present → UPDATE
-   ✔ Id null / undefined → ADD
-   ✔ Uses GET_ALL data for edit
-===================================================== */
 
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Input } from "../Library/Input";
-import { Button } from "../Lib/button";
+import  Button  from "../Library/Button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "../Lib/select";
-import { Textarea } from "../Lib/textarea";
+} from "../Library/Select";
+import { Textarea } from "../Library/Textarea";
 import { Switch } from "../Library/Switch";
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
 import { Label } from "../Library/Label";
-import { useToast } from "../Lib/use-toast";
+import { useToast } from "../Library/use-toast";
 
 import {
   UpsertFieldValidationRule,
@@ -169,7 +162,7 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
         toast({
           title: "Validation Error",
           description: errors.join(", "),
-          variant: "destructive"
+          variant: "danger"
         });
         return;
       }
@@ -196,7 +189,7 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
         toast({
           title: "Error",
           description: err.message || "Save failed",
-          variant: "destructive"
+          variant: "danger"
         });
       }
     },

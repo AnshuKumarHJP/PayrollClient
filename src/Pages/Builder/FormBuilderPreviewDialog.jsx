@@ -1,8 +1,8 @@
 import Modal from "../../Component/Modal";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
-import { Button } from "../../Lib/button";
-import { Badge } from "../../Lib/badge";
+import { Button } from "../../Library/Button";
+import { Badge } from "../../Library/Badge";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
 import {
@@ -11,9 +11,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../Lib/select";
-import { Textarea } from "../../Lib/textarea";
-import FileInput from "../../Lib/FileInput";
+} from "../../Library/Select";
+import { Textarea } from "../../Library/textarea";
+import FileInput from "../...Library/FileInput";
 
 const FormBuilderPreviewDialog = ({
   isOpen,

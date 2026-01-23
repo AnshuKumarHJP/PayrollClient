@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
-import { Button } from "../../Lib/button";
+import { Button } from "../../Library/Button";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Library/Select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Lib/table";
-import { Badge } from "../../Lib/badge";
-import { Alert, AlertDescription } from "../../Lib/alert";
-import { FileSpreadsheet, Download, Eye, CheckCircle, AlertTriangle, Info } from "lucide-react";
-import { useToast } from "../../Lib/use-toast";
+import { Badge } from "../../Library/Badge";
+import { Alert } from "../../Library/Alert";
+import { FileSpreadsheet, Download, CheckCircle, AlertTriangle, Info } from "lucide-react";
+import { useToast } from "../../Library/use-toast";
 import { templateService } from "../../../api/services/templateService";
 import { downloadExcelTemplate, downloadCSV } from "../../services/excelUtils";
 
@@ -102,6 +102,7 @@ const ExcelTemplatePreview = () => {
         toast({
           title: "Info",
           description: "Please generate preview first before downloading.",
+          variant:"info"
         });
         return;
       }
@@ -111,13 +112,14 @@ const ExcelTemplatePreview = () => {
       toast({
         title: "Success",
         description: "Excel template downloaded successfully with data validation and instructions.",
+        variant:"success"
       });
     } catch (error) {
       console.error('Download error:', error);
       toast({
         title: "Error",
         description: "Failed to download template. Please try again.",
-        variant: "destructive",
+        variant: "danger",
       });
     }
   };
@@ -341,11 +343,8 @@ const ExcelTemplatePreview = () => {
           <CardTitle>Template Usage Instructions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
+          <Alert variant="info" icon="true">
               <strong>How to use the Excel template:</strong>
-            </AlertDescription>
           </Alert>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

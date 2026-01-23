@@ -18,7 +18,7 @@
    ========================================================= */
 .ag-theme-alpine {
   --ag-font-family: Inter, system-ui, sans-serif;
-  --ag-font-size: 13px;
+  --ag-font-size: clamp(11px, 1.8vw, 14px);
 
   /* Base colors */
   --ag-background-color: #ffffff;
@@ -256,6 +256,12 @@
 
 .ag-theme-alpine ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+/* Actions column: tighter padding */
+.ag-theme-alpine .ag-cell[col-id="__actions__"] {
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 

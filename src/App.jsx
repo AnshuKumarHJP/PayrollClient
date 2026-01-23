@@ -8,20 +8,9 @@ import AppLayout from "./layout/AppLayout";
 const Login = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home"));
 const ImportHistory = lazy(() => import("./Pages/ImportHistory"));
-const WorkflowDashboard = lazy(() => import("./Pages/WorkflowDashboard"));
-const WorkflowTasks = lazy(() => import("./Pages/WorkflowTasks"));
-const TaskDetailView = lazy(() => import("./Pages/TaskDetailView"));
-const ApproveRejectScreen = lazy(() => import("./Pages/ApproveRejectScreen"));
-const AuditLogView = lazy(() => import("./Pages/AuditLogView"));
-const OpsDashboard = lazy(() => import("./Pages/OpsDashboard"));
 const UnclaimedTasksView = lazy(() => import("./Pages/UnclaimedTasksView"));
-const TaskActionScreen = lazy(() => import("./Pages/TaskActionScreen"));
-const TeamDashboard = lazy(() => import("./Pages/TeamDashboard"));
 const Configuration = lazy(() => import("./Pages/Configuration"));
 const Dashboard = lazy(() => import("./Pages/Dashboard/Dashboard"));
-const SalaryRegister = lazy(() => import("./Pages/SalaryRegister"));
-const RunPayroll = lazy(() => import("./Pages/RunPayroll"));
-const Payslips = lazy(() => import("./Pages/Payslips"));
 const Form = lazy(() => import("./Pages/Builder/Form"));
 const Employee = lazy(() => import("./Pages/Employee/Employee"));
 const InputModule = lazy(() => import("./Pages/InputModule"));
@@ -81,55 +70,13 @@ const router = createBrowserRouter([
       // { path: "employee", element: Load(Employee) },
       // Multi-Step Verification Workflow
       {
-        path: "workflow",
-        element: Load(WorkflowDashboard),
-      },
-      {
         path: "workflow/mode",
         element: Load(ModeSelection),
-      },
-      {
-        path: "workflow/tasks",
-        element: Load(WorkflowTasks),
-      },
-      {
-        path: "workflow/tasks/:id",
-        element: Load(TaskDetailView),
-      },
-      {
-        path: "workflow/approve/:id",
-        element: Load(ApproveRejectScreen),
-      },
-      {
-        path: "workflow/audit",
-        element: Load(AuditLogView),
-      },
-      // Team Operations & Task Distribution
-      {
-        path: "ops/dashboard",
-        element: Load(OpsDashboard),
       },
       {
         path: "ops/unclaimed",
         element: Load(UnclaimedTasksView),
       },
-      {
-        path: "ops/action",
-        element: Load(TaskActionScreen),
-      },
-      {
-        path: "team",
-        element: Load(TeamDashboard),
-      },
-      {
-        path: "ops/performance",
-        element: Load(TeamDashboard),
-      },
-      { path: "processing/run", element: Load(RunPayroll) },
-      { path: "processing/register", element: Load(SalaryRegister) },
-      {
-        path: "processing/payslips", element: Load(Payslips)
-      }
     ],
   },
 ]);

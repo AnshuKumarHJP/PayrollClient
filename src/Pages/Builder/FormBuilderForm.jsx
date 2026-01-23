@@ -7,19 +7,19 @@ import {
   CardTitle,
 } from "../../Library/Card";
 
-import { Button } from "../../Lib/button";
+import { Button } from "../../Library/Button";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
-import { Textarea } from "../../Lib/textarea";
+import { Textarea } from "../../Library/Textarea";
 import { Switch } from "../../Library/Switch";
-import { Badge } from "../../Lib/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
+import { Badge } from "../../Library/Badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Library/Select";
 
 import AdvanceTable from "../../Component/AdvanceTable";
 import AppIcon from "../../Component/AppIcon";
 import Loading from '../../Component/Loading'
 
-import { useToast } from "../../Lib/use-toast";
+import { useToast } from "../../Library/use-toast";
 
 // Field Dialog Component
 import FieldDialog from "./BuilderComponents/FieldDialog";
@@ -131,7 +131,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
         toast({
           title: "Error",
           description: "Form not found.",
-          variant: "destructive",
+          variant: "danger",
         });
         onCancel?.();
         return;
@@ -191,7 +191,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
       toast({
         title: "Error",
         description: "Failed to load form.",
-        variant: "destructive",
+        variant: "danger",
       });
       onCancel?.();
     } finally {
@@ -235,7 +235,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
       toast({
         title: "Duplicate Field Name",
         description: `A field with name "${processedField.Name}" already exists`,
-        variant: "destructive",
+        variant: "danger",
       });
       return;
     }
@@ -289,7 +289,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
       return toast({
         title: "Missing",
         description: "Form Name Required",
-        variant: "destructive",
+        variant: "danger",
       });
     }
 
@@ -328,7 +328,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
       toast({
         title: "Failed",
         description: "Unable to save",
-        variant: "destructive",
+        variant: "danger",
       });
     } finally {
       setSaveStatus(null);

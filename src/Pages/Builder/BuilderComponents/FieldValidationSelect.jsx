@@ -6,7 +6,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../../../Lib/select";
+} from "../../../Library/Select";
 import { useEffect } from "react";
 import AppIcon from "../../../Component/AppIcon"; // spinner icon if needed
 import { GetAllFieldValidationRules } from "../../../Store/FormBuilder/Action";

@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useEffect } from "react";
-import {Avatar} from "../Lib/avatar";
+import {Avatar} from "../Library/Avatar";
 import AppIcon from "../Component/AppIcon";
 
 const FileInput = forwardRef((props, ref) => {
@@ -125,8 +125,8 @@ const FileInput = forwardRef((props, ref) => {
         onClick={() => document.getElementById(inputId).click()}
         className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 cursor-pointer transition-all duration-200 ${
           dragActive
-            ? "border-emerald-500 bg-emerald-50 dark:bg-blue-900/20"
-            : "border-gray-300 hover:border-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-600"
+            ? "border-indigo-500 bg-indigo-50 dark:bg-blue-900/20"
+            : "border-gray-300 hover:border-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-600"
         }`}
       >
         <AppIcon name="CloudUpload"  className="text-gray-500 dark:text-gray-300 mb-2" />

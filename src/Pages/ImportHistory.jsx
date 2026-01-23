@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import { Button } from "../Lib/button";
+import  Button  from "../Library/Button";
 import { Input } from "../Library/Input";
 import { Label } from "../Library/Label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Library/Select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Lib/table";
-import { Badge } from "../Lib/badge";
+import { Badge } from "../Library/Badge";
 import { History, Download, Search, Filter, Loader2 } from "lucide-react";
 import { importHistoryService } from "../../api/services/importHistoryService";
-import { useToast } from "../Lib/use-toast";
+import { useToast } from "../Library/use-toast";
 
 const ImportHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,7 +34,7 @@ const ImportHistory = () => {
       toast({
         title: 'Error',
         description: 'Failed to fetch import history. Please try again.',
-        variant: 'destructive',
+        variant: 'danger',
       });
     } finally {
       setLoading(false);

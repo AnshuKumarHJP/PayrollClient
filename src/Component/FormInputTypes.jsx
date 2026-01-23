@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../Lib/select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../Library/Select";
 import { Switch } from "../Library/Switch";
 import { Input } from "../Library/Input";
-import { Button } from "../Lib/button";
-import { cn } from "../Lib/utils";
-import { toast } from "../Lib/use-toast";
+import  Button  from "../Library/Button";
+import { cn } from "../Library/utils";
+import { toast } from "../Library/use-toast";
 import axios from "axios";
 import { motion } from "framer-motion";
 import AppIcon from "./AppIcon";
@@ -70,7 +70,7 @@ const FormInputTypes = ({
                   onChange?.(file.name);
                   toast({
                     title: "File Selected",
-                    description: file.name
+                    description: file.name,
                   });
                 }
               }}

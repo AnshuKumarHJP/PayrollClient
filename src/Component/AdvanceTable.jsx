@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import { Button } from "../Lib/button";
+import Button from "../Library/Button";
 import { Input } from "../Library/Input";
 import {
   Table,
@@ -15,8 +15,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem
-} from "../Lib/dropdown-menu";
-import PaginationAdvance from "../Lib/PaginationAdvance";
+} from "../Library/DropdownMenu";
+import PaginationAdvance from "../Library/Table/PaginationAdvance";
 import { motion } from "framer-motion";
 import {
   computeLeftOffsets,
@@ -118,7 +118,7 @@ const AdvanceTable = ({
 
   /* ---------------- FILTER ---------------- */
   const filtered = useMemo(() => {
-    let rows = [...data];
+    let rows = [...safeArray(data)];
 
     if (searchTerm.trim()) {
       const low = searchTerm.toLowerCase();
@@ -217,7 +217,7 @@ const AdvanceTable = ({
   /* ---------------- UI ---------------- */
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Card className="mt-5 border-t-4 border-emerald-300 shadow-md">
+      <Card className="mt-5 border-t-4 border-indigo-300 shadow-md">
         {/* HEADER */}
         <CardHeader className="px-4 py-2">
           {title && (
@@ -275,7 +275,7 @@ const AdvanceTable = ({
             </div>
 
             {/* SEARCH */}
-            <div className="flex border px-2 py-2 rounded-md w-full sm:w-64 items-center gap-2">
+            <div className="flex border px-2 rounded-md w-full sm:w-64 items-center gap-2">
               <AppIcon
                 name="Search"
                 className="h-4 w-4 text-gray-400 shrink-0"
@@ -284,8 +284,8 @@ const AdvanceTable = ({
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className=" w-full  border-none outline-none ring-0 ring-offset-0 focus:ring-0 focus:outline-none focus:border-none focus:ring-offset-0 
-                p-0 shadow-none focus:shadow-none"
+                className=" w-full border-0 outline-none  ring-0  ring-offset-0 shadow-none focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:shadow-none
+     focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent "
               />
 
               {searchTerm && (
@@ -293,6 +293,7 @@ const AdvanceTable = ({
                   name="X"
                   onClick={() => setSearchTerm("")}
                   className="cursor-pointer"
+                  size={14}
                 />
               )}
             </div>
@@ -322,7 +323,7 @@ const AdvanceTable = ({
                 text-sm w-full ${sizeClass}
                 [&_th]:px-0 [&_td]:px-0
                 [&_tbody_tr:nth-child(odd)>td]:bg-gray-50
-                [&_tbody_tr:hover>td]:bg-emerald-50
+                [&_tbody_tr:hover>td]:bg-indigo-50
                 [&_thead_th]:border-t [&_thead_th]:border-b [&_thead_th]:border-gray-300
                 [&_tbody_tr>td]:border-t [&_tbody_tr>td]:border-gray-200
                 [&_tbody_tr:not(:last-child)>td]:border-b
@@ -330,7 +331,7 @@ const AdvanceTable = ({
                 [&_thead_th]:border-l [&_thead_th]:border-r [&_thead_th]:border-gray-300
               `}
                 >
-                  <TableHeader className="bg-emerald-100">
+                  <TableHeader className="bg-indigo-100">
                     {/* GROUP HEADERS */}
                     {columnGroups.length > 0 && (
                       <TableRow>
@@ -340,7 +341,7 @@ const AdvanceTable = ({
                             onMouseLeave={() => setHoveredCol(null)}
                             className={`
                           border-l border-r border-gray-300
-                          ${hoveredCol === "__index__" ? "bg-emerald-200" : "bg-emerald-100"}
+                          ${hoveredCol === "__index__" ? "bg-indigo-200" : "bg-indigo-100"}
                         `}
                             style={{
                               position: isSmall ? "relative" : "sticky",
@@ -358,7 +359,7 @@ const AdvanceTable = ({
                           <TableHead
                             key={grp.title}
                             colSpan={grp.span}
-                            className="bg-emerald-100 text-center font-semibold border-l border-r border-gray-300"
+                            className="bg-indigo-100 text-center font-semibold border-l border-r border-gray-300"
                           >
                             {grp.title}
                           </TableHead>
@@ -373,7 +374,7 @@ const AdvanceTable = ({
                         md:sticky right-0 border-gray-300
                         text-center px-3 z-10
                         transition-colors
-                        ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
+                        ${hoveredCol === "__actions__" ? "bg-indigo-200" : "bg-indigo-100"}
                       `}
                           >
                             {/* Actions */}
@@ -392,7 +393,7 @@ const AdvanceTable = ({
                           className={`
                         border-l border-r border-gray-300 
                         transition-colors
-                        ${hoveredCol === "__index__" ? "bg-emerald-200" : "bg-emerald-100"}
+                        ${hoveredCol === "__index__" ? "bg-indigo-200" : "bg-indigo-100"}
                       `}
                           style={{
                             position: isSmall ? "relative" : "sticky",
@@ -417,7 +418,7 @@ const AdvanceTable = ({
                             className={`
                           border-l border-r border-gray-300 
                           transition-colors duration-200
-                          ${hoveredCol === col.key ? "bg-emerald-200" : "bg-emerald-100"}
+                          ${hoveredCol === col.key ? "bg-indigo-200" : "bg-indigo-100"}
                         `}
                             style={getColStyle(
                               col,
@@ -433,7 +434,7 @@ const AdvanceTable = ({
                               <Input
                                 placeholder={`Search ${col.label}`}
                                 className=" h-7 px-1text-xs  bg-transparent border-0 border-b border-gray-400 rounded-none outline-none
-                           ring-0 ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-b focus:border-emerald-600
+                           ring-0 ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-b focus:border-indigo-600
                             shadow-none focus:shadow-none px-0"
                                 value={colFilters[col.key] || ""}
                                 onChange={(e) =>
@@ -477,7 +478,7 @@ const AdvanceTable = ({
                         md:sticky right-0 border-l border-r border-gray-300
                         text-center px-3 z-10
                         transition-colors
-                        ${hoveredCol === "__actions__" ? "bg-emerald-200" : "bg-emerald-100"}
+                        ${hoveredCol === "__actions__" ? "bg-indigo-200" : "bg-indigo-100"}
                       `}
                         >
                           Actions
@@ -506,7 +507,7 @@ const AdvanceTable = ({
                               onMouseLeave={() => setHoveredCol(null)}
                               className={`
                             border-l border-r border-gray-200 pl-4
-                            ${hoveredCol === "__index__" ? "bg-emerald-100" : "bg-white"}
+                            ${hoveredCol === "__index__" ? "bg-indigo-100" : "bg-white"}
                           `}
                               style={{
                                 position: isSmall ? "relative" : "sticky",
@@ -537,7 +538,7 @@ const AdvanceTable = ({
                                   className={`
                                 px-2 border-l border-r border-gray-200
                                 transition-colors
-                                ${hoveredCol === col.key ? "bg-emerald-100" : ""}
+                                ${hoveredCol === col.key ? "bg-indigo-100" : ""}
                               `}
                                   style={getColStyle(
                                     col,
@@ -567,7 +568,7 @@ const AdvanceTable = ({
                             md:sticky right-0 bg-white z-10 
                             border-l border-r border-gray-200 
                             text-center px-3
-                            ${hoveredCol === "__actions__" ? "bg-emerald-100" : ""}
+                            ${hoveredCol === "__actions__" ? "bg-indigo-100" : ""}
                           `}
                             >
                               {renderActions(row)}

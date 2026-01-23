@@ -26,7 +26,7 @@ const states = {
 
 const errorText = "text-p10 text-danger mt-0.5";
 
-export function Textarea({
+function Textarea({
     label,
     error,
     rows = 4,
@@ -50,3 +50,5 @@ export function Textarea({
         </div>
     );
 }
+export default Textarea
+export {Textarea}

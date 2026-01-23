@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { Button } from "../../Lib/button";
+import { Button } from "../../Library/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
-import { Textarea } from "../../Lib/textarea";
+import { Textarea } from "../../Library/Textarea";
 import { Switch } from "../../Library/Switch";
-import { useToast } from "../../Lib/use-toast";
+import { useToast } from "../../Library/use-toast";
 import AppIcon from "../../Component/AppIcon";
 import RoleSelect from "../../Component/RoleSelect";
 import { SweetSuccess } from "../../Component/SweetAlert";
@@ -155,7 +155,7 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
         toast({
           title: "Validation Error",
           description: errors.join(", "),
-          variant: "destructive",
+          variant: "danger",
         });
         return;
       }
@@ -173,7 +173,7 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
         toast({
           title: "Error",
           description: err.message || "Save failed",
-          variant: "destructive",
+          variant: "danger",
         });
       }
     },
@@ -239,7 +239,7 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
     <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
       {/* Header */}
       <form onSubmit={handleSubmit}>
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between border-b bg-gradient-to-r from-blue-400 to-indigo-400">
+        <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-2 flex items-center justify-between border-b bg-gradient-to-r from-blue-400 to-indigo-400">
           <div>
             <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
               <AppIcon name={"Settings"} size={30} /> Workflow Configuration
@@ -252,8 +252,12 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
             <Button type="submit">
               {form.WorkflowCode ? "Update Workflow" : "Create Workflow"}
             </Button>
-            <Button type="button" variant="outline" onClick={addStep}>
-              <AppIcon name="Plus" className="w-4 h-4 mr-2" />
+            <Button 
+            type="button"
+             variant="soft"
+              onClick={addStep}
+              icon={<AppIcon name="Plus" className="w-4 h-4 mr-2" />}>
+              
               Add Step
             </Button>
           </div>

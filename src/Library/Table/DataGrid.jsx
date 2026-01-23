@@ -158,7 +158,7 @@ const DataGrid = ({
   return (
     <div className={`${className} bg-white shadow-md border rounded`} {...props}>
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 border-">
+      <div className="sm:flex items-center justify-between gap-3 px-4 py-3 space-y-2">
         <div className="flex items-center gap-2">
           <AppIcon name={gridIcon}/>
           <h3 className="font-semibold text-gray-800">{gridTitle}</h3>

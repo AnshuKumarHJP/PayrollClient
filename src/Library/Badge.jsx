@@ -27,6 +27,28 @@ const badgeVariants = cva(
 
         muted:
           "bg-[var(--badge-muted-bg)] text-[var(--badge-muted-text)]",
+
+         // NEW VARIANTS --------------------------
+
+        info: "bg-indigo-500 text-white border-indigo-500",
+
+        dark: "bg-gray-900 text-white border-gray-900",
+
+        light: "bg-gray-100 text-gray-900 border-gray-100",
+
+        ghost: "bg-transparent text-foreground hover:bg-accent",
+
+        muted: "bg-gray-200 text-gray-700 border-gray-200",
+
+        purple: "bg-purple-600 text-white border-purple-600",
+
+        teal: "bg-teal-500 text-white border-teal-500",
+
+        gradient:
+          "bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent",
+
+        soft:
+          "bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100",
       },
 
       size: {

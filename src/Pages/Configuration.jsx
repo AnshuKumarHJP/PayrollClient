@@ -9,7 +9,7 @@ import React, {
 import { Activity } from "react"; // React 19
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 
-import { Button } from "../Lib/button";
+import  Button  from "../Library/Button";
 import { Settings, X } from "lucide-react";
 import AppIcon from "../Component/AppIcon";
 import Loading from "../Component/Loading";
@@ -30,12 +30,12 @@ const MenuList = React.memo(function MenuList({ items, activeMenu, onSelect }) {
           onClick={() => onSelect(item.key)}
           className={`p-3 flex justify-between items-center border-b cursor-pointer transition-all
             ${activeMenu === item.key
-              ? "bg-emerald-100 border-l-4 border-l-emerald-600"
-              : "hover:bg-emerald-50"
+              ? "bg-primary-500 text-white border-l-4 border-l-primary-400"
+              : "hover:bg-primary-500 hover:text-white"
             }`}
         >
           <div className="flex items-center gap-2">
-            <AppIcon size={15} name={item.icon} className="text-emerald-600" />
+            <AppIcon size={15} name={item.icon} className="text-white" />
             <p className="font-semibold text-xs md:text-sm">{item.title}</p>
           </div>
           <AppIcon name="MoveRight" size={16} />
@@ -177,14 +177,14 @@ const Configuration = () => {
 
         <div className="flex items-center gap-2">
           {isAddEditMode && (
-            <Button variant="destructive" onClick={handleSaveCancel}>
+            <Button variant="danger" onClick={handleSaveCancel}>
               <X size={16} />
             </Button>
           )}
 
           {/* MOBILE MENU ICON */}
           <button
-            className="md:hidden p-2 bg-emerald-600 text-white rounded-lg"
+            className="md:hidden p-2 bg-primary-600 text-white rounded-lg"
             onClick={() => setMobileMenuOpen(true)}
           >
             <AppIcon name="Menu" />
@@ -225,7 +225,7 @@ const Configuration = () => {
       <div className="grid md:grid-cols-[280px_1fr] gap-3 min-w-0">
 
         {/* SIDEBAR DESKTOP */}
-        <div className="border hidden md:block shadow-sm rounded-xl bg-white max-h-[80vh] overflow-y-auto min-w-0">
+        <div className=" hidden md:block shadow-sm rounded-xl bg-white max-h-[80vh] overflow-y-auto min-w-0">
           <MenuList
             items={configItems}
             activeMenu={activeMenu}

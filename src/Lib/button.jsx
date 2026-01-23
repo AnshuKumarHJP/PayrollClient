@@ -33,6 +33,8 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
+        primary: "bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-300",
+
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
 
         destructive:

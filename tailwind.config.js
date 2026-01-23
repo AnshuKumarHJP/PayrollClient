@@ -63,9 +63,7 @@ export default {
         success: "var(--success-500)",
         warning: "var(--warning-500)",
         danger: "var(--danger-500)",
-
-        white: "var(--white)",
-        black: "var(--black)",
+       
       },
 
       /* =====================

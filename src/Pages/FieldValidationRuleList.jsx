@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useToast } from "../Lib/use-toast";
+import { useToast } from "../Library/use-toast";
 
 import {
   GetAllFieldValidationRules,
@@ -18,13 +18,12 @@ import { ActiveBadge, SeverityBadge } from "../Component/HealperComponents";
 import { SweetConfirm } from "../Component/SweetAlert";
 
 /* =====================================================
-   VALIDATION PARAMETERS CELL (PURE + SAFE)
+   VALIDATION PARAMETERS CELL (PURE)
 ===================================================== */
 const ValidationParamsCell = React.memo(({ value }) => {
   if (!value) return <span className="text-gray-400">—</span>;
 
   let params = value;
-
   if (typeof value === "string") {
     try {
       params = JSON.parse(value);
@@ -55,31 +54,27 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
   const dispatch = useDispatch();
   const { toast } = useToast();
 
-  const {
-    data = [],
-    isLoading,
-    error,
-  } = useSelector(
+  const { data = [], isLoading, error } = useSelector(
     (state) => state.FormBuilderStore.FieldValidationRule || {}
   );
 
-  /* ================= FETCH ON MOUNT ================= */
+  /* ================= FETCH ================= */
   useEffect(() => {
     dispatch(GetAllFieldValidationRules());
   }, [dispatch]);
 
-  /* ================= ERROR HANDLING ================= */
+  /* ================= ERROR ================= */
   useEffect(() => {
     if (error) {
       toast({
         title: "Error",
         description: error,
-        variant: "destructive",
+        variant: "danger",
       });
     }
   }, [error, toast]);
 
-  /* ================= ACTION HANDLERS ================= */
+  /* ================= ACTIONS ================= */
   const handleCreateNew = useCallback(() => {
     onAddEditMode?.(true, { type: "add" });
   }, [onAddEditMode]);
@@ -103,20 +98,22 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     [dispatch]
   );
 
-  /* ================= ACTION CELL ================= */
   const renderActionCell = useCallback(
     (row) => (
-      <div className="flex gap-2">
+      <div className="flex items-center justify-center gap-3 h-full pl-2">
         <Button
-          variant="warning"
-          size="sm"
+          variant="ghost"
+          size="icon"
+         // className="text-amber-600"       // 👈 icon-only size
           onClick={() => handleEdit(row.Id)}
         >
           <AppIcon name="Edit" />
         </Button>
+
         <Button
-          variant="destructive"
-          size="sm"
+          variant="ghost"
+          size="icon"
+          //className="text-red-600"
           onClick={() => handleDelete(row.Id)}
         >
           <AppIcon name="Trash" />
@@ -126,27 +123,49 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
     [handleEdit, handleDelete]
   );
 
+
   /* ================= COLUMN DEFINITIONS ================= */
   const columnDefs = useMemo(
     () => [
-      {
-        headerName: "",
-        width: 20,                        // compact & clean
-        checkboxSelection: true,          // row checkbox
-        headerCheckboxSelection: true,    // select-all checkbox
-        pinned: "left",                   // always visible
-        suppressMenu: true,               // no column menu
-        sortable: false,                  // checkbox column should not sort
-        filter: false,                    // checkbox column should not filter
-        resizable: false,                 // fixed width = stable layout
-        lockPosition: true,               // prevent drag
+      /* ===== SELECTION (CHECKBOX) COLUMN ===== */
+      // {
+      //   colId: "__select__",
+      //   headerName: "",
+      //   width: 48,
+      //   minWidth: 48,
+      //   maxWidth: 48,
+      //   checkboxSelection: true,
+      //   headerCheckboxSelection: true,
+      //   pinned: "left",
+      //   lockPosition: true,
+
+      //   sortable: false,
+      //   filter: false,
+      //   resizable: false,
+      //   suppressMenu: true,
+
+      //   suppressColumnsToolPanel: true,
+      //   suppressExport: true,
+      // },
+       {
+        colId: "SLNO",
+        headerName: "#",
+        pinned: "left",
+        minWidth: 40,
+        maxWidth: 40,
+        valueGetter: (params) => params.node.rowIndex + 1,
+        cellClass: "text-center font-medium",
+        sortable: false,
+        filter: false,
+        suppressMenu: true,
       },
+
       {
         field: "RuleCode",
         colId: "RuleCode",
         headerName: "Rule Code",
         pinned: "left",
-        minWidth: 140,
+        flex:1
       },
       {
         field: "RuleName",
@@ -166,6 +185,8 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
         field: "ValidationParameters",
         colId: "ValidationParameters",
         headerName: "Validation Parameters",
+        tooltipField: "ValidationParameters",
+
         minWidth: 240,
         cellRenderer: ValidationParamsCell,
         valueFormatter: (p) =>
@@ -207,7 +228,9 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
         headerName: "Category",
         minWidth: 150,
         valueFormatter: (p) =>
-          Categories.find((c) => c.value === Number(p.value))?.label ?? p.value,
+          Categories.find(
+            (c) => c.value === Number(p.value)
+          )?.label ?? p.value,
       },
       {
         field: "IsActive",
@@ -226,17 +249,21 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
         minWidth: 120,
         sort: "asc",
       },
+
+      /* ===== ACTIONS COLUMN ===== */
       {
-        // colId: "Actions",
+        colId: "__actions__",
         headerName: "Actions",
         pinned: "right",
-        minWidth: 50,
+        width: 90,
+        minWidth: 90,
+        maxWidth: 90,
         cellRenderer: (p) => renderActionCell(p.data),
-        sortable: false,
-        filter: false,
-        suppressMenu: true,
-        suppressColumnsToolPanel: true,
-        suppressExport: true,
+        // sortable: false,
+        // filter: false,
+        // suppressMenu: true,
+        // suppressColumnsToolPanel: true,
+        // suppressExport: true,
       },
     ],
     [renderActionCell]
@@ -252,12 +279,15 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
   return (
     <div>
       <div className="flex justify-end mb-2">
-        <Button variant="default"
-          className="flex"
-          onClick={handleCreateNew}>
-          <AppIcon name="Plus" />
+        <Button
+          variant="primary"
+          className="text-white"
+          icon={<AppIcon name="Plus" />}
+          onClick={handleCreateNew}
+        >
           Add New Field Validation Rule
         </Button>
+
       </div>
 
       <DataGrid
@@ -269,9 +299,21 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
         enableRowSelection="multiple"
         pagination
         paginationPageSize={10}
+        paginationPageSizeSelector={[5, 10, 20, 50]}
+        
       />
     </div>
   );
 };
 
 export default FieldValidationRuleList;
+
+/* =====================================================
+   NOTE FOR FUTURE YOU
+-----------------------------------------------------
+- Checkbox column MUST be fixed width (48px)
+- Never make checkbox flexible
+- Always suppress export & column tools
+- cellRenderer = UI only
+- valueFormatter = export / clipboard truth
+===================================================== */

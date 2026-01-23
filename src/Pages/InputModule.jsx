@@ -1,45 +1,40 @@
-import { useEffect, useMemo, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { motion } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import { Button } from "../Lib/button";
-import { Badge } from "../Lib/badge";
-import { Skeleton } from "../Lib/skeleton";
-import Loading from "../Component/Loading";
+import Button from "../Library/Button";
+import { Badge } from "../Library/Badge";
+import { SkeletonCard } from "../Skeleton/Skeletons";
 import AppIcon from "../Component/AppIcon";
-import CryptoService from '../Security/useCrypto'
+import CryptoService from "../Security/useCrypto";
 
-import { motion } from "framer-motion";
 import {
   GetClientFormBuilderHeaderMappingsByClientId,
   GetFormBuilder,
 } from "../Store/FormBuilder/Action";
 import { Modules } from "../Data/StaticData";
 
-/* =========================================================
+/* =====================================================
    COMPONENT
-========================================================= */
+===================================================== */
 const InputModule = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  /* -------------------------------------------------------
-     REDUX STATE
-  ------------------------------------------------------- */
+
   const { FormBuilder, ClientFormBuilderHeaderMapping } = useSelector(
     (s) => s.FormBuilderStore
   );
 
-  const formBuilders = Array.isArray(FormBuilder?.data) ? FormBuilder.data : [];
-  const mappings = Array.isArray(ClientFormBuilderHeaderMapping?.data) ? ClientFormBuilderHeaderMapping.data : [];
-
-  const selectedClientId =  useSelector((state) => state.Auth?.Common?.SelectedClient || "");
+  const selectedClientId = useSelector(
+    (s) => s.Auth?.Common?.SelectedClient
+  );
 
   const lastFetchedClientRef = useRef(null);
+  const [openingFormId, setOpeningFormId] = useState(null);
 
-  /* -------------------------------------------------------
-     LOAD DATA (NO DOUBLE CALLS)
-  ------------------------------------------------------- */
+  /* ================= LOAD DATA ================= */
   useEffect(() => {
     if (!FormBuilder?.data?.length) {
       dispatch(GetFormBuilder());
@@ -48,254 +43,190 @@ const InputModule = () => {
 
   useEffect(() => {
     if (!selectedClientId) return;
-
     if (lastFetchedClientRef.current === selectedClientId) return;
-    lastFetchedClientRef.current = selectedClientId;
 
-    dispatch(
-      GetClientFormBuilderHeaderMappingsByClientId(selectedClientId)
-    );
+    lastFetchedClientRef.current = selectedClientId;
+    dispatch(GetClientFormBuilderHeaderMappingsByClientId(selectedClientId));
   }, [dispatch, selectedClientId]);
 
-  /* -------------------------------------------------------
-     BUILD LOOKUP MAP (FormBuilderId → MappingId)
-  ------------------------------------------------------- */
+  /* ================= MAP DATA ================= */
   const mappingByFormBuilderId = useMemo(() => {
     const map = new Map();
-    mappings.forEach((m) => {
-      map.set(m.FormBuilderId, m.Id);
-    });
+    (ClientFormBuilderHeaderMapping?.data || []).forEach((m) =>
+      map.set(m.FormBuilderId, m.Id)
+    );
     return map;
-  }, [mappings]);
+  }, [ClientFormBuilderHeaderMapping?.data]);
 
-  /* -------------------------------------------------------
-     FINAL MAPPED FORMS (🔥 THIS IS WHAT YOU WANT)
-  ------------------------------------------------------- */
   const mappedForms = useMemo(() => {
-    return formBuilders
-      ?.filter((f) => mappingByFormBuilderId.has(f.Id))
-      ?.map((f) => ({
+    const formData = Array.isArray(FormBuilder?.data) ? FormBuilder.data : [];
+    return formData
+      .filter((f) => mappingByFormBuilderId.has(f.Id))
+      .map((f) => ({
         ...f,
         mappingId: mappingByFormBuilderId.get(f.Id),
       }));
-  }, [formBuilders, mappingByFormBuilderId]);
+  }, [FormBuilder?.data, mappingByFormBuilderId]);
 
-  /* -------------------------------------------------------
-     LOADING STATE
-  ------------------------------------------------------- */
+  /* ================= NAVIGATION ================= */
+  const handleNavigate = async (id) => {
+    setOpeningFormId(id);
+    try {
+      // Simulate loading delay for demo
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const encryptedId = CryptoService.EncryptWithAES(id.toString());
+      navigate(`/inputs/${encryptedId}`);
+    } finally {
+      setOpeningFormId(null);
+    }
+  };
+
+  /* ================= LOADING ================= */
   if (FormBuilder.isLoading || ClientFormBuilderHeaderMapping.isLoading) {
     return (
-      <div className="p-4 sm:p-6">
-        {/* HEADER SKELETON */}
-        <div className="mb-8">
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-
-        {/* MODULE GRID SKELETON */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="rounded-2xl overflow-hidden">
-              {/* TOP STRIP */}
-              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 opacity-70" />
-
-              {/* BADGES SKELETON */}
-              <div className="absolute right-2 top-2 space-x-1">
-                <Skeleton className="h-5 w-12" />
-                <Skeleton className="h-5 w-16" />
-              </div>
-
-              <CardHeader className="text-center pb-4 pt-6">
-                {/* ICON SKELETON */}
-                <Skeleton className="h-14 w-14 rounded-2xl mx-auto mb-4" />
-
-                <Skeleton className="h-6 w-32 mx-auto" />
-              </CardHeader>
-
-              <CardContent className="text-center pb-6 px-6">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-3/4 mx-auto mb-5" />
-
-                <Skeleton className="h-10 w-full rounded-xl" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <SkeletonCard key={i} className="h-64 rounded-xl" />
+        ))}
       </div>
     );
   }
 
-  /* -------------------------------------------------------
-     FRAMER MOTION
-  ------------------------------------------------------- */
+  /* ================= ANIMATION ================= */
   const containerAnim = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.12 },
-    },
+    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
   };
 
   const cardAnim = {
-    hidden: { opacity: 0, y: 15 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 120, damping: 14 },
-    },
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0 },
   };
-
-  const handleNavigate = async (Id) => {
-    const encryptedId = CryptoService.EncryptWithAES(Id.toString());
-    navigate(`/inputs/${encryptedId}`);
-
-  }
 
   console.log(mappedForms);
 
 
-  /* -------------------------------------------------------
-     RENDER
-  ------------------------------------------------------- */
+  /* ================= RENDER ================= */
   return (
-    <div className="">
-
+    <div className="space-y-4">
       {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+      <div>
+        <h1 className="text-xl font-semibold text-foreground">
           Payroll Input Modules
         </h1>
-        <p className="text-gray-600 text-sm mt-1">
+        <p className="text-sm text-muted-foreground">
           Forms enabled for the selected client
         </p>
       </div>
 
-      {/* MODULE GRID */}
+      {/* GRID */}
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
         variants={containerAnim}
         initial="hidden"
         animate="show"
       >
-        {mappedForms.map((m, index) => {
-          const isInactive = m.IsActive === false;
-          return (
-            <motion.div
-              key={index}
-              variants={cardAnim}
-              whileHover={!isInactive ? { y: -2, scale: 1.01 } : {}}
-              className={isInactive ? "opacity-30 pointer-events-none" : ""}
-            >
-              <Card
-                className=" relative rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-emerald-200/60 dark:border-gray-700 
-                 shadow-sm hover:shadow-md transition-all"
-              >
-                {/* TOP STRIP */}
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-400" />
+        {mappedForms.map((m) => {
+          const inactive = m.IsActive === false;
 
-                {/* STATUS */}
+          let fields = [];
+          try {
+            fields = JSON.parse(m.FieldsConfigurations || "[]");
+          } catch { }
+
+          const groupedCount = fields.filter((f) => f.FieldGroup).length;
+
+          return (
+            <motion.div key={m.Id} variants={cardAnim}>
+              <Card
+                className={`group relative rounded border bg-slate-100/50 transition
+                ${inactive ? "opacity-40 pointer-events-none" : "hover:shadow-lg"}`}
+              >
+                 {/* GRADIENT STRIP */}
+                <div className="absolute rounded-t inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600" />
+
+                {/* STATUS BADGES */}
                 <div className="absolute right-3 top-3 flex gap-1 text-[10px]">
-                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                    v{m.Version}
-                  </span>
-                  <span
-                    className={`px-2 py-1 font-semibold rounded-full ${m.IsActive
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-600"
-                      }`}
-                  >
+                  <Badge variant="warning">v{m.Version}</Badge>
+                  <Badge variant={m.IsActive ? "success" : "danger"}>
                     {m.IsActive ? "Active" : "Inactive"}
-                  </span>
+                  </Badge>
                 </div>
 
                 {/* HEADER */}
-                <CardHeader className="pt-5 pb-3 text-center">
-                  <div className="flex justify-center mb-2">
-                    <div
-                      className=" h-10 w-10 rounded-lg  bg-emerald-100  border border-emerald-300 flex items-center justify-center
-                        text-emerald-700"
-                    >
-                      <AppIcon name={m.Icon} size={18} />
-                    </div>
+                <CardHeader className="pt-6 pb-3 text-center">
+                  <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
+                    <AppIcon name={m.Icon} size={18} />
                   </div>
 
-                  <CardTitle className="text-sm font-semibold text-gray-900">
+                  <CardTitle className="text-sm font-semibold">
                     {m.Name}
                   </CardTitle>
 
-                  <div className="mt-1 flex flex-wrap items-center justify-center gap-2 text-[11px] text-gray-500">
-                    {/* MODULE */}
-                    <div className="flex items-center gap-1.5">
-                      <AppIcon name="Layers" size={11} />
-                      <span>Module</span>
-                      <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
-                        {Modules.find((mo) => mo.value === m.ModuleId)?.label || m.ModuleId}
-                      </Badge>
-                    </div>
-
-                    {/* SEPARATOR */}
-                    <span className="opacity-40">|</span>
-
-                    {/* MODE */}
-                    <div className="flex items-center gap-1.5">
-                      <AppIcon name="GitMerge" size={11} />
-                      <span className="font-medium">
-                        {m.IsGroupSaveEnabled ? "Grouped" : "Flat"}
-                      </span>
-                    </div>
+                  <div className="mt-1 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="muted">
+                      {
+                        Modules.find((x) => x.value === m.ModuleId)
+                          ?.label
+                      }
+                    </Badge>
+                    <AppIcon name={"Layers"} size={14} />
+                    <span>
+                      {m.IsGroupSaveEnabled ? "Grouped" : "Flat"}
+                    </span>
                   </div>
-
                 </CardHeader>
 
                 {/* CONTENT */}
-                <CardContent className="px-4 pb-4 text-center">
-                  <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                <CardContent className="space-y-4 px-5 pb-5 text-center">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {m.Description}
                   </p>
 
                   {/* STATS */}
-                  <div className="grid grid-cols-3 gap-2 mb-3 text-[11px]">
-                    <div className="rounded-md bg-emerald-50 py-2">
-                      <div className="text-emerald-700 font-medium">Fields</div>
-                      <div>{JSON.parse(m.FieldsConfigurations || "[]").length}</div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="rounded-md bg-muted py-2">
+                      <div className="font-medium">Fields</div>
+                      <div>
+                        {JSON.parse(m.FieldsConfigurations || "[]").length}
+                      </div>
                     </div>
-                    <div className="rounded-md bg-blue-50 py-2">
-                      <div className="text-blue-700 font-medium">Upload</div>
+                    <div className="rounded-md bg-muted py-2">
+                      <div className="font-medium">Upload</div>
                       <div>{m.BulkApi ? "Yes" : "No"}</div>
                     </div>
-                    <div className="rounded-md bg-purple-50 py-2">
-                      <div className="text-purple-700 font-medium">Mode</div>
+                    <div className="rounded-md bg-muted py-2">
+                      <div className="font-medium">Mode</div>
                       <div>{m.UpsertApi ? "Upsert" : "Read"}</div>
                     </div>
                   </div>
+                  {/* METRICS */}
+
+                  {/* META LINE */}
+                  <div className="flex justify-center gap-4 text-[11px] text-muted-foreground">
+                    <span>Grouped Fields: {groupedCount}</span>
+                    <span>Order: {m.DisplayOrder}</span>
+                  </div>
 
                   {/* ACTION */}
-                  {isInactive ? (
-                    <Button
-                      disabled
-                      size="md"
-                      className="w-full text-xs bg-gray-300 text-gray-600"
-                    >
-                      Not Available
-                    </Button>
-                  ) : (
-                    <Button
-                      size="md"
-                      onClick={() => handleNavigate(m.Id)}
-                      className=" w-full text-xs  bg-emerald-600 hover:bg-emerald-700  text-white"
-                    >
-                      Open
-                    </Button>
-                  )}
+                  <Button
+                    size="md"
+                    variant={inactive ? "outline" : "primary"}
+                    className="w-full"
+                    onClick={() => handleNavigate(m.Id)}
+                    disabled={inactive || openingFormId === m.Id}
+                    loading={openingFormId === m.Id}
+                  >
+                    {inactive ? "Not Available" : openingFormId === m.Id ? "Opening…" : "Open"}
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
-
-          )
+          );
         })}
 
         {mappedForms.length === 0 && (
-          <p className="col-span-full text-center text-gray-500">
+          <p className="col-span-full text-center text-muted-foreground">
             No forms mapped for this client
           </p>
         )}

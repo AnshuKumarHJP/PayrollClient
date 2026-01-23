@@ -1,5 +1,5 @@
 import { Label } from "../../../Library/Label";
-import { MultiSelect } from "../../../Lib/MultiSelect";
+import { MultiSelect } from "../../../Library/MultiSelect";
 
 const FieldApplicableSelect = ({ fieldForm, setFieldForm }) => {
   return (

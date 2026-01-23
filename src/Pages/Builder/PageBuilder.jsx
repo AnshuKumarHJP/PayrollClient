@@ -1,6 +1,6 @@
 // PageBuilder.jsx
 import React, { useState, useMemo } from "react";
-import { Button } from "../../Lib/button";
+import { Button } from "../../Library/Button";
 import { motion } from "framer-motion";
 
 import AdvanceTable from "../../Component/AdvanceTable";
@@ -13,7 +13,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem
-} from "../../Lib/select";
+} from "../../Library/Select";
 
 import AppIcon from "../../Component/AppIcon";
 
@@ -141,7 +141,7 @@ const PageBuilder = ({
                 setEditRecord(null);
               }}
               className={`pb-2 px-4 text-xs md:text-sm ${activeTab === tab
-                  ? "border-b-2 border-emerald-500 text-emerald-600"
+                  ? "border-b-2 border-indigo-800 text-indigo-700 font-semibold"
                   : "text-gray-500"
                 }`}
             >
@@ -180,6 +180,9 @@ const PageBuilder = ({
               setActiveTab("view");
             }
             return ok; // Indicate success to BulkUpload
+          }}
+          onCancel={() => {
+            setActiveTab("view");
           }}
         />
       )}

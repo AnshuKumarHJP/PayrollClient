@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "../../Library/DropdownMenu";
-import { Button } from "../../Lib/button";
+import { Button } from "../../Library/Button";
 import { Switch } from "../../Library/Switch";
 
 import {

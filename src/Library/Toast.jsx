@@ -78,12 +78,15 @@ export function ToastIcon({ variant = "info" }) {
     success: { icon: "CheckCircle", color: "text-[var(--toast-success-icon)]" },
     warning: { icon: "AlertTriangle", color: "text-[var(--toast-warning-icon)]" },
     danger: { icon: "XCircle", color: "text-[var(--toast-danger-icon)]" },
+    destructive: { icon: "XCircle", color: "text-[var(--toast-danger-icon)]" },
   };
+
+  const iconData = map[variant] || map.info;
 
   return (
     <AppIcon
-      name={map[variant].icon}
-      className={cn("mt-0.5 h-5 w-5", map[variant].color)}
+      name={iconData.icon}
+      className={cn("mt-0.5 h-5 w-5", iconData.color)}
     />
   );
 }

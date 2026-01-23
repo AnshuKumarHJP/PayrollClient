@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../Lib/select";
+} from "../Library/Select";
 
 const RoleSelect = ({ value, onChange, placeholder = "Select your Role", allowNone = false }) => {
   const handleValueChange = (v) => {

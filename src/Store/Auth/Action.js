@@ -5,7 +5,7 @@ import {
   GET_AUTH_SUCCESS,
   GET_AUTH_FAILURE
 } from "./ActionType";
-import { toast } from "../../Lib/use-toast";
+import { toast } from "../../Library/use-toast";
 import { setSelectedRole } from "./AuhtSlice";
 
 const getAuthRequest = () => ({ type: GET_AUTH_REQUEST });
@@ -115,7 +115,7 @@ export const AuthenticateUser = (formData, signal) => async (dispatch) => {
       toast({
         title: 'Network Error',
         description: 'Unable to connect to the server. Please check your internet connection or try again later.',
-        variant: 'destructive',
+        variant: 'danger',
       })
       errorMessage = "Unable to connect to the server. Please check your internet connection or try again later.";
     } else if (error.response && error.response.data) {

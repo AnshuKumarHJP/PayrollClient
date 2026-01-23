@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card } from "../Library/Card";
-import { Button } from "../Lib/button";
+import Button from "../Library/Button";
 import { Label } from "../Library/Label";
-import { Alert, AlertDescription } from "../Lib/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Lib/tabs";
-import { Loader2, XCircle, CheckCircle, Plus, Trash } from "lucide-react";
-
+import { Alert } from "../Library/Alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Library/Tab";
 import AppIcon from "../Component/AppIcon";
 import FormInputTypes from "./FormInputTypes";
 import useValidationRules from "../Hooks/useValidationRules";
@@ -221,7 +219,7 @@ const DynamicForm = ({
 
     // 🚫 STOP HERE IF ANY ERROR EXISTS
     if (!isValid) {
-      setStatus((s) => ({...s,submitting: false, apiSuccess: false}));
+      setStatus((s) => ({ ...s, submitting: false, apiSuccess: false }));
       return;
     }
 
@@ -236,7 +234,7 @@ const DynamicForm = ({
       });
 
 
-      setStatus((s) => ({...s,submitting: false,apiSuccess: ok}));
+      setStatus((s) => ({ ...s, submitting: false, apiSuccess: ok }));
     } catch {
       setStatus((s) => ({ ...s, submitting: false, apiSuccess: false }));
     }
@@ -283,24 +281,20 @@ const DynamicForm = ({
    ---------------------------------------------- */
   return (
     <motion.div variants={fadeIn} initial="hidden" animate="show">
-
-
       {/* SUCCESS / ERROR */}
       <AnimatePresence>
         {status.apiSuccess === true && (
           <motion.div variants={scaleIn} initial="hidden" animate="show" exit="hidden">
-            <Alert className="border-green-500 mb-4">
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>Saved successfully!</AlertDescription>
+            <Alert variant="success" className="mb-4 flex" icon="true">
+              Saved successfully!
             </Alert>
           </motion.div>
         )}
 
         {status.apiSuccess === false && (
           <motion.div variants={scaleIn} initial="hidden" animate="show" exit="hidden">
-            <Alert className="border-red-500 mb-4">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription>Submission failed. Check errors.</AlertDescription>
+            <Alert variant="danger" className="mb-4 flex" icon="true">
+              Submission failed. Check errors.
             </Alert>
           </motion.div>
         )}
@@ -309,140 +303,147 @@ const DynamicForm = ({
 
       {/* HEADER */}
       {/* <div className="bg-white shadow-xl rounded-2xl overflow-hidden " > */}
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
-         px-4 sm:px-6 py-3 sm:py-5 border-b  bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg mb-4">
-          {/* LEFT CONTENT */}
-          <div className="flex items-start gap-3">
-            <AppIcon
-              name={Template.Icon}
-              size={24}
-              className="text-white shrink-0 mt-1 sm:mt-0"
-            />
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
+         px-4 sm:px-6 py-3 sm:py-2 border-b  bg-gradient-to-r from-blue-700 to-indigo-500 rounded-lg mb-4">
+        {/* LEFT CONTENT */}
+        <div className="flex items-start gap-3">
+          <AppIcon
+            name={Template.Icon}
+            size={24}
+            className="text-white shrink-0 mt-1 sm:mt-0"
+          />
 
-            <div>
-              <h2 className="text-base sm:text-xl font-semibold text-white leading-tight">
-                {Template?.Name}
-              </h2>
-              {Template?.Description && (
-                <p className="text-green-100 text-xs sm:text-sm mt-1">
-                  {Template.Description}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT ACTIONS */}
-          <div className=" flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto ">
-            <Button
-              onClick={() => setIsGrouped((p) => !p)}
-              className=" w-full sm:w-auto bg-green-600 text-white hover:bg-green-700
-        active:bg-green-800 shadow-md hover:shadow-lg  transition-all duration-200" >
-              {isGrouped ? "Ungroup" : "Group"}
-            </Button>
-
-            {AddMore && (
-              <Button
-                onClick={addMore}
-                className="w-full sm:w-auto border border-green-200
-          text-green-700 bg-white hover:bg-green-50 hover:text-green-800
-          active:bg-green-100 shadow-sm transition-all duration-200 flex items-center justify-center">
-                <Plus className="mr-2 h-4 w-4" />
-                Add More
-              </Button>
+          <div>
+            <h2 className="text-base sm:text-xl font-semibold text-white leading-tight">
+              {Template?.Name}
+            </h2>
+            {Template?.Description && (
+              <p className="text-green-100 text-xs sm:text-sm mt-1">
+                {Template.Description}
+              </p>
             )}
           </div>
         </div>
-        {/* </div> */}
 
-        {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <AnimatePresence>
-            {forms.map((_, i) => (
-              <motion.div
-                key={i}
-                variants={fadeIn}
-                initial="hidden"
-                animate="show"
-                exit={{ opacity: 0, y: -8 }}
-              >
-                <Card className="p-4 mb-4 border border-emerald-200">
-                  {AddMore && forms.length > 1 && (
-                    <div className="flex justify-between mb-4">
-                      <div className="text-sm font-semibold">Entry #{i + 1}</div>
-                      <Button variant="destructive" className="w-fit" size="sm" type="button" onClick={() => removeForm(i)}>
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+        {/* RIGHT ACTIONS */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto">
+          {/* GROUP / UNGROUP */}
+          <Button
+            variant="primary"
+            size="md"
+            className="w-full sm:w-auto  text-white font-medium  shadow-md hover:shadow-lg"
+            onClick={() => setIsGrouped((p) => !p)}
+          >
+            {isGrouped ? "Ungroup" : "Group"}
+          </Button>
 
-                  {/* GROUPED VIEW */}
-                  {isGrouped ? (
-                    <Tabs defaultValue={Object.keys(groups)[0]} className="w-full">
-                      <TabsList
-                        className="w-full grid bg-emerald-100/40 border p-0"
-                        style={{
-                          gridTemplateColumns: `repeat(${Object.keys(groups).length}, 1fr)`,
-                        }}
-                      >
-                        {Object.keys(groups).map((g) => (
-                          <TabsTrigger
-                            key={g}
-                            value={g}
-                            className="text-sm font-medium text-emerald-700
-                          data-[state=active]:bg-emerald-300 data-[state=active]:text-emerald-900"
-                          >
-                            {g}
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
+          {/* ADD MORE */}
+          {AddMore && (
+            <Button
+              variant="outline"
+              size="md"
+              className=" w-full sm:w-auto  border-white text-white  hover:bg-indigo-50 hover:text-indigo-800  active:bg-indigo-100
+                shadow-sm hover:shadow-md"
+              icon={<AppIcon name="Plus" />}
+              onClick={addMore}
+            >
+              Add More
+            </Button>
+          )}
 
-                      {Object.entries(groups).map(([gName, flds]) => (
-                        <TabsContent key={gName} value={gName} className="mt-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {flds.map((f) => (
-                              <div key={f.Name} >
-                                <Label>{f.Label}</Label>
-                                {renderField(i, f)}
-                              </div>
-                            ))}
-                          </div>
-                        </TabsContent>
+        </div>
+      </div>
+      {/* </div> */}
+
+      {/* FORM */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <AnimatePresence>
+          {forms.map((_, i) => (
+            <motion.div
+              key={i}
+              variants={fadeIn}
+              initial="hidden"
+              animate="show"
+              exit={{ opacity: 0, y: -8 }}
+            >
+              <Card className="p-4 mb-4 border border-gray-200">
+                {AddMore && forms.length > 1 && (
+                  <div className="flex justify-between mb-4">
+                    <div className="text-sm font-semibold">Entry #{i + 1}</div>
+                    <Button variant="danger"
+                      icon={<AppIcon name={"Trash"} className="h-4 w-4" />}
+                      className="w-fit" size="sm" type="button" onClick={() => removeForm(i)} />
+                  </div>
+                )}
+
+                {/* GROUPED VIEW */}
+                {isGrouped ? (
+                  <Tabs defaultValue={Object.keys(groups)[0]} className="w-full">
+                    <TabsList
+                      className="w-full grid bg-indigo-100 border p-0"
+                      style={{
+                        gridTemplateColumns: `repeat(${Object.keys(groups).length}, 1fr)`,
+                      }}
+                    >
+                      {Object.keys(groups).map((g) => (
+                        <TabsTrigger
+                          key={g}
+                          value={g}
+                          className="text-sm font-medium text-indigo-700
+                          data-[state=active]:bg-indigo-700 data-[state=active]:text-white"
+                        >
+                          {g}
+                        </TabsTrigger>
                       ))}
-                    </Tabs>
-                  ) : (
-                    /* FLAT VIEW */
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {fields.map((f) => (
-                        <div key={f.Name}>
-                          <Label>{f.Label}</Label>
-                          {renderField(i, f)}
+                    </TabsList>
+
+                    {Object.entries(groups).map(([gName, flds]) => (
+                      <TabsContent key={gName} value={gName} className="mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {flds.map((f) => (
+                            <div key={f.Name} >
+                              <Label>{f.Label}</Label>
+                              {renderField(i, f)}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                ) : (
+                  /* FLAT VIEW */
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {fields.map((f) => (
+                      <div key={f.Name}>
+                        <Label>{f.Label}</Label>
+                        {renderField(i, f)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
-          {/* FOOTER BUTTONS */}
-          <Card className="flex justify-end gap-3 border border-emerald-200 p-2">
-            <Button variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
+        {/* FOOTER BUTTONS */}
+        <Card className="flex justify-end gap-3 border border-gray-200 p-2">
+          <Button variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
 
-            <Button type="submit" disabled={status.submitting}>
-              {status.submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…
-                </>
-              ) : (
-                "Submit"
-              )}
-            </Button>
-          </Card>
-        </form>
+          <Button type="submit" disabled={status.submitting}>
+            {status.submitting ? (
+              <>
+                <AppIcon name={"Loader2"} className="h-4 w-4 animate-spin mr-2" /> Processing…
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
+        </Card>
+      </form>
       {/* </div> */}
     </motion.div>
   );

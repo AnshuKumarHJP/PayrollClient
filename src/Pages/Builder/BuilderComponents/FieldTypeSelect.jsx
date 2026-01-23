@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../Lib/select";
+} from "../../../Library/Select";
 
 const typeOptions = [
   "text", "textarea", "number", "email", "password", "tel", "url",

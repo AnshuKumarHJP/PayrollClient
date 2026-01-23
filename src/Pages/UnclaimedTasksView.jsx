@@ -1,6 +1,6 @@
-import React,{ useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import { Button } from "../Lib/button";
+import Button from "../Library/Button";
 import { Input } from "../Library/Input";
 import { Label } from "../Library/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Lib/select";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Lib/tabs";
 import { UserPlus, Clock, AlertTriangle, CheckCircle, User, Users, Filter, Search } from "lucide-react";
 import unclaimedTasksService from "../../api/services/unclaimedTasksService";
-import { useToast } from "../Lib/use-toast";
+import { useToast } from "../Library/use-toast";
 
 const UnclaimedTasksView = () => {
   const [activeTab, setActiveTab] = useState("available");
@@ -41,7 +41,7 @@ const UnclaimedTasksView = () => {
       toast({
         title: 'Error',
         description: 'Failed to fetch unclaimed tasks. Please try again.',
-        variant: 'destructive',
+        variant: 'danger',
       });
     } finally {
       setLoading(false);
@@ -72,8 +72,8 @@ const UnclaimedTasksView = () => {
   const filteredTasks = useMemo(() => {
     return unclaimedTasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           task.requester.toLowerCase().includes(searchTerm.toLowerCase());
+        task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.requester.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
 
       return matchesSearch && matchesPriority;
@@ -106,6 +106,7 @@ const UnclaimedTasksView = () => {
       toast({
         title: 'Success',
         description: 'Task claimed successfully!',
+        variant: "success"
       });
       // Refresh the tasks list
       fetchUnclaimedTasks();
@@ -113,7 +114,7 @@ const UnclaimedTasksView = () => {
       toast({
         title: 'Error',
         description: 'Failed to claim task. Please try again.',
-        variant: 'destructive',
+        variant: 'danger',
       });
     }
   }, [toast]);
@@ -124,6 +125,7 @@ const UnclaimedTasksView = () => {
       toast({
         title: 'Success',
         description: 'Task assigned successfully!',
+        variant: "success"
       });
       setSelectedTask(null);
       setAssignToUser("");
@@ -133,7 +135,7 @@ const UnclaimedTasksView = () => {
       toast({
         title: 'Error',
         description: 'Failed to assign task. Please try again.',
-        variant: 'destructive',
+        variant: 'danger',
       });
     }
   }, [toast]);
@@ -307,8 +309,8 @@ const UnclaimedTasksView = () => {
                           <br />
                           <span className="text-xs">
                             {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)} days overdue` :
-                             daysUntilDue === 0 ? 'Due today' :
-                             `${daysUntilDue} days left`}
+                              daysUntilDue === 0 ? 'Due today' :
+                                `${daysUntilDue} days left`}
                           </span>
                         </div>
                       </TableCell>
@@ -389,7 +391,7 @@ const UnclaimedTasksView = () => {
                                   >
                                     Assign Task
                                   </Button>
-                                  <Button variant="outline" onClick={() =>{ setSelectedTask(null)}}>
+                                  <Button variant="outline" onClick={() => { setSelectedTask(null) }}>
                                     Cancel
                                   </Button>
                                 </div>

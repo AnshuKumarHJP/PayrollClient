@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import AppIcon from "../Component/AppIcon";
 
 /**
  * Props
@@ -18,22 +19,26 @@ const variantMap = {
   info: {
     wrap:
       "bg-[var(--alert-info-bg)] text-[var(--alert-info-text)] border-[var(--alert-info-border)]",
-    icon: "pi pi-info-circle",
+    icon: "Info",
+    flexDirection: "flex-row",
   },
   success: {
     wrap:
       "bg-[var(--alert-success-bg)] text-[var(--alert-success-text)] border-[var(--alert-success-border)]",
-    icon: "pi pi-check",
+    icon: "CircleCheckBig",
+    flexDirection: "flex-row",
   },
   warning: {
     wrap:
       "bg-[var(--alert-warning-bg)] text-[var(--alert-warning-text)] border-[var(--alert-warning-border)]",
-    icon: "pi pi-exclamation-triangle",
+    icon: "AlertTriangle",
+    flexDirection: "flex-row",
   },
   danger: {
     wrap:
       "bg-[var(--alert-danger-bg)] text-[var(--alert-danger-text)] border-[var(--alert-danger-border)]",
-    icon: "pi pi-times-circle",
+    icon: "XCircle",
+    flexDirection: "flex-row",
   },
 };
 
@@ -52,11 +57,12 @@ export function Alert({
         "flex items-start gap-2 border rounded-[var(--alert-radius)]",
         sizeMap[size],
         variantMap[variant].wrap,
+        variantMap[variant].flexDirection,
         className
       )}
     >
       {icon && (
-        <i className={clsx(variantMap[variant].icon, "mt-0.5")} />
+        <AppIcon name={variantMap[variant].icon} size={16} className="mt-0.5" />
       )}
 
       <div className="flex-1">{children}</div>
@@ -66,7 +72,7 @@ export function Alert({
           onClick={onClose}
           className="ml-2 opacity-70 hover:opacity-100"
         >
-          <i className="pi pi-times" />
+          <AppIcon name="XCircle" size={16} />
         </button>
       )}
     </div>

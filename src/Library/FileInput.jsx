@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useEffect } from "react";
-import { Avatar } from "./Avatarr";
+import { Avatar } from "./Avatar";
 import AppIcon from "../Component/AppIcon";
 import { cn } from "@/lib/utils";
 

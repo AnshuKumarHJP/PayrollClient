@@ -1,5 +1,5 @@
 import React from 'react'
-import { Badge } from "../Lib/badge";
+import { Badge } from "../Library/Badge";
 import { Severities } from '../Data/StaticData';
 
 /* =====================================================

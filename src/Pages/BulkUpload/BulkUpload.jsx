@@ -1,15 +1,21 @@
-
 /* =========================================================
-   BulkUpload.jsx  (FULL – LIVE ROW VALIDATION)
+   BulkUpload.jsx
+   PRODUCTION-READY • STABLE • MODERN UX
+   ✔ Visible progress (reading + submitting)
+   ✔ Smooth animation
+   ✔ Safe async handling
+   ✔ No flicker / no hidden state
 ========================================================= */
+
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Card, CardContent } from "../../Library/Card";
-import { Button } from "../../Lib/button";
-import { Alert, AlertDescription } from "../../Lib/alert";
-
-import FileInput from "../../Lib/FileInput";
+import { Button } from "../../Library/Button";
+import { Alert } from "../../Library/Alert";
+import { Progress } from "../../Library/progress";
+import FileInput from "../../Library/FileInput";
 import AppIcon from "../../Component/AppIcon";
 
 import {
@@ -19,29 +25,47 @@ import {
 } from "../../services/excelUtils";
 
 import useValidationRules from "../../Hooks/useValidationRules";
-import { motion, AnimatePresence } from "framer-motion";
 import BulkUploadTable from "./BulkUploadTable";
 
+/* ---------------------------------------------------------
+   Small async delay to allow React repaint (UX polish)
+--------------------------------------------------------- */
+const wait = (ms = 120) => new Promise((res) => setTimeout(res, ms));
+
 export default function BulkUpload({ Template, onSuccess, onCancel }) {
-  const selectedClient = useSelector((state) => state.Auth?.Common?.SelectedClient || "");
+  const selectedClient = useSelector(
+    (state) => state.Auth?.Common?.SelectedClient || ""
+  );
 
   const { validate, loading: rulesLoading } = useValidationRules(Template);
 
   const [uploadFile, setUploadFile] = useState(null);
   const [excelData, setExcelData] = useState(null);
   const [fileInfo, setFileInfo] = useState(null);
-  const [phase, setPhase] = useState("idle"); // idle | reading | ready | error | submitting | success
-  const [errorDetails, setErrorDetails] = useState(null);
 
-  /* ---------------- PARSE FIELDS ---------------- */
+  const [phase, setPhase] = useState("idle");
+  // idle | reading | ready | error | submitting | success
+
+  const [errorDetails, setErrorDetails] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  /* =========================================================
+     FIELD METADATA (UPLOAD ONLY)
+  ========================================================= */
   const fields = useMemo(() => {
     if (!Template?.FieldsConfigurations) return [];
+
     return Template.FieldsConfigurations
       .map((f) => {
         let applicable = [];
         let options = [];
-        try { applicable = JSON.parse(f.ApplicableJson || "[]"); } catch {}
-        try { options = JSON.parse(f.OptionsJson || "[]"); } catch {}
+        try {
+          applicable = JSON.parse(f.ApplicableJson || "[]");
+        } catch {}
+        try {
+          options = JSON.parse(f.OptionsJson || "[]");
+        } catch {}
+
         return {
           ...f,
           name: f.Name,
@@ -54,23 +78,30 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
       .filter((f) => f.applicable.includes("upload"));
   }, [Template]);
 
-  /* ---------------- READ EXCEL ---------------- */
+  /* =========================================================
+     READ + VALIDATE EXCEL
+  ========================================================= */
   useEffect(() => {
     if (!uploadFile || !Template || rulesLoading) return;
 
     let cancelled = false;
 
     const run = async () => {
-      setPhase("reading");
-      setErrorDetails(null);
-
-      setFileInfo({
-        name: uploadFile.name,
-        size: (uploadFile.size / 1024).toFixed(2) + " KB",
-        lastModified: new Date(uploadFile.lastModified).toLocaleString(),
-      });
-
       try {
+        setPhase("reading");
+        setErrorDetails(null);
+        setUploadProgress(0);
+
+        setFileInfo({
+          name: uploadFile.name,
+          size: (uploadFile.size / 1024).toFixed(2) + " KB",
+          lastModified: new Date(uploadFile.lastModified).toLocaleString(),
+        });
+
+        /* -------- Step 1: Structure validation -------- */
+        setUploadProgress(10);
+        await wait();
+
         const structure = await validateExcelStructure(uploadFile, { fields });
         if (!structure.valid) {
           setPhase("error");
@@ -81,13 +112,25 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
           return;
         }
 
+        setUploadProgress(30);
+        await wait();
+
+        /* -------- Step 2: Read Excel -------- */
         const data = await readExcelFile(uploadFile, { fields });
         if (cancelled) return;
 
-        const errors = [];
+        setUploadProgress(60);
+        await wait();
 
-        for (let i = 0; i < data.rows.length; i++) {
-          const res = await validate(data.rows[i], { context: "bulk_upload" });
+        /* -------- Step 3: Row validation -------- */
+        const errors = [];
+        const total = data.rows.length || 1;
+
+        for (let i = 0; i < total; i++) {
+          const res = await validate(data.rows[i], {
+            context: "bulk_upload",
+          });
+
           if (!res.valid) {
             Object.entries(res.errors).forEach(([field, message]) => {
               errors.push({
@@ -97,12 +140,14 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
               });
             });
           }
+
+          setUploadProgress(60 + Math.floor((i / total) * 30));
+          await wait(40);
         }
 
-        setExcelData({
-          ...data,
-          errors,
-        });
+        setExcelData({ ...data, errors });
+        setUploadProgress(100);
+        await wait(200);
 
         if (errors.length) {
           setPhase("error");
@@ -113,7 +158,7 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
         } else {
           setPhase("ready");
         }
-      } catch {
+      } catch (err) {
         setPhase("error");
         setErrorDetails({
           title: "Processing Error",
@@ -123,18 +168,24 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
     };
 
     run();
-    return () => (cancelled = true);
+    return () => {
+      cancelled = true;
+    };
   }, [uploadFile, Template, fields, validate, rulesLoading]);
 
-  /* ---------------- LIVE ROW VALIDATION ---------------- */
+  /* =========================================================
+     LIVE ROW VALIDATION
+  ========================================================= */
   const validateRow = useCallback(
     async (rowIndex, updatedRow) => {
-      const result = await validate(updatedRow, { context: "bulk_upload" });
+      const result = await validate(updatedRow, {
+        context: "bulk_upload",
+      });
 
       setExcelData((prev) => {
         if (!prev) return prev;
 
-        const remaining = (prev.errors || []).filter(
+        const remaining = prev.errors.filter(
           (e) => e.row !== rowIndex + 1
         );
 
@@ -147,7 +198,6 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
             }));
 
         const mergedErrors = [...remaining, ...newErrors];
-
         setPhase(mergedErrors.length ? "error" : "ready");
 
         return {
@@ -162,11 +212,19 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
     [validate]
   );
 
-  /* ---------------- SUBMIT ---------------- */
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
   const handleSubmit = async () => {
     if (!excelData || excelData.errors.length) return;
 
     setPhase("submitting");
+    setUploadProgress(0);
+
+    const interval = setInterval(() => {
+      setUploadProgress((p) => (p >= 90 ? 90 : p + 10));
+    }, 200);
+
     const ok = await onSuccess?.({
       templateId: Template?.Id,
       file: uploadFile,
@@ -174,35 +232,51 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
       clientCode: selectedClient,
     });
 
+    clearInterval(interval);
+    setUploadProgress(100);
+    await wait(300);
+
     setPhase(ok ? "success" : "error");
   };
 
-  /* ---------------- UI ---------------- */
-  return (
-    <motion.div className="p-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Card className="mb-4 p-4 bg-emerald-50/40 border-l-4 border-emerald-400">
-        <h3 className="font-semibold text-md mb-2">Bulk Upload Instructions</h3>
-        <ul className="list-disc list-inside text-sm space-y-1">
-          <li>Download the template</li>
-          <li>Fill mandatory fields</li>
-          <li>Fix errors inline</li>
-        </ul>
-      </Card>
+  /* =========================================================
+     RESET
+  ========================================================= */
+  const handleCancel = () => {
+    setUploadFile(null);
+    setExcelData(null);
+    setFileInfo(null);
+    setPhase("idle");
+    setErrorDetails(null);
+    setUploadProgress(0);
+  };
 
-      <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg px-6 py-4 mb-4 flex justify-between items-center">
+  /* =========================================================
+     UI
+  ========================================================= */
+  return (
+    <motion.div
+      className="p-2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-lg px-6 py-3 mb-4 flex justify-between items-center">
         <div className="flex items-center gap-3 text-white">
           <AppIcon name="FileSpreadsheet" size={22} />
           <div>
             <h2 className="text-lg font-semibold">
               Bulk Upload · {Template?.Name}
             </h2>
-            <p className="text-xs opacity-90">{Template?.Description}</p>
+            <p className="text-xs opacity-90">
+              {Template?.Description}
+            </p>
           </div>
         </div>
 
         <Button
-          variant="outline"
-          className="bg-white"
+          variant="primary"
+          icon={<AppIcon name="Download" />}
           onClick={() =>
             downloadExcelTemplate(
               fields,
@@ -212,7 +286,6 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
             )
           }
         >
-          <AppIcon name="Download" className="mr-2" />
           Download Template
         </Button>
       </div>
@@ -221,13 +294,11 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
         <CardContent className="space-y-4">
           <AnimatePresence>
             {errorDetails && (
-              <Alert className="border-red-500 bg-red-50">
-                <AlertDescription>
+              <Alert variant="danger" icon={true} className="border-red-500 bg-red-50">
                   <strong>{errorDetails.title}</strong>
                   {errorDetails.messages?.map((m, i) => (
                     <div key={i}>{m}</div>
                   ))}
-                </AlertDescription>
               </Alert>
             )}
           </AnimatePresence>
@@ -240,25 +311,41 @@ export default function BulkUpload({ Template, onSuccess, onCancel }) {
             />
           )}
 
-          {excelData && (
+         
+
+          {/* PROGRESS (READING + SUBMITTING) */}
+          {["reading", "submitting"].includes(phase) && (
+            <Progress
+              value={uploadProgress}
+              variant={phase === "submitting" ? "info" : "default"}
+              label="Uploading your records"
+            />
+          )}
+
+           {excelData && (
             <BulkUploadTable
               column={fields}
               data={excelData.rows}
               errors={excelData.errors}
               onValidateRow={validateRow}
-              disabled = {false}
+              // disabled={phase === "submitting"}
+              disabled={true}
             />
           )}
 
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={onCancel}>
+            <Button variant="ghost" onClick={handleCancel}>
+              Clear
+            </Button>
+
+            <Button variant="danger" onClick={onCancel}>
               Cancel
             </Button>
 
             <Button
+              variant="primary"
               disabled={phase !== "ready"}
               onClick={handleSubmit}
-              className="bg-emerald-600 text-white"
             >
               {phase === "submitting" ? "Uploading…" : "Start Upload"}
             </Button>

@@ -198,7 +198,7 @@ export const STATIC_WORKFLOW_DETAILS = {
         StepName: "Manager Approval",
         ApproverRoleCode: 3, // Reporting Manager
         IsMandatory: true,
-        Conditions: null,
+        Conditions: `{ "Amount": { "$lt": 5000 } }`,
         EscalationTo: 2, // HR Manager
         EscalationHours: 24,
         IsActive: true,
@@ -209,7 +209,7 @@ export const STATIC_WORKFLOW_DETAILS = {
         StepName: "HR Approval",
         ApproverRoleCode: 2, // HR Manager
         IsMandatory: true,
-        Conditions: null,
+        Conditions: `{ "Amount": { "$lt": 5000 } }`,
         EscalationTo: null,
         EscalationHours: null,
         IsActive: true,
@@ -266,7 +266,7 @@ export const STATIC_WORKFLOW_DETAILS = {
         StepName: "HR Verification",
         ApproverRoleCode: 2,
         IsMandatory: true,
-        Conditions: null,
+        Conditions: `{ "Amount": { "$lt": 5000 } }`,
         EscalationTo: 1,
         EscalationHours: 24,
         IsActive: true,

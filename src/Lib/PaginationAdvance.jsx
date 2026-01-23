@@ -6,8 +6,8 @@ const PaginationAdvance = ({
   count = 1,
   page = 1,
   rowsPerPage = 10,
-  onChangePage = () => {},
-  onChangePageSize = () => {},
+  onChangePage = () => { },
+  onChangePageSize = () => { },
 }) => {
   const handlePrev = () => page > 1 && onChangePage(page - 1);
   const handleNext = () => page < count && onChangePage(page + 1);
@@ -46,6 +46,7 @@ const PaginationAdvance = ({
       </div>
 
       {/* Page numbers */}
+      {/* Page numbers */}
       <div className="flex items-center justify-center gap-1">
         <button
           onClick={handlePrev}
@@ -54,7 +55,7 @@ const PaginationAdvance = ({
             "px-3 py-1 text-sm rounded-md border",
             page === 1
               ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-emerald-500 hover:text-white border-emerald-300 text-emerald-600"
+              : "hover:bg-primary-500 hover:text-white border-primary-300 text-primary-600"
           )}
         >
           Prev
@@ -68,8 +69,8 @@ const PaginationAdvance = ({
             className={cn(
               "w-8 h-8 text-sm rounded-md border",
               p === page
-                ? "bg-emerald-500 text-white border-emerald-500"
-                : "border-gray-300 hover:bg-emerald-200"
+                ? "bg-primary-500 text-white border-primary-500"
+                : "border-gray-300 hover:bg-primary-200"
             )}
           >
             {p}
@@ -84,7 +85,7 @@ const PaginationAdvance = ({
             "px-3 py-1 text-sm rounded-md border",
             page === count
               ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-emerald-500 hover:text-white border-emerald-300 text-emerald-600"
+              : "hover:bg-primary-500 hover:text-white border-primary-300 text-primary-600"
           )}
         >
           Next

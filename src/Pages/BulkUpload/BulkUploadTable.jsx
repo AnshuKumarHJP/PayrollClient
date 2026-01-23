@@ -10,7 +10,7 @@ import {
 
 import AppIcon from "../../Component/AppIcon";
 import FormInputTypes from "../../Component/FormInputTypes";
-import PaginationAdvance from "../../Lib/PaginationAdvance";
+import PaginationAdvance from "../../Library/Table/PaginationAdvance";
 
 const BulkUploadTable = ({
   column = [],
@@ -71,18 +71,18 @@ const BulkUploadTable = ({
   );
 
   return (
-    <div className="w-full overflow-auto border rounded">
+    <div className="w-full overflow-auto border rounded pb-4">
       <Table className="
        text-sm w-full 
                 [&_tbody_tr:nth-child(odd)>td]:bg-gray-50
-                [&_tbody_tr:hover>td]:bg-emerald-50
+                [&_tbody_tr:hover>td]:bg-indigo-50
                 [&_thead_th]:border-t [&_thead_th]:border-b [&_thead_th]:border-gray-300
                 [&_tbody_tr>td]:border-t [&_tbody_tr>td]:border-gray-200
                 [&_tbody_tr:not(:last-child)>td]:border-b
                 [&_tbody_td]:border-l [&_tbody_td]:border-r [&_tbody_td]:border-gray-200
                 [&_thead_th]:border-l [&_thead_th]:border-r [&_thead_th]:border-gray-300
       ">
-        <TableHeader className="bg-emerald-100">
+        <TableHeader className="bg-indigo-500 text-white">
           <TableRow>
             <TableHead className="w-10 text-center">#</TableHead>
             {column.map((c) => (
@@ -146,15 +146,17 @@ const BulkUploadTable = ({
         </TableBody>
       </Table>
 
-      {rows.length > 0 && (
-        <PaginationAdvance
-          count={totalPages}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onChangePage={setPage}
-          onChangePageSize={setRowsPerPage}
-        />
-      )}
+      <div className="px-2">
+        {rows.length > 0 && (
+          <PaginationAdvance
+            count={totalPages}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onChangePage={setPage}
+            onChangePageSize={setRowsPerPage}
+          />
+        )}
+      </div>
     </div>
   );
 };

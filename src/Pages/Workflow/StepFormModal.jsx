@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "../../Lib/button";
+
+
+/* ===================== StepFormModal.jsx ===================== */
+import React, { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "../../Library/dialog";
+import { Button } from "../../Library/Button";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
-import { Textarea } from "../../Lib/textarea";
-import { Dialog, DialogContent, DialogTitle } from "../../Lib/dialog";
-import { useToast } from "../../Lib/use-toast";
-import RoleSelect from "../../Component/RoleSelect";
+import { Textarea } from "../../Library/Textarea";
 import { Switch } from "../../Library/Switch";
+import RoleSelect from "../../Component/RoleSelect";
+import { useToast } from "../../Library/use-toast";
+import AppIcon from "../../Component/AppIcon";
 
 function StepFormModal({
   isOpen,
@@ -17,199 +21,216 @@ function StepFormModal({
   existingNames = [],
 }) {
   const { toast } = useToast();
+  const editingMode = initial;
 
-  const [stepOrder, setStepOrder] = useState("");
-  const [stepName, setStepName] = useState("");
-  const [ApproverRoleCode, setApproverRoleCode] = useState("");
-  const [isMandatory, setIsMandatory] = useState(true);
-  const [conditions, setConditions] = useState("");
-  const [escalationTo, setEscalationTo] = useState("");
-  const [escalationHours, setEscalationHours] = useState("");
-  const [DisplayOrder, setDisplayOrder] = useState(1);
-  const [isActive, setIsActive] = useState(true);
+  const [form, setForm] = useState({
+    StepOrder: "",
+    StepName: "",
+    ApproverRoleCode: "",
+    EscalationTo: "",
+    EscalationHours: "",
+    DisplayOrder: 1,
+    Conditions: "",
+    IsActive: true,
+  });
 
   useEffect(() => {
-    setStepOrder(initial?.StepOrder ?? "");
-    setStepName(initial?.StepName ?? "");
-    setApproverRoleCode(initial?.ApproverRoleCode ?? "");
-    setIsMandatory(initial?.IsMandatory ?? true);
-    setConditions(initial?.Conditions ?? "");
-    setEscalationTo(initial?.EscalationTo ?? "");
-    setEscalationHours(initial?.EscalationHours ?? "");
-    setDisplayOrder(initial?.DisplayOrder ?? 1);
-    setIsActive(initial?.IsActive ?? true);
+    if (initial) {
+      setForm({
+        StepOrder: initial.StepOrder ?? "",
+        StepName: initial.StepName ?? "",
+        ApproverRoleCode: initial.ApproverRoleCode ?? "",
+        EscalationTo: initial.EscalationTo ?? "",
+        EscalationHours: initial.EscalationHours ?? "",
+        DisplayOrder: initial.DisplayOrder ?? 1,
+        Conditions: initial.Conditions ?? "",
+        IsActive: initial.IsActive ?? true,
+      });
+    }
   }, [initial]);
 
+  const update = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
   const validateAndSave = () => {
-    const orderNum = Number(stepOrder);
+    if (!form.StepName.trim())
+      return toast({ title: "Step name required", variant: "danger" });
 
-    if (!stepName.trim())
-      return toast({
-        title: "Validation Error",
-        description: "Step name is required.",
-        variant: "destructive",
-      });
+    if (!form.StepOrder || Number(form.StepOrder) <= 0)
+      return toast({ title: "Invalid step order", variant: "danger" });
 
-    if (!orderNum || orderNum <= 0)
-      return toast({
-        title: "Validation Error",
-        description: "Step order must be greater than 0.",
-        variant: "destructive",
-      });
-
-    if (!ApproverRoleCode)
-      return toast({
-        title: "Validation Error",
-        description: "Approver role is required.",
-        variant: "destructive",
-      });
+    if (!form.ApproverRoleCode)
+      return toast({ title: "Approver role required", variant: "danger" });
 
     if (
-      existingOrders.includes(orderNum) &&
-      initial?.StepOrder !== orderNum
+      existingOrders.includes(form.StepOrder) &&
+      initial?.StepOrder !== form.StepOrder
     )
       return toast({
         title: "Validation Error",
         description: "Step order already used.",
-        variant: "destructive",
+        variant: "danger",
       });
 
     if (
-      existingNames.includes(stepName.trim()) &&
-      initial?.StepName !== stepName.trim()
+      existingNames.includes(form.StepName.trim()) &&
+      initial?.StepName !== form.StepName.trim()
     )
       return toast({
         title: "Validation Error",
         description: "Step name already used.",
-        variant: "destructive",
+        variant: "danger",
       });
 
     // escalation pair validation
-    if (escalationTo && !escalationHours)
+    if (form.EscalationTo && !form.EscalationHours)
       return toast({
         title: "Validation Error",
         description:
           "Escalation hours are required when escalation role is selected.",
-        variant: "destructive",
+        variant: "danger",
       });
 
-    if (!escalationTo && escalationHours)
+    if (!form.EscalationTo && form.EscalationHours)
       return toast({
         title: "Validation Error",
         description:
           "Select escalation role before setting escalation hours.",
-        variant: "destructive",
+        variant: "danger",
       });
 
+
     onSave({
-      StepOrder: orderNum,
-      StepName: stepName.trim(),
-      ApproverRoleCode: Number(ApproverRoleCode),
-      IsMandatory: !!isMandatory,
-      Conditions: conditions || "",
-      EscalationTo: escalationTo ? Number(escalationTo) : "",
-      EscalationHours: escalationHours
-        ? Number(escalationHours)
+      ...form,
+      StepOrder: Number(form.StepOrder),
+      EscalationHours: form.EscalationHours
+        ? Number(form.EscalationHours)
         : "",
-      DisplayOrder: DisplayOrder,
-      IsActive: isActive,
     });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        header={<DialogTitle className="text-xl font-semibold">{initial ? "Edit Step" : "Add New Step"}</DialogTitle>}
-        body={
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Step Order <span className="text-red-500"> *</span></Label>
-                <Input
-                  type="number"
-                   placeholder="e.g. 1"
-                  value={stepOrder}
-                  onChange={(e) => setStepOrder(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label>Step Name <span className="text-red-500"> *</span></Label>
-                <Input
-                  value={stepName}
-                   placeholder="e.g. Manager Approval"
-                  onChange={(e) => setStepName(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label>Approver Role<span className="text-red-500"> *</span></Label>
-                <RoleSelect
-                  value={ApproverRoleCode}
-                  onChange={setApproverRoleCode}
-                />
-              </div>
-
-              <div>
-                <Label>Escalation To</Label>
-                <RoleSelect
-                  value={escalationTo}
-                  onChange={setEscalationTo}
-                  allowNone={true}
-                />
-              </div>
-
-              <div>
-                <Label>Escalation Hours</Label>
-                <Input
-                  type="number"
-                  value={escalationHours}
-                  placeholder="e.g. 24"
-                  onChange={(e) => setEscalationHours(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label>Display Order</Label>
-                <Input
-                  type="number"
-                  value={DisplayOrder}
-                  placeholder="e.g. 1"
-                  onChange={(e) => setDisplayOrder(Number(e.target.value))}
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 flex gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                />
-                <Label>Active</Label>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <Label>Conditions (JSON)</Label>
-              <Textarea
-               id="conditions"
-                value={conditions}
-                 placeholder='Optional JSON rules, e.g. {"minAmount":1000}'
-                onChange={(e) => setConditions(e.target.value)}
-                  className="min-h-[80px]"
+        className="w-1/2"
+        header={
+          <div className="flex items-center gap-3 p-2 border-b bg-gradient-to-r from-indigo-600 to-indigo-500 text-white">
+            <div className="p-2 rounded-lg text-white">
+              <AppIcon
+                name={editingMode !== null ? "Pencil" : "Plus"}
+                size={20}
               />
             </div>
-          </>
+            <div>
+              <DialogTitle className="text-md font-semibold text-white">
+                {editingMode !== null
+                  ? "Edit Configuration Item"
+                  : "Add New Configuration Item"}
+              </DialogTitle>
+              <p className="text-[12px] text-gray-100 mt-1">
+                {editingMode !== null
+                  ? "Update the configuration details below"
+                  : "Fill in the details to create a new configuration item"}
+              </p>
+            </div>
+          </div>
+        }
+        body={
+          <div className="space-y-6">
+            {/* STEP DETAILS */}
+            <section>
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Step Details
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Step Order *</Label>
+                  <Input
+                    type="number"
+                    value={form.StepOrder}
+                    onChange={(e) => update("StepOrder", e.target.value)}
+                    placeholder="e.g. 1"
+                  />
+                </div>
+                <div>
+                  <Label>Step Name *</Label>
+                  <Input
+                    value={form.StepName}
+                    onChange={(e) => update("StepName", e.target.value)}
+                    placeholder="e.g. Manager Approval"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* APPROVAL */}
+            <section className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
+              <h4 className="text-sm font-semibold text-indigo-700 mb-3">
+                Approval Configuration
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Approver Role *</Label>
+                  <RoleSelect
+                    value={form.ApproverRoleCode}
+                    onChange={(v) => update("ApproverRoleCode", v)}
+                  />
+                </div>
+                <div className="flex items-center gap-3 mt-6">
+                  <Switch
+                    checked={form.IsActive}
+                    onCheckedChange={(v) => update("IsActive", v)}
+                  />
+                  <Label>Active Step</Label>
+                </div>
+              </div>
+            </section>
+
+            {/* ESCALATION */}
+            <section className="rounded-xl border border-amber-100 bg-amber-50/40 p-4">
+              <h4 className="text-sm font-semibold text-amber-700 mb-3">
+                Escalation (Optional)
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <RoleSelect
+                  value={form.EscalationTo}
+                  allowNone
+                  onChange={(v) => update("EscalationTo", v)}
+                />
+                <Input
+                  type="number"
+                  value={form.EscalationHours}
+                  placeholder="Hours"
+                  onChange={(e) =>
+                    update("EscalationHours", e.target.value)
+                  }
+                />
+              </div>
+            </section>
+
+            {/* ADVANCED */}
+            <details>
+              <summary className="cursor-pointer text-sm font-medium text-gray-600">
+                Advanced Conditions (JSON)
+              </summary>
+              <Textarea
+                className="mt-3 min-h-[90px] font-mono text-xs"
+                placeholder='{"minAmount":1000}'
+                value={form.Conditions}
+                onChange={(e) => update("Conditions", e.target.value)}
+              />
+            </details>
+          </div>
         }
         footer={
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={validateAndSave}>
-              {initial ? "Update Step" : "Add Step"}
-            </Button>
+          <div className="flex justify-end items-center">
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={validateAndSave}>
+                {initial ? "Update Step" : "Add Step"}
+              </Button>
+            </div>
           </div>
         }
       />

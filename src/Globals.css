@@ -49,7 +49,7 @@
         --primary-200: #b0adff;
         --primary-300: #8a86ff;
         --primary-400: #5c56ff;
-        --primary-500: #130f40;
+        --primary-500: #1f195e;
         --primary-600: #100d38;
         --primary-700: #0d0a2e;
         --primary-800: #090724;
@@ -259,7 +259,7 @@
         --toast-radius: 10px;
 
         /* Background */
-        --toast-bg: var(--white);
+        --toast-bg: #ffffff;
 
         /* Text */
         --toast-title-color: #111827;

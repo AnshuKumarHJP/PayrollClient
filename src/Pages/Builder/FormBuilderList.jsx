@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent } from "../../Library/Card";
-import { Button } from "../../Lib/button";
-import { Badge } from "../../Lib/badge";
+import { Button } from "../../Library/Button";
+import { Badge } from "../../Library/Badge";
 import { GetFormBuilder, DeleteFormBuilder } from "../../Store/FormBuilder/Action";
-import { useToast } from "../../Lib/use-toast";
+import { useToast } from "../../Library/use-toast";
 import AdvanceTable from "../../Component/AdvanceTable";
 import AppIcon from "../../Component/AppIcon";
 import { SweetConfirm, SweetSuccess } from "../../Component/SweetAlert";
@@ -76,7 +76,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
       </Button>
       <Button
         size="sm"
-        variant="destructive"
+        variant="danger"
         onClick={() => handleDelete(row.Id)}
         title="Delete"
       >
@@ -111,7 +111,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
           toast({
             title: 'Error',
             description: 'Failed to delete form. Please try again.',
-            variant: 'destructive',
+            variant: 'danger',
           });
         } finally {
           controller.abort(); // 🔥 API CANCELLED HERE
@@ -177,8 +177,9 @@ const FormBuilderList = ({ onAddEditMode }) => {
           <AppIcon name="FileText" size={24} />
           <h1 className="text-sm md:text-xl font-bold">Form Builder Management</h1>
         </div>
-        <Button onClick={handleCreateNew}>
-          <AppIcon name="Plus" size={16} className="mr-2" />
+        <Button onClick={handleCreateNew}
+        icon={<AppIcon name="Plus" size={16} />}
+        >
           Create Form
         </Button>
       </div>

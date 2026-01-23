@@ -47,7 +47,7 @@ import {
 } from "./ActionType";
 
 import ClientAPI from "../../services/ClientApi";
-import { toast } from "../../Lib/use-toast";
+import { toast } from "../../Library/use-toast";
 import CryptoService from "../../Security/useCrypto";
 
 /* =====================================================
@@ -129,20 +129,21 @@ export const UpsertFieldValidationRule = (payload, signal) => async (dispatch) =
     dispatch({ type: UPSERT_FIELDVALIDATIONRULE_SUCCESS });
     toast({
       title: "Success",
-      description: decrypted?.Message || "Saved successfully"
+      description: decrypted?.Message || "Saved successfully",
+      variant: "success"
     });
 
     return decrypted;
   } catch (error) {
     dispatch({
       type: UPSERT_FIELDVALIDATIONRULE_FAILURE,
-      payload: error.message || "Failed to save field validation rule"
+      payload: error.message || "Failed to save field validation rule",
     });
 
     toast({
       title: "Error",
       description: error.message,
-      variant: "destructive"
+      variant: "danger"
     });
 
     throw error;
@@ -171,7 +172,8 @@ export const DeleteFieldValidationRuleById = (id, signal) => async (dispatch) =>
     dispatch({ type: DELETE_FIELDVALIDATIONRULE_SUCCESS });
     toast({
       title: "Success",
-      description: decrypted?.Message || "Deleted successfully"
+      description: decrypted?.Message || "Deleted successfully",
+      variant: "success"
     });
     return decrypted;
   } catch (error) {
@@ -183,7 +185,7 @@ export const DeleteFieldValidationRuleById = (id, signal) => async (dispatch) =>
     toast({
       title: "Error",
       description: error.message,
-      variant: "destructive"
+      variant: "danger"
     });
 
     throw error;
@@ -228,6 +230,11 @@ export const GetFormBuilder = (signal) => async (dispatch) => {
       type: GET_FORMBUILDER_FAILURE,
       payload: error.response?.data?.message || "Failed to fetch forms",
     });
+    toast({
+      title: "Error",
+      description: error.response?.data?.message,
+      variant: "danger"
+    });
   } finally {
     controller.abort(); // 🔥 API CANCELLED HERE
   }
@@ -253,7 +260,8 @@ export const UpsertFormBuilder = (payload, signal) => async (dispatch) => {
     dispatch({ type: UPSERT__FORMBUILDER_SUCCESS });
     toast({
       title: "Success",
-      description: decrypted?.Message || "Saved successfully"
+      description: decrypted?.Message || "Saved successfully",
+      variant: "danger"
     });
 
     return decrypted;
@@ -266,7 +274,7 @@ export const UpsertFormBuilder = (payload, signal) => async (dispatch) => {
     toast({
       title: "Error",
       description: error.message,
-      variant: "destructive"
+      variant: "danger"
     });
 
     throw error;
@@ -299,7 +307,8 @@ export const DeleteFormBuilder = (id, signal) => async (dispatch) => {
 
     toast({
       title: "Success",
-      description: decrypted?.Message || "Deleted successfully"
+      description: decrypted?.Message || "Deleted successfully",
+      variant: "success"
     });
 
     return decrypted;
@@ -308,7 +317,7 @@ export const DeleteFormBuilder = (id, signal) => async (dispatch) => {
 
     dispatch({ type: DELETE_FORMBUILDER_FAILURE, payload: msg });
 
-    toast({ title: "Error", description: msg, variant: "destructive" });
+    toast({ title: "Error", description: msg, variant: "danger" });
   } finally {
     controller.abort(); // 🔥 API CANCELLED HERE
   }
@@ -343,6 +352,11 @@ export const GetFormBuilderById = (id, signal) => async (dispatch) => {
       type: GET_FORMBUILDER_BY_ID_FAILURE,
       payload: error.response?.data?.message || "Failed to fetch form",
     });
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "danger"
+    });
     throw error;
   } finally {
     controller.abort(); // 🔥 API CANCELLED HERE
@@ -376,7 +390,8 @@ export const InsertClientFormBuilderHeaderMapping = (payload, signal) => async (
     dispatch({ type: INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_SUCCESS });
     toast({
       title: "Success",
-      description: decrypted?.Message || "Inserted successfully"
+      description: decrypted?.Message || "Inserted successfully",
+      variant: "success"
     });
 
     return decrypted;
@@ -389,7 +404,7 @@ export const InsertClientFormBuilderHeaderMapping = (payload, signal) => async (
     toast({
       title: "Error",
       description: error.message,
-      variant: "destructive"
+      variant: "danger"
     });
 
     throw error;
@@ -417,7 +432,8 @@ export const DeleteClientFormBuilderHeaderMappingById = (id, signal) => async (d
     dispatch({ type: DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_SUCCESS });
     toast({
       title: "Success",
-      description: decrypted?.Message || "Deleted successfully"
+      description: decrypted?.Message || "Deleted successfully",
+      variant: "success"
     });
     return decrypted;
   } catch (error) {
@@ -429,7 +445,7 @@ export const DeleteClientFormBuilderHeaderMappingById = (id, signal) => async (d
     toast({
       title: "Error",
       description: error.message,
-      variant: "destructive"
+      variant: "danger"
     });
 
     throw error;
@@ -466,6 +482,11 @@ export const GetClientFormBuilderHeaderMappingsByClientId = (clientId, signal) =
     dispatch({
       type: GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_FAILURE,
       payload: error.message || "Failed to fetch client form builder header mappings"
+    });
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "danger"
     });
     throw error;
   } finally {

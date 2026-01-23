@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import { Button } from "../Lib/button";
-import { Badge } from "../Lib/badge";
-import { Alert, AlertDescription } from "../Lib/alert";
+import  Button  from "../Library/Button";
+import { Badge } from "../Library/Badge";
+import { Alert } from "../Library/Alert";
 import { ArrowRight, Info, CheckCircle } from "lucide-react";
 import AppIcon from "../Component/AppIcon"
 import { SweetSuccess } from "../Component/SweetAlert";
-import {useToast} from '../Lib/use-toast'
+import {useToast} from '../Library/use-toast'
 import { ModeSelectionData } from "../Data/StaticData";
 
 const ModeSelection = () => {
@@ -27,7 +27,7 @@ const ModeSelection = () => {
       toast({
         title: "Validation Error",
         description: "Please select a data entry mode.",
-        variant: "destructive",
+        variant: "danger",
       });
       return;
     }
@@ -36,7 +36,7 @@ const ModeSelection = () => {
       toast({
         title: "Validation Error",
         description: "Active client is required. Please select a client.",
-        variant: "destructive",
+        variant: "danger",
       });
       return;
     }
@@ -45,7 +45,7 @@ const ModeSelection = () => {
       toast({
         title: "Validation Error",
         description: "Active client contract is required. Please select a contract.",
-        variant: "destructive",
+        variant: "danger",
       });
       return;
     }
@@ -69,9 +69,9 @@ const ModeSelection = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="">
       {/* HEADER */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-4">
         <div className="flex justify-center items-center gap-2 mb-2">
           <AppIcon name="Settings" size={32} />
           <h1 className="text-2xl font-bold">Choose Data Entry Mode</h1>
@@ -105,7 +105,7 @@ const ModeSelection = () => {
                     <CardTitle>{mode.name}</CardTitle>
                     {isSelected && (
                       <Badge className="mt-1 bg-blue-100 text-blue-700">
-                        <CheckCircle size={12} className="mr-1" />
+                        <AppIcon name={"CheckCircle"} size={12} className="mr-1" />
                         Selected
                       </Badge>
                     )}
@@ -121,7 +121,7 @@ const ModeSelection = () => {
                   <ul className="space-y-1 text-sm text-gray-600">
                     {mode.features.map((f, i) => (
                       <li key={i} className="flex gap-2">
-                        <CheckCircle size={14} className="text-green-500 mt-0.5" />
+                        <AppIcon name={"CheckCircle"} size={14} className="text-green-500 mt-0.5" />
                         {f}
                       </li>
                     ))}
@@ -159,13 +159,10 @@ const ModeSelection = () => {
             </p>
 
             {selectedMode === "flexible" && (
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
+              <Alert variant="info">
                   Flexible Mode accepts <strong>raw data</strong>. An admin or
                   operations user will map, validate, and standardize the data
                   before payroll processing.
-                </AlertDescription>
               </Alert>
             )}
           </CardContent>
@@ -178,10 +175,10 @@ const ModeSelection = () => {
           size="lg"
           disabled={!selectedMode || isProceeding}
           onClick={handleProceed}
-          className="px-8"
+          className="px-8 flex"
+           icon={<AppIcon name="ArrowRight" size={16} className="ml-2" />}
         >
           {isProceeding ? "Setting up..." : "Proceed"}
-          <ArrowRight size={16} className="ml-2" />
         </Button>
       </div>
     </div>

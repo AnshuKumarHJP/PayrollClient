@@ -1,73 +1,76 @@
-import React from "react";
-import clsx from "clsx";
+import * as React from "react";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { cn } from "./utils";
 
-/**
- * Props
- * - items: [{ label, value, content, icon }]
- * - value
- * - onChange
- * - size: sm | md | lg
- * - headerVariant: default | pill | outline
- */
+/* -----------------------------------------
+   ROOT
+----------------------------------------- */
+const Tabs = TabsPrimitive.Root;
 
-const sizeMap = {
-  sm: "h-[var(--tab-sm-h)] text-p11 px-3",
-  md: "h-[var(--tab-md-h)] text-p px-3.5",
-  lg: "h-[var(--tab-lg-h)] text-lead px-4",
-};
+/* -----------------------------------------
+   TABS LIST (Scrollable + Memoized)
+----------------------------------------- */
+const TabsListBase = React.forwardRef(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      "flex items-center gap-1",
+      "w-full overflow-x-auto scrollbar-none",       // ⭐ scrollable if too many tabs
+      "rounded-md bg-muted text-muted-foreground p-1",
+      className
+    )}
+    {...props}
+  />
+));
+TabsListBase.displayName = "TabsList";
 
-const headerVariantMap = {
-  default: "bg-[var(--tab-header-default-bg)]",
-  pill: "bg-[var(--tab-header-pill-bg)] p-1 rounded-[var(--tab-radius)]",
-  outline:
-    "border border-[var(--tab-header-outline-border)] rounded-[var(--tab-radius)] p-1",
-};
+export const TabsList = React.memo(TabsListBase);
 
-export function Tabs({
-  items,
-  value,
-  onChange,
-  size = "md",
-  headerVariant = "default",
-  className,
-}) {
-  const activeItem = items.find((t) => t.value === value);
+/* -----------------------------------------
+   TABS TRIGGER (Memoized)
+----------------------------------------- */
+const TabsTriggerBase = React.forwardRef(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex-1 min-w-[100px]",                       // ⭐ always equal width
+      "text-center select-none",
+      "inline-flex items-center justify-center whitespace-nowrap",
+      "rounded-sm px-3 py-1.5 text-sm font-medium transition-all",
+      "ring-offset-background",
+      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "disabled:pointer-events-none disabled:opacity-50",
+      className
+    )}
+    {...props}
+  />
+));
+TabsTriggerBase.displayName = "TabsTrigger";
 
-  return (
-    <div className={clsx("w-full", className)}>
-      {/* ---------- TAB HEADER ---------- */}
-      <div
-        className={clsx(
-          "inline-flex gap-1",
-          headerVariantMap[headerVariant]
-        )}
-      >
-        {items.map((tab) => {
-          const active = tab.value === value;
+export const TabsTrigger = React.memo(TabsTriggerBase);
 
-          return (
-            <button
-              key={tab.value}
-              onClick={() => onChange(tab.value)}
-              className={clsx(
-                "flex items-center gap-1 rounded-[var(--tab-radius)] transition font-medium",
-                sizeMap[size],
-                active
-                  ? "bg-[var(--tab-active-bg)] text-[var(--tab-active-text)]"
-                  : "bg-[var(--tab-inactive-bg)] text-[var(--tab-inactive-text)] hover:bg-white"
-              )}
-            >
-              {tab.icon && <i className={clsx("pi", tab.icon)} />}
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+/* -----------------------------------------
+   TABS CONTENT (forceMount + Memoized)
+----------------------------------------- */
+const TabsContentBase = React.forwardRef(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2",
+      "ring-offset-background focus-visible:outline-none",
+      "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className
+    )}
+    {...props}
+  />
+));
 
-      {/* ---------- TAB BODY ---------- */}
-      <div className="mt-4">
-        {activeItem?.content}
-      </div>
-    </div>
-  );
-}
+TabsContentBase.displayName = "TabsContent";
+
+export const TabsContent = React.memo(TabsContentBase);
+
+/* -----------------------------------------
+   EXPORT ROOT
+----------------------------------------- */
+export { Tabs };

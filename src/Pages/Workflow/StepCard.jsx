@@ -27,10 +27,10 @@ function StepCard({ step, onEdit, onDelete, onMoveUp, onMoveDown, isFirst, isLas
             <IconButton title="Move down" onClick={onMoveDown} className={isLast ? "opacity-50 cursor-not-allowed" : ""}>
               <ArrowDown className="w-4 h-4" />
             </IconButton>
-            <IconButton title="Edit" onClick={onEdit}>
+            <IconButton title="Edit" onClick={onEdit} className="hover:bg-warning">
               <Edit className="w-4 h-4" />
             </IconButton>
-            <IconButton title="Delete" onClick={onDelete} className="hover:bg-destructive hover:text-destructive-foreground">
+            <IconButton title="Delete" onClick={onDelete} className="hover:bg-danger hover:text-red-900">
               <Trash2 className="w-4 h-4" />
             </IconButton>
           </div>

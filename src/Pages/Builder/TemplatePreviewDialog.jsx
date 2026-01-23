@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "../../Component/Modal";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
-import { Button } from "../../Lib/button";
+import { Button } from "../../Library/Button";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
 import {
@@ -11,9 +11,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../Lib/select";
-import { Textarea } from "../../Lib/textarea";
-import FileInput from "../../Lib/FileInput";
+} from "../../Library/Select";
+import { Textarea } from "../../Library/Textarea";
+import FileInput from "../../Library/FileInput";
 
 const TemplatePreviewDialog = ({
   isOpen,

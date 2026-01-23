@@ -1,5 +1,5 @@
 import { Card } from "../../Library/Card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Lib/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Library/Select";
 import { ScrollArea } from "@/Lib/scroll-area";
 import React from 'react'
 

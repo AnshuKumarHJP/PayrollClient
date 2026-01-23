@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
 
-import { Button } from "../../../Lib/button";
-import { useToast } from "../../../Lib/use-toast";
+import  Button  from "../../../Library/Button";
+import { useToast } from "../../../Library/use-toast";
 
 // Field Components
 import FieldBasicInputs from "./FieldBasicInputs";
@@ -104,7 +104,7 @@ const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
       toast({
         title: "Validation Error",
         description: error.message,
-        variant: "destructive",
+        variant: "danger",
       });
     }
   };

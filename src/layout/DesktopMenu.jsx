@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import AppIcon from "../Component/AppIcon";
-import { cn } from "@/lib/utils";
+import { cn } from "../Library/utils"
 
 const ACTIVE_COLOR = "#9747FF";
 

@@ -261,7 +261,7 @@ export const UpsertFormBuilder = (payload, signal) => async (dispatch) => {
     toast({
       title: "Success",
       description: decrypted?.Message || "Saved successfully",
-      variant: "danger"
+      variant: "success"
     });
 
     return decrypted;

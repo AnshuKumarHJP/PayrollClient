@@ -6,7 +6,7 @@ import {
     SelectValue,
     SelectContent,
     SelectItem,
-} from "@/Lib/select"; // <-- ShadCN
+} from "../../Library/Select"; // <-- ShadCN
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
 
 export default function SalarySlipCard() {

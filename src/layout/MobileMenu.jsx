@@ -7,7 +7,7 @@ import AppIcon from "../Component/AppIcon";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../Library/utils"
 
 const ACTIVE_COLOR = "#9747FF";
 

@@ -116,7 +116,7 @@ const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
       title="Pop Up"
       Header={() => (
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
-         px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-emerald-400 to-green-400">
+         px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-400 to-indigo-400">
           {/* LEFT CONTENT */}
           <div className="items-start gap-3">
             <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
@@ -131,11 +131,13 @@ const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
       )}
       Footer={() => (
         <div className="flex justify-end gap-2 p-2">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
-            {initialFieldForm.id ? "Update" : "Add"}
+          <Button 
+          size="sm"
+          onClick={handleSave}>
+            {initialFieldForm.id ? "Update Field" : "Add Field"}
           </Button>
         </div>
       )}

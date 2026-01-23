@@ -1,6 +1,6 @@
 import React from "react";
 import { DayPicker } from "react-day-picker";
-import { cn } from "@/lib/utils";
+import { cn } from "./utils"
 import "react-day-picker/style.css";
 import AppIcon from "../Component/AppIcon";
 import { buttonVariants } from "./Button";

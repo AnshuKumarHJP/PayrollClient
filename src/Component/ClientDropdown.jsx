@@ -6,7 +6,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/Library/Select";
-import { fetchClients } from "../../api/services/clientServices";
+// import { fetchClients } from "../../api/services/clientServices";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedClient } from "../Store/Auth/AuhtSlice";
 
@@ -39,8 +39,8 @@ const ClientDropdown = ({
         if (UserClient) {
           setClients(storeClients);
         } else {
-          const apiClients = await fetchClients();
-          setClients(apiClients || []);
+          // const apiClients = await fetchClients();
+          // setClients(apiClients || []);
         }
       } catch (e) {
         console.error("Client load error", e);

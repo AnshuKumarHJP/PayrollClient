@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
   TooltipContent,
   TooltipProvider
-} from "../Lib/tooltip";
+} from "../Library/tooltip";
 
 /* ───────────────────────────────
    MODAL MODES (NO TRANSFORM CENTERING)

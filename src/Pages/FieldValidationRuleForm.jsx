@@ -178,12 +178,14 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
         const res = await dispatch(UpsertFieldValidationRule(payload));
 
         if (res?.Status) {
-          dispatch(GetAllFieldValidationRules());
           SweetSuccess({
             title: form.Id ? "Updated" : "Created",
             text: `Field validation rule ${form.Id ? "updated" : "created"} successfully.`,
           });
           onSave?.(res);
+          setTimeout(()=>{
+            dispatch(GetAllFieldValidationRules());
+          },[1000])
         }
       } catch (err) {
         toast({
@@ -202,9 +204,9 @@ const FieldValidationRuleForm = ({ id, onSave, onCancel }) => {
   return (
     <div className="bg-white shadow-xl rounded-2xl overflow-hidden ">
       {/* Header */}
-      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b bg-gradient-to-r from-emerald-400 to-green-400">
-        <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
-          <AppIcon name={"BookOpenCheck"} size={30} />  Field Validation Rule
+      <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-2 border-b bg-gradient-to-r from-blue-400 to-indigo-400">
+        <h2 className="text-sm sm:text-lg font-semibold text-white flex items-center gap-2">
+          <AppIcon name={"BookOpenCheck"} size={20} />  Field Validation Rule
         </h2>
         <p className="text-green-100 text-xs sm:text-sm">
           Create and manage validation rules dynamically

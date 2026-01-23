@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "../Lib/table";
+} from "../Library/table";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

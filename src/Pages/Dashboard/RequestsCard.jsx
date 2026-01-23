@@ -1,5 +1,4 @@
-import { Badge } from "@/Lib/badge";
-import { ScrollArea } from "@/Lib/scroll-area";
+import { Badge } from "../../Library/Badge";
 import { Dot } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
 
@@ -53,7 +52,7 @@ export default function RequestsCard() {
                 </div>
 
                 {/* Scrollable List */}
-                <ScrollArea className="h-[170px] pr-1 w-full">
+                <div className="h-[170px] pr-1 w-full">
                     {requests.map((item, index) => (
                         <div
                             key={index}
@@ -91,7 +90,7 @@ export default function RequestsCard() {
                             </span>
                         </div>
                     ))}
-                </ScrollArea>
+                </div>
             </CardContent>
         </Card>
     );

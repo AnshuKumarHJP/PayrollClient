@@ -2,7 +2,7 @@
 import * as React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import { cn } from "./utils"
 import AppIcon from "../Component/AppIcon";
 
 /* ---------- ROOT ---------- */

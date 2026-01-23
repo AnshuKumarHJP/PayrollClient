@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../Library/Select";
-import { Textarea } from "../../Library/textarea";
-import FileInput from "../...Library/FileInput";
+import { Textarea } from "../../Library/Textarea";
+import FileInput from "../../Library/FileInput";
 
 const FormBuilderPreviewDialog = ({
   isOpen,
@@ -30,7 +30,7 @@ const FormBuilderPreviewDialog = ({
       isOpen={isOpen}
       onClose={() => onOpenChange(false)}
       Header={
-        <h2 className="text-sm sm:text-lg md:text-xl p-2">
+        <h2 className="text-sm sm:text-lg md:text-xl p-2 font-semibold">
           Form Preview : {formName || "New Form"}
         </h2>
       }
@@ -169,8 +169,10 @@ const FormBuilderPreviewDialog = ({
         </div>
       }
       Footer={
-        <div className="flex justify-end p-4">
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+        <div className="flex justify-end p-2 pr-4">
+          {/* <Button 
+          size="sm"
+          onClick={() => onOpenChange(false)}>Close</Button> */}
         </div>
       }
     />

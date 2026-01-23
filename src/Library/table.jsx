@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "./utils";
 
 /* ============================================================
    FIXED TABLE — horizontal scroll now works on all devices

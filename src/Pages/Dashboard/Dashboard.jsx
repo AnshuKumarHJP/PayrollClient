@@ -3,11 +3,11 @@ import StatCard from './StatCard'
 import { Calendar } from '../../Library/Calendar'
 import { Card } from '../../Library/Card'
 import {
-  LineChartComponent,
-  BarChartComponent,
-  PieChartComponent,
-  AreaChartComponent,
-  ScatterChartComponent
+    LineChartComponent,
+    BarChartComponent,
+    PieChartComponent,
+    AreaChartComponent,
+    ScatterChartComponent
 } from '../../ChartGraph'
 
 import AttendanceCard from './AttendanceCard'
@@ -73,51 +73,42 @@ const Dashboard = () => {
                 TOP SECTION 
                 Cards Left  & Calendar Right
             ============================== */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 w-full">
-                {/* LEFT SIDE: Full dashboard content (takes 3 columns on large screens) */}
-                <div className="lg:col-span-3 space-y-4">
-                    {/* --- Top Stat Cards Row --- */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+            <div className="space-y-4">
+                {/* --- Top Stat Cards Row --- */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
 
-                        <StatCard
-                            title="Total Employees"
-                            value="200/200"
-                            change="+15%"
-                            type="employees"
-                        />
+                    <StatCard
+                        title="Total Employees"
+                        value="200/200"
+                        change="+15%"
+                        type="employees"
+                    />
 
-                        <StatCard
-                            title="On Leaves"
-                            value="20/200"
-                            change="-10%"
-                            type="leaves"
-                        />
+                    <StatCard
+                        title="On Leaves"
+                        value="20/200"
+                        change="-10%"
+                        type="leaves"
+                    />
 
-                        <StatCard
-                            title="New Joinee"
-                            value="10/200"
-                            change="+12%"
-                            type="new"
-                        />
+                    <StatCard
+                        title="New Joinee"
+                        value="10/200"
+                        change="+12%"
+                        type="new"
+                    />
 
-                        <EmployeeDistributionCard />
-                    </div>
-
-                    {/* --- Attendance + Salary Slip + Requests --- */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <AttendanceCard />
-                        <SalarySlipCard />
-                        <RequestsCard />
-                    </div>
+                    <EmployeeDistributionCard />
                 </div>
 
-                {/* RIGHT SIDE: Calendar Card (Responsive) */}
-                <div className="lg:col-span-1">
-                    <Card className="p-3 h-full items-center justify-center flex">
-                        <Calendar />
-                    </Card>
+                {/* --- Attendance + Salary Slip + Requests --- */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <AttendanceCard />
+                    <SalarySlipCard />
+                    <RequestsCard />
                 </div>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
                 <AnnouncementsCard />
                 <HRPoliciesCard />

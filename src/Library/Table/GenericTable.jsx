@@ -201,7 +201,7 @@ const CustomDataGrid = ({
         <div className="flex gap-2 items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="">
+             <Button variant="outline" className="border-gray-200">
                 <AppIcon name="Columns" size={16} />
               </Button>
             </DropdownMenuTrigger>
@@ -216,7 +216,7 @@ const CustomDataGrid = ({
                         : [...p, col.key]
                     )
                   }
-                  className="flex justify-between gap-4"
+                  className="flex justify-between gap-8 px-4"
                 >
                   {col.label}
                   <Switch size="sm" checked={visibleCols.includes(col.key)} />

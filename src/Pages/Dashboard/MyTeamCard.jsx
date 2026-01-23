@@ -1,6 +1,5 @@
 import { Mail } from "lucide-react";
 import { Card } from "../../Library/Card";
-import { ScrollArea } from "@/Lib/scroll-area";
 
 import React from 'react'
 
@@ -17,7 +16,7 @@ const MyTeamCard = () => {
                 <h2 className="font-semibold text-lg">My Team</h2>
                 <span className="text-blue-600 text-sm cursor-pointer">View All</span>
             </div>
-             <ScrollArea className="h-[190px] pr-1 ">
+             <div className="h-[190px] pr-1 ">
                 {team.map((member, i) => (
                     <div key={i} className="flex items-center justify-between mb-1 border-b last:border-none pb-2">
                         <div className="flex items-center gap-3">
@@ -32,7 +31,7 @@ const MyTeamCard = () => {
                         <Mail size={18} className="text-gray-400 cursor-pointer" />
                     </div>
                 ))}
-            </ScrollArea>
+            </div>
         </Card>
     )
 }

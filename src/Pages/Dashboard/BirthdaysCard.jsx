@@ -1,6 +1,5 @@
 import { Card } from "../../Library/Card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Library/Select";
-import { ScrollArea } from "@/Lib/scroll-area";
 import React from 'react'
 
 const BirthdaysCard = () => {
@@ -25,7 +24,7 @@ const BirthdaysCard = () => {
                     </SelectContent>
                 </Select>
             </div>
-            <ScrollArea className="h-[190px] pr-1 ">
+            <div className="h-[190px] pr-1 ">
                 {people.map((p, i) => (
                     <div key={i} className="flex items-center justify-between mb-1 border-b last:border-none pb-2">
                         <div className="flex items-center gap-3">
@@ -45,7 +44,7 @@ const BirthdaysCard = () => {
                         <span className="text-gray-500 text-sm">{p.date}</span>
                     </div>
                 ))}
-            </ScrollArea>
+            </div>
         </Card>
     )
 }

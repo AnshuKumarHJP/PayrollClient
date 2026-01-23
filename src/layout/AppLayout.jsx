@@ -1,6 +1,6 @@
 // src/layout/LayoutContent.jsx
 import { Outlet } from "react-router";
-import { TooltipProvider } from "@/Lib/tooltip";
+import { TooltipProvider } from "@/Library/tooltip";
 
 import { Toaster } from "@/Library/Toaster";
 

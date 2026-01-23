@@ -312,7 +312,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
         FieldsConfigurations: fields.map(f => ({ ...f, ApplicableJson: JSON.stringify(f.ApplicableJson || []) })),
       };
 
-      
+
       const res = await dispatch(UpsertFormBuilder(FormBuilderHeader));
 
       if (res?.Status) {
@@ -344,7 +344,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
     { key: "Name", label: "Name", minWidth: 140 },
 
     {
-      key: "Type",label: "Type",minWidth: 120,
+      key: "Type", label: "Type", minWidth: 120,
       render: (v) => <Badge className="text-xs">{v}</Badge>
     },
 
@@ -426,10 +426,10 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
       <div className="bg-white shadow-xl rounded-2xl overflow-hidden ">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
-         px-4 sm:px-6 py-3 sm:py-5 bg-gradient-to-r from-emerald-400 to-green-400">
+         px-4 sm:px-6 py-3 sm:py-2 bg-gradient-to-r from-blue-400 to-indigo-400">
           {/* LEFT CONTENT */}
           <div className="items-start gap-3">
-            <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm sm:text-lg font-semibold text-white flex items-center gap-2">
               <AppIcon name="Settings" size={20} /> {HeaderCode ? "Edit Form" : "Create Form"}
             </h2>
             <p className="text-green-100 text-xs sm:text-sm">
@@ -441,22 +441,28 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           <div className=" flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto ">
             <Button
               variant="outline"
+                size="sm"
+              icon={<AppIcon name="Eye" size={16} />}
               onClick={() => setIsPreviewDialogOpen(true)}
             >
-              <AppIcon name="Eye" size={16} className="mr-1" /> Preview
+              Preview
             </Button>
-
             <Button
-              variant="default"
+              variant="primary"
+              size="sm"
               disabled={saveStatus === "saving"}
               onClick={handleSaveForm}
+              icon={<AppIcon name="Save" size={16} />}
             >
-              <AppIcon name="Save" size={16} className="mr-1" />
               {saveStatus === "saving" ? "Saving…" : "Save"}
             </Button>
 
-            <Button variant="purple" onClick={openAddField}>
-              <AppIcon name="Plus" size={16} className="mr-1" /> Add Field
+            <Button 
+            variant="primary"
+              size="sm"
+              icon={<AppIcon name="Plus" size={16}  />}
+              onClick={openAddField}>
+              Add Field
             </Button>
           </div>
         </div>

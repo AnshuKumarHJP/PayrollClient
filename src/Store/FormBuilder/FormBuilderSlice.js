@@ -1,3 +1,4 @@
+import { GetMasterDataForClientPortalWorkflowCreation } from "./Action";
 import {
   GET_ALL_FIELDVALIDATIONRULES_REQUEST,
   GET_ALL_FIELDVALIDATIONRULES_SUCCESS,
@@ -43,6 +44,22 @@ import {
   GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_SUCCESS,
   GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_FAILURE,
 
+  UPSERT_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_REQUEST,
+  UPSERT_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_SUCCESS,
+  UPSERT_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_FAILURE,
+
+  DELETE_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_BY_ID_REQUEST,
+  DELETE_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_BY_ID_SUCCESS,
+  DELETE_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_BY_ID_FAILURE,
+
+  GET_ALL_CLIENT_PORTAL_WORKFLOW_CONFIGURATIONS_REQUEST,
+  GET_ALL_CLIENT_PORTAL_WORKFLOW_CONFIGURATIONS_SUCCESS,
+  GET_ALL_CLIENT_PORTAL_WORKFLOW_CONFIGURATIONS_FAILURE,
+
+  GET_MASTER_DATA_FOR_CLIENT_PORTAL_WORKFLOW_CREATION_REQUEST,
+  GET_MASTER_DATA_FOR_CLIENT_PORTAL_WORKFLOW_CREATION_SUCCESS,
+  GET_MASTER_DATA_FOR_CLIENT_PORTAL_WORKFLOW_CREATION_FAILURE,
+
 } from "./ActionType";
 
 /* =====================================================
@@ -51,8 +68,10 @@ import {
 
 const initialState = {
   FieldValidationRule: { data: [], isLoading: false, error: null, Success: null },
-  FormBuilder: { data: [], isLoading: false, error: null, Success: null },
+  FormBuilder: { data: [], currentForm: null, isLoading: false, error: null, Success: null },
   ClientFormBuilderHeaderMapping: { data: [], isLoading: false, error: null, Success: null },
+  ClientPortalWorkflowConfiguration: { data: [], isLoading: false, error: null, Success: null },
+  ClientPortalWorkflowConfigurationMaster: { data: [], isLoading: false, error: null, Success: null },
 };
 
 /* =====================================================
@@ -83,6 +102,14 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
     case GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_REQUEST:
       return { ...state, ClientFormBuilderHeaderMapping: { ...state.ClientFormBuilderHeaderMapping, isLoading: true, error: null, Success: null }, };
 
+    // ClientPortalWorkflowConfiguration
+    case UPSERT_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_REQUEST:
+    case DELETE_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_BY_ID_REQUEST:
+    case GET_ALL_CLIENT_PORTAL_WORKFLOW_CONFIGURATIONS_REQUEST:
+      return { ...state, ClientPortalWorkflowConfiguration: { ...state.ClientPortalWorkflowConfiguration, isLoading: true, error: null, Success: null }, };
+
+    case GetMasterDataForClientPortalWorkflowCreation:
+      return { ...state, ClientPortalWorkflowConfigurationMaster: { ...state.ClientPortalWorkflowConfigurationMaster, isLoading: true, error: null, Success: null }, };
     /* ================= SUCCESS ================= */
 
     // Validation Rules
@@ -99,7 +126,7 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
       return { ...state, FormBuilder: { ...state.FormBuilder, isLoading: false, data: action.payload, Success: true }, };
 
     case GET_FORMBUILDER_BY_ID_SUCCESS:
-      return { ...state, FormBuilder: { ...state.FormBuilder, isLoading: false, data: action.payload, Success: true, }, };
+      return { ...state, FormBuilder: { ...state.FormBuilder, isLoading: false, currentForm: action.payload, Success: true, }, };
 
     case UPSERT__FORMBUILDER_SUCCESS:
     case DELETE_FORMBUILDER_SUCCESS:
@@ -133,11 +160,30 @@ export const FormBuilder_Reducer = (state = initialState, action) => {
     case DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_SUCCESS:
       return { ...state, ClientFormBuilderHeaderMapping: { ...state.ClientFormBuilderHeaderMapping, isLoading: false, Success: true }, };
 
+    // ClientPortalWorkflowConfiguration
+    case UPSERT_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_SUCCESS:
+    case DELETE_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_BY_ID_SUCCESS:
+      return { ...state, ClientPortalWorkflowConfiguration: { ...state.ClientPortalWorkflowConfiguration, isLoading: false, Success: true }, };
+
+    case GET_ALL_CLIENT_PORTAL_WORKFLOW_CONFIGURATIONS_SUCCESS:
+      return { ...state, ClientPortalWorkflowConfiguration: { ...state.ClientPortalWorkflowConfiguration, isLoading: false, data: action.payload, Success: true }, };
+
+    case GET_MASTER_DATA_FOR_CLIENT_PORTAL_WORKFLOW_CREATION_SUCCESS:
+      return { ...state, ClientPortalWorkflowConfigurationMaster: { ...state.ClientPortalWorkflowConfigurationMaster, isLoading: false, data: action.payload, Success: true }, };
+
     // ClientFormBuilderHeaderMapping - FAILURE
     case INSERT_CLIENT_FORM_BUILDER_HEADER_MAPPING_FAILURE:
     case DELETE_CLIENT_FORM_BUILDER_HEADER_MAPPING_BY_ID_FAILURE:
     case GET_CLIENT_FORM_BUILDER_HEADER_MAPPINGS_BY_CLIENT_ID_FAILURE:
       return { ...state, ClientFormBuilderHeaderMapping: { ...state.ClientFormBuilderHeaderMapping, isLoading: false, error: action.payload, Success: false }, };
+
+    // ClientPortalWorkflowConfiguration - FAILURE
+    case UPSERT_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_FAILURE:
+    case DELETE_CLIENT_PORTAL_WORKFLOW_CONFIGURATION_BY_ID_FAILURE:
+    case GET_ALL_CLIENT_PORTAL_WORKFLOW_CONFIGURATIONS_FAILURE:
+      return { ...state, ClientPortalWorkflowConfiguration: { ...state.ClientPortalWorkflowConfiguration, isLoading: false, error: action.payload, Success: false }, };
+    case GET_MASTER_DATA_FOR_CLIENT_PORTAL_WORKFLOW_CREATION_FAILURE:
+      return { ...state, ClientPortalWorkflowConfigurationMaster: { ...state.ClientPortalWorkflowConfiguration, isLoading: false, error: action.payload, Success: false }, };
 
 
 

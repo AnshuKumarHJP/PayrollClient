@@ -29,8 +29,8 @@ const Login = () => {
   const authSuccess = useSelector((s) => s.Auth?.LogResponce?.Success);
 
   const [formData, setFormData] = useState({
-    UserName: "15172",
-    password: "test",
+    UserName: "", //15172
+    password: "", //test
   });
 
   /* -------------------------

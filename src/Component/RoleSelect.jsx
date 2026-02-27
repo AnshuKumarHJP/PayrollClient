@@ -27,8 +27,8 @@ const RoleSelect = ({ value, onChange, placeholder = "Select your Role", allowNo
           <SelectItem value="none">None</SelectItem>
         )}
         {STATIC_ROLES.map((role) => (
-          <SelectItem key={role.RoleCode} value={role.RoleCode.toString()}>
-            {role.Role_Name}
+          <SelectItem key={role.Code} value={role.Code.toString()}>
+            {role.Name}
           </SelectItem>
         ))}
       </SelectContent>

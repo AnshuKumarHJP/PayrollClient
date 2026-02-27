@@ -13,7 +13,7 @@ export const ModalTrigger = Dialog.Trigger;
 export const ModalOverlay = React.forwardRef((props, ref) => (
   <Dialog.Overlay
     ref={ref}
-    className="fixed inset-0 bg-[var(--modal-overlay-bg)] backdrop-blur-sm animate-in fade-in"
+    className="fixed inset-0 z-[1000] bg-[var(--modal-overlay-bg)] backdrop-blur-sm animate-in fade-in"
     {...props}
   />
 ));

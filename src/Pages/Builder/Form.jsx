@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import axios from "axios";
-
 import PageBuilder from "./PageBuilder";
 import Loading from "../../Component/Loading";
 import CryptoService from "../../Security/useCrypto";
 import { GetFormBuilderById } from "../../Store/FormBuilder/Action";
+import { InitiateClientPortalWFBatchService } from "./FormDataService";
+import { useToast } from "../../Library/use-toast";
 
 const fadeInSlow = {
   hidden: { opacity: 0 },
@@ -17,6 +17,7 @@ const fadeInSlow = {
 const Form = () => {
   const { templateID } = useParams();
   const dispatch = useDispatch();
+  const { toast } = useToast();
 
   const { data: template, isLoading, error } = useSelector(
     (state) => state.FormBuilderStore.FormBuilder
@@ -24,7 +25,7 @@ const Form = () => {
 
   const [decryptedId, setDecryptedId] = useState(null);
   const [decryptDone, setDecryptDone] = useState(false);
-  const [tableData, setTableData] = useState([]);
+  const [PayloadStatus, setPayloadStatus] = useState(1000);
 
   /* ---------------- DECRYPT ---------------- */
   useEffect(() => {
@@ -33,6 +34,7 @@ const Form = () => {
     setDecryptDone(true);
   }, [templateID]);
 
+
   /* ---------------- FETCH TEMPLATE ---------------- */
   useEffect(() => {
     if (decryptDone && decryptedId) {
@@ -40,46 +42,128 @@ const Form = () => {
     }
   }, [decryptDone, decryptedId, dispatch]);
 
-  /* ---------------- GET TABLE DATA ---------------- */
-  const getTableData = useCallback(async () => {
-    if (!template?.GetApi) return;
-
-    try {
-      const res = await axios.get(template.GetApi);
-      setTableData(res.data ?? []);
-    } catch (err) {
-      console.error("GetApi failed", err);
-    }
-  }, [template]);
-
-  useEffect(() => {
-    if (template?.GetApi) {
-      getTableData();
-    }
-  }, [template, getTableData]);
 
   /* ---------------- UPSERT (ADD + UPDATE) ---------------- */
   const handleUpsert = useCallback(
     async ({ isEdit, recordId, data }) => {
       if (!template?.UpsertApi) return false;
-      console.log(data);
+      let ClientPortalWorkflowConfigurationId = null;
+      let ModuleProcessActionId = null;
+      if (template?.ClientPortalWorkflowConfiguration?.length > 0) {
+        const properties = template.ClientPortalWorkflowConfiguration[0]?.ClientPortalWorkflowProperties;
+        ClientPortalWorkflowConfigurationId = template.ClientPortalWorkflowConfiguration[0]?.Id;
+        ModuleProcessActionId = template.ClientPortalWorkflowConfiguration[0]?.ModuleProcessActionId;
+        if (Array.isArray(properties)) {
+          const matchedProperty = properties.find(x => x.FlowOrder === 1);
+          if (matchedProperty && matchedProperty.ActionProcessingStatus !== undefined) {
+            setPayloadStatus(matchedProperty.ActionProcessingStatus);
+          }
+        }
+      }
 
       try {
-        const payload = isEdit ? { ...data, id: recordId } : data;
-        // await axios.post(template.UpsertApi, payload);
-        // await getTableData();
-        return true;
+        const rawPayload = isEdit ? { ...data, id: recordId } : data;
+
+        // Ensure payload is an array for batch processing
+        const payloadArray = Array.isArray(rawPayload) ? rawPayload : [rawPayload];
+
+        const finalPayload = {
+          BatchName: `Batch-${template?.Name}-${Date.now()}`,
+          ModuleId: template?.ModuleId,
+          FormBuilderId: template?.Id,
+          ClientPortalWorkflowConfigurationId: ClientPortalWorkflowConfigurationId,
+          RequestCount: payloadArray.length,
+          ObjectStorageId: 0,
+          SearchCriteria: "",
+          ModuleProcessId: template?.ModuleId,
+          ModuleProcessActionId: ModuleProcessActionId,
+          SourcePayload: JSON.stringify(payloadArray),
+          Status: PayloadStatus
+        }
+        const res = await InitiateClientPortalWFBatchService(finalPayload)
+        if (res?.Status) {
+          toast({
+            title: "Success",
+            description: res.Message || "Form submitted successfully",
+            variant: "success"
+          });
+          return true;
+        } else {
+          toast({
+            title: "Error",
+            description: res.Message || "Form submitted failed",
+            variant: "error"
+          });
+          return false;
+        }
       } catch (err) {
         console.error("Upsert failed", err);
         return false;
       }
     },
-    [template, getTableData]
+    [template]
   );
 
   const handleBulkSave = async (bulkData) => {
     console.log("Bulk save data:", bulkData);
-    return false
+    if (!template?.UpsertApi) return false;
+    let ClientPortalWorkflowConfigurationId = null;
+    let ModuleProcessActionId = null;
+    if (template?.ClientPortalWorkflowConfiguration?.length > 0) {
+      const properties = template.ClientPortalWorkflowConfiguration[0]?.ClientPortalWorkflowProperties;
+      ClientPortalWorkflowConfigurationId = template.ClientPortalWorkflowConfiguration[0]?.Id;
+      ModuleProcessActionId = template.ClientPortalWorkflowConfiguration[0]?.ModuleProcessActionId;
+      if (Array.isArray(properties)) {
+        const matchedProperty = properties.find(x => x.FlowOrder === 1);
+        if (matchedProperty && matchedProperty.ActionProcessingStatus !== undefined) {
+          setPayloadStatus(matchedProperty.ActionProcessingStatus);
+        }
+      }
+    }
+    try {
+      // Fix: rows are inside excelData
+      const { excelData, ...rest } = bulkData;
+      const rows = excelData?.rows || [];
+
+      const payloadArray = rows.map(row => ({
+        ...rest,
+        ...row
+      }));
+      const finalPayload = {
+        BatchName: `Batch-${template?.Name}-${Date.now()}`,
+        ModuleId: template?.ModuleId,
+        FormBuilderId: template?.Id,
+        ClientPortalWorkflowConfigurationId: ClientPortalWorkflowConfigurationId,
+        RequestCount: payloadArray.length,
+        ObjectStorageId: 0,
+        SearchCriteria: "",
+        ModuleProcessId: template?.ModuleId,
+        ModuleProcessActionId: ModuleProcessActionId,
+        SourcePayload: JSON.stringify(payloadArray),
+        Status: PayloadStatus
+      }
+      console.log("finalPayload", finalPayload);
+      return true;
+      const res = await InitiateClientPortalWFBatchService(finalPayload)
+      if (res?.Status) {
+        toast({
+          title: "Success",
+          description: res.Message || "Form submitted successfully",
+          variant: "success"
+        });
+        return true;
+      } else {
+        toast({
+          title: "Error",
+          description: res.Message || "Form submitted failed",
+          variant: "error"
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Bulk save failed", error);
+      return false;
+    }
   }
 
   /* ---------------- UI STATES ---------------- */
@@ -93,7 +177,6 @@ const Form = () => {
     <motion.div variants={fadeInSlow} initial="hidden" animate="show">
       <PageBuilder
         Template={template}
-        rows={tableData}
         AddMore
         onUpsert={handleUpsert}
         onBulkSave={handleBulkSave}

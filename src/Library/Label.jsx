@@ -13,11 +13,9 @@ const labelVariants = cva(
   `
     font-medium
     leading-tight
-    text-tiny
-    sm:text-p11
-    md:text-p
-    text-gray-700
-
+    text-sm
+    md:text-[13px]
+    text-slate-900 dark:text-white
     peer-disabled:cursor-not-allowed
     peer-disabled:opacity-70
   `

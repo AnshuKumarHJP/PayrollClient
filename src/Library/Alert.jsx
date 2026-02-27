@@ -10,9 +10,9 @@ import AppIcon from "../Component/AppIcon";
  */
 
 const sizeMap = {
-  sm: "px-[var(--alert-sm-px)] py-2 text-p11",
-  md: "px-[var(--alert-md-px)] py-2.5 text-p",
-  lg: "px-[var(--alert-lg-px)] py-3 text-lead",
+  sm: "px-[var(--alert-sm-px)] py-2 text-xs",
+  md: "px-[var(--alert-md-px)] py-2.5 text-sm",
+  lg: "px-[var(--alert-lg-px)] py-3 text-sm",
 };
 
 const variantMap = {
@@ -62,7 +62,7 @@ export function Alert({
       )}
     >
       {icon && (
-        <AppIcon name={variantMap[variant].icon} size={16} className="mt-0.5" />
+        <AppIcon name={variantMap[variant].icon} size={15} className="mt-0.5" />
       )}
 
       <div className="flex-1">{children}</div>

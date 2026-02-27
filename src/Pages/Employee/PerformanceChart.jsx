@@ -1,10 +1,6 @@
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import React from "react";
+import ReactECharts from "echarts-for-react";
+import * as echarts from "echarts";
 
 const data = [
   { name: "Jan", employee: 30, intern: 20 },
@@ -18,6 +14,68 @@ const data = [
 ];
 
 export default function PerformanceChart() {
+  const option = {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#1e293b' },
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '10%',
+      top: '5%',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: data.map(item => item.name),
+      axisLine: { lineStyle: { color: '#e2e8f0' } },
+      axisLabel: { color: '#64748b' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: '#f1f5f9' } },
+      axisLabel: { color: '#64748b' }
+    },
+    series: [
+      {
+        name: 'Employee',
+        type: 'line',
+        smooth: true,
+        data: data.map(item => item.employee),
+        lineStyle: { color: '#FACC15', width: 3 },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(250, 204, 21, 0.4)' },
+            { offset: 1, color: 'rgba(250, 204, 21, 0)' }
+          ])
+        },
+        symbol: 'none'
+      },
+      {
+        name: 'Intern',
+        type: 'line',
+        smooth: true,
+        data: data.map(item => item.intern),
+        lineStyle: { color: '#3B82F6', width: 3 },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(59, 130, 246, 0.4)' },
+            { offset: 1, color: 'rgba(59, 130, 246, 0)' }
+          ])
+        },
+        symbol: 'none'
+      }
+    ],
+    animationDuration: 1500,
+    animationEasing: 'cubicOut',
+  };
+
   return (
     <>
       <h3 className="text-sm font-semibold">Over all Employee Performance</h3>
@@ -31,14 +89,13 @@ export default function PerformanceChart() {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={230}>
-        <AreaChart data={data}>
-          <Area dataKey="employee" stroke="#FACC15" fill="#FACC1544" />
-          <Area dataKey="intern" stroke="#3B82F6" fill="#3B82F644" />
-          <XAxis dataKey="name" />
-          <Tooltip />
-        </AreaChart>
-      </ResponsiveContainer>
+      <div style={{ width: '100%', height: '230px' }}>
+        <ReactECharts
+          option={option}
+          style={{ height: '100%', width: '100%' }}
+          opts={{ renderer: 'svg' }}
+        />
+      </div>
     </>
   );
 }

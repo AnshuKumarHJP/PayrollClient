@@ -13,9 +13,6 @@ const badgeVariants = cva(
     variants: {
       variant: {
         /* ---------- STATUS ---------- */
-        info:
-          "bg-[var(--badge-info-bg)] text-[var(--badge-info-text)]",
-
         success:
           "bg-[var(--badge-success-bg)] text-[var(--badge-success-text)]",
 
@@ -24,9 +21,6 @@ const badgeVariants = cva(
 
         danger:
           "bg-[var(--badge-danger-bg)] text-[var(--badge-danger-text)]",
-
-        muted:
-          "bg-[var(--badge-muted-bg)] text-[var(--badge-muted-text)]",
 
          // NEW VARIANTS --------------------------
 

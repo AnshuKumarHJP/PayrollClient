@@ -14,7 +14,7 @@ export const downloadExcelTemplate = async (
   workbook.creator = "Payroll System";
   workbook.created = new Date();
 
-  const filteredFields = fields?.filter(f => Array.isArray(f.applicable) && f.applicable.includes("upload"));
+  const filteredFields = fields.filter(f => Array.isArray(f.ApplicableJson) && f.ApplicableJson.includes("upload"));
 
   const ws = workbook.addWorksheet("Data Entry");
 
@@ -179,9 +179,10 @@ export const validateExcelStructure = async (file, fields) => {
         return { valid: false, error: "Invalid fields data: fields must be an array or an object with a fields array" };
       }
     }
+    // console.log("fieldArray",fieldArray);
 
     // Filter fields to only include those applicable for upload
-    const filteredFields = fieldArray.filter(f => Array.isArray(f.applicable) && f.applicable.includes("upload"));
+    const filteredFields = fieldArray.filter(f => Array.isArray(f.ApplicableJson) && f.ApplicableJson.includes("upload"));
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(await file.arrayBuffer());
@@ -195,7 +196,6 @@ export const validateExcelStructure = async (file, fields) => {
     const expected = filteredFields.map((f) =>
       f.required ? `${f.label} *` : f.label
     );
-
     /* ✔ FIX 1: Extract RichText correctly */
     const extractedHeaders = headerRow.values
       .slice(1)
@@ -205,7 +205,6 @@ export const validateExcelStructure = async (file, fields) => {
         }
         return value;
       });
-
     /* ✔ FIX 2: Compare both arrays safely - check if all expected headers are present (order doesn't matter) */
     for (let i = 0; i < expected.length; i++) {
       if (!extractedHeaders.includes(expected[i])) {
@@ -250,7 +249,16 @@ export const readExcelFile = async (file, template) => {
   const rows = [];
   const errors = [];
 
-  const fields = template.fields.filter(f => Array.isArray(f.applicable) && f.applicable.includes("upload")); // mapped by column
+  const fields = template.fields.filter(f => Array.isArray(f.ApplicableJson) && f.ApplicableJson.includes("upload"));
+
+  // Get headers from the sheet
+  const headerRow = ws.getRow(2);
+  const headers = headerRow.values.slice(1).map((value) => {
+    if (typeof value === "object" && value.richText) {
+      return value.richText.map((rt) => rt.text).join("");
+    }
+    return value;
+  });
 
   ws.eachRow((row, rowNum) => {
     if (rowNum <= 2) return; // Skip org + header row
@@ -259,7 +267,12 @@ export const readExcelFile = async (file, template) => {
     let rowErrors = [];
     let hasData = false;
 
-    fields.forEach((field, i) => {
+    headers.forEach((header, i) => {
+      // Strip * from header and labels for matching
+      const cleanHeader = header.replace(/\s*\*$/, '');
+      const field = fields.find(f => f.Name === cleanHeader || f.Label.replace(/\s*\*$/, '') === cleanHeader);
+      if (!field) return; // Skip if no matching field
+
       const cell = row.getCell(i + 1);
       let value = cell.value;
 
@@ -277,12 +290,16 @@ export const readExcelFile = async (file, template) => {
 
       // ONLY REQUIRED VALIDATION
       if (field.required && !value) {
-        rowErrors.push(`${field.label} is required`);
+        rowErrors.push(`${field.Label.replace(/\s*\*$/, '')} is required`);
       }
 
       // ⛔ NO TYPE VALIDATION
-      // KEEP RAW VALUES, NO TRANSFORMATION
-      rowData[field.name] = value;
+      // BUT FORMAT DATES TO yyyy-MM-dd
+      if (field.type === "date" && value instanceof Date && !isNaN(value)) {
+        rowData[field.Name] = value.toISOString().split('T')[0]; // yyyy-MM-dd
+      } else {
+        rowData[field.Name] = value;
+      }
     });
 
     if (hasData || rowErrors.length) {

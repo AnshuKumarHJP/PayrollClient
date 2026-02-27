@@ -9,7 +9,7 @@ import {
 } from "../Library/DropdownMenu";
 
 // ⭐ ADD FRAMER MOTION
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import AppIcon from "./AppIcon";
 
 export default function NotificationDropdown() {
@@ -24,12 +24,9 @@ export default function NotificationDropdown() {
           whileTap={{ scale: 0.92 }}
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.15 }}
-          className="
-            relative flex items-center justify-center h-9 w-9 rounded-full
-            border border-indigo-200/60 bg-indigo-50/40 backdrop-blur-md
-            text-indigo-700 shadow-sm hover:bg-indigo-100/60
-            transition-all
-          "
+          className="relative flex items-center justify-center
+            p-2.5 rounded-lg text-slate-600 dark:text-slate-300
+             hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
         >
           {/* Notification Pulse Dot */}
           {notifying && (
@@ -37,7 +34,7 @@ export default function NotificationDropdown() {
               <span className="absolute inset-0 rounded-full bg-orange-400 opacity-75 animate-ping" />
             </span>
           )}
-          <AppIcon name={"Bell"} size={18} className="text-indigo-700"/>
+          <AppIcon name={"Bell"} size={18} className="w-5 h-5" />
         </motion.button>
       </DropdownMenuTrigger>
 

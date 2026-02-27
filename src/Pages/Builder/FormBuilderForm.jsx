@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 import {
   Card,
@@ -15,7 +16,7 @@ import { Switch } from "../../Library/Switch";
 import { Badge } from "../../Library/Badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Library/Select";
 
-import AdvanceTable from "../../Component/AdvanceTable";
+import AdvanceTable from "../../Library/Table/AdvanceTable";
 import AppIcon from "../../Component/AppIcon";
 import Loading from '../../Component/Loading'
 
@@ -32,18 +33,23 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   UpsertFormBuilder,
   GetFormBuilder,
+  GetFormBuilderById,
+  GetAllFieldValidationRules,
+  GetAllClientPortalWorkflowConfigurations,
 } from "../../Store/FormBuilder/Action";
 
 
 // Static Data
 import { Modules } from "../../Data/StaticData";
 import { SweetSuccess, SweetConfirm } from "../../Component/SweetAlert";
+import CryptoService from "../../Security/useCrypto";
 
 
 // ------------------------------------------------
 // DEFAULT DETAILS (FormBuilderDetails)
 // ------------------------------------------------
 const emptyField = {
+  DetailsCode: crypto.randomUUID(),
   Name: "",
   Label: "",
   Type: "text",
@@ -60,6 +66,7 @@ const emptyField = {
   GroupBackendKey: "",
   DisplayOrder: 1,
   Active: true,
+
 };
 
 
@@ -67,10 +74,13 @@ const emptyField = {
 // ------------------------------------------------
 // MAIN COMPONENT
 // ------------------------------------------------
-const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
-  const HeaderCode = propId;
+const FormBuilderForm = () => {
   const dispatch = useDispatch();
   const { toast } = useToast();
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const HeaderCode = id ? Number(CryptoService.decrypt(id)) : null;
 
   const [loading, setLoading] = useState(false);
   const [fields, setFields] = useState([]);
@@ -89,36 +99,45 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
     BulkApi: "",
     IsGroupSaveEnabled: false,
     FieldsConfigurations: [],
+    ClientPortalWCId: 0
   });
 
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState(false);
   const [initialFieldForm, setInitialFieldForm] = useState(emptyField);
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
-  const { FormBuilder, FieldValidationRule } = useSelector((state) => state.FormBuilderStore);
+  const { Common } = useSelector((s) => s.Auth);
+  const { FormBuilder, FieldValidationRule, ClientPortalWorkflowConfiguration } = useSelector((state) => state.FormBuilderStore);
+  const { data: workflowData } = ClientPortalWorkflowConfiguration;
 
+  useEffect(() => {
+    dispatch(
+      GetAllClientPortalWorkflowConfigurations({
+        ClientId: Common?.SelectedClientCode,
+        ClientContractId: Common?.SelectedClientContractCode,
+      })
+    );
+  }, [dispatch, Common]);
 
   // ------------------------------------------------
   // LOAD RULES + FORM
   // ------------------------------------------------
   useEffect(() => {
-    if (HeaderCode && FormBuilder?.data?.length > 0) {
-      loadForm();
-    } else if (HeaderCode && !FormBuilder?.data) {
-      // Load forms if not already loaded
-      dispatch(GetFormBuilder());
-    }
-  }, [HeaderCode, FormBuilder?.data]);
-
-  // Separate effect to load form once data is available
-  useEffect(() => {
-    if (HeaderCode && FormBuilder?.data?.length > 0) {
-      const formExists = FormBuilder.data.find(f => f.Id === HeaderCode);
-      if (formExists) {
+    if (HeaderCode) {
+      if (FormBuilder?.data) {
+        // Data is available, load the form
         loadForm();
+      } else {
+        // No data, fetch by ID
+        dispatch(GetFormBuilderById(HeaderCode));
       }
     }
-  }, [FormBuilder?.data, HeaderCode]);
+
+    // Load field validation rules if not available
+    if (!FieldValidationRule?.data || FieldValidationRule.data.length === 0) {
+      dispatch(GetAllFieldValidationRules());
+    }
+  }, [HeaderCode, FormBuilder?.data, FieldValidationRule?.data]);
 
   // ------------------------------------------------
   // LOAD FORM (HEADER + DETAILS)
@@ -126,17 +145,23 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   const loadForm = async () => {
     try {
       setLoading(true);
-      let form = FormBuilder?.data?.find(f => f.Id === HeaderCode);
+      let form;
+
+      if (Array.isArray(FormBuilder?.data)) {
+        form = FormBuilder.data.find(f => f.Id === HeaderCode);
+      } else if (FormBuilder?.data && typeof FormBuilder.data === 'object') {
+        // Handle case where data is a single object from GetFormBuilderById
+        form = FormBuilder.data.Id === HeaderCode ? FormBuilder.data : null;
+      }
       if (!form) {
         toast({
           title: "Error",
           description: "Form not found.",
           variant: "danger",
         });
-        onCancel?.();
+        navigate("/formbuilder");
         return;
       }
-
       // HEADER
       setFormHeader({
         Id: HeaderCode || 0,
@@ -152,6 +177,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
         BulkApi: form.BulkApi || "",
         IsGroupSaveEnabled: form.IsGroupSaveEnabled || false,
         FieldsConfigurations: [],
+        ClientPortalWCId: form.ClientPortalWCId
       });
 
       // DETAILS - Parse FieldsConfigurations JSON string
@@ -165,6 +191,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           parsed = Array.isArray(fieldsConfig) ? fieldsConfig : [];
         } catch (parseError) {
           console.error("Error parsing FieldsConfigurations:", parseError);
+          console.error("Invalid JSON string:", form.FieldsConfigurations);
           parsed = [];
         }
       }
@@ -172,7 +199,6 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
       setFields(
         parsed.map((f, i) => ({
           ...f,
-          id: f.DetailsCode || f.id || Date.now() + i, // Ensure each field has an id
           ApplicableJson:
             typeof f.ApplicableJson === "string"
               ? (() => {
@@ -213,52 +239,85 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   // OPEN EDIT FIELD
   // ------------------------------------------------
   const openEditField = (row) => {
-    setInitialFieldForm({ ...row });
+    setInitialFieldForm(JSON.parse(JSON.stringify(row))); // Deep clone to avoid shared references
     setIsFieldDialogOpen(true);
   };
-
 
   // ------------------------------------------------
   // HANDLE FIELD SAVE
   // ------------------------------------------------
   const handleFieldSave = (processedField) => {
-    // Check for duplicate field names
-    const existingFields = initialFieldForm.id
-      ? fields.filter(f => f.id !== initialFieldForm.id)
-      : fields;
+    setFields((prev) => {
+      let isEdit = false;
 
-    const duplicateName = existingFields.find(f =>
-      f.Name?.trim().toLowerCase() === processedField.Name?.trim().toLowerCase()
-    );
-
-    if (duplicateName) {
-      toast({
-        title: "Duplicate Field Name",
-        description: `A field with name "${processedField.Name}" already exists`,
-        variant: "danger",
+      /* ----------------------------------
+         EDIT MODE (match by DetailsCode)
+      ---------------------------------- */
+      const updated = prev.map((f) => {
+        if (
+          processedField.DetailsCode &&
+          f.DetailsCode === processedField.DetailsCode
+        ) {
+          isEdit = true;
+          return {
+            ...f,
+            ...processedField, // ✅ safe merge
+          };
+        }
+        return f;
       });
-      return;
-    }
 
-    if (initialFieldForm.id) {
-      setFields(fields.map((f) => (f.id === initialFieldForm.id ? processedField : f)));
-    } else {
-      processedField.DisplayOrder = fields.length + 1;
-      setFields([...fields, processedField]);
-    }
+      if (isEdit) {
+        return updated; // ✅ edit done
+      }
+
+      /* ----------------------------------
+         ADD MODE (no DetailsCode match)
+      ---------------------------------- */
+
+      // prevent duplicate Name
+      const duplicate = prev.some(
+        (f) =>
+          f.Name?.trim().toLowerCase() ===
+          processedField.Name?.trim().toLowerCase()
+      );
+
+      if (duplicate) {
+        toast({
+          title: "Duplicate Field Name",
+          description: `Field "${processedField.Name}" already exists`,
+          variant: "danger",
+        });
+        return prev; // ❌ stop add
+      }
+
+      return [
+        ...prev,
+        {
+          ...processedField,
+          DetailsCode: processedField.DetailsCode || crypto.randomUUID(), // ✅ ensure unique
+          DisplayOrder: prev.length + 1,
+          Active: true,
+        },
+      ];
+    });
+
+    setIsFieldDialogOpen(false);
+    setInitialFieldForm(emptyField);
   };
+
 
 
 
   // ------------------------------------------------
   // DELETE FIELD
   // ------------------------------------------------
-  const deleteField = (id) => {
+  const deleteField = (detailsCode) => {
     SweetConfirm({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       onConfirm: () => {
-        setFields(fields.filter((f) => f.id !== id));
+        setFields(fields.filter((f) => f.DetailsCode !== detailsCode));
         SweetSuccess({
           title: 'Deleted!',
           text: 'Field has been deleted.'
@@ -309,6 +368,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
         GetApi: formHeader.GetApi,
         BulkApi: formHeader.BulkApi,
         IsGroupSaveEnabled: formHeader.IsGroupSaveEnabled,
+        ClientPortalWCId: formHeader.ClientPortalWCId,
         FieldsConfigurations: fields.map(f => ({ ...f, ApplicableJson: JSON.stringify(f.ApplicableJson || []) })),
       };
 
@@ -321,7 +381,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           title: HeaderCode ? "Updated" : "Created",
           text: `Form  ${HeaderCode ? "updated" : "created"} successfully.`,
         });
-        onSave?.(res);
+        onCancel();
       }
 
     } catch {
@@ -335,6 +395,9 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
     }
   };
 
+  const onCancel = () => {
+    navigate("/formbuilder");
+  }
 
   // ------------------------------------------------
   // TABLE COLUMNS
@@ -422,8 +485,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
   // ------------------------------------------------
   return (
     <>
-
-      <div className="bg-white shadow-xl rounded-2xl overflow-hidden ">
+      <div className="bg-white dark:bg-slate-800 shadow-xl rounded-2xl overflow-hidden ">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
          px-4 sm:px-6 py-3 sm:py-2 bg-gradient-to-r from-blue-400 to-indigo-400">
@@ -440,14 +502,6 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           {/* RIGHT ACTIONS */}
           <div className=" flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto ">
             <Button
-              variant="outline"
-                size="sm"
-              icon={<AppIcon name="Eye" size={16} />}
-              onClick={() => setIsPreviewDialogOpen(true)}
-            >
-              Preview
-            </Button>
-            <Button
               variant="primary"
               size="sm"
               disabled={saveStatus === "saving"}
@@ -457,12 +511,26 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
               {saveStatus === "saving" ? "Saving…" : "Save"}
             </Button>
 
-            <Button 
-            variant="primary"
+            <Button
+              variant="primary"
               size="sm"
-              icon={<AppIcon name="Plus" size={16}  />}
+              icon={<AppIcon name="Plus" size={16} />}
               onClick={openAddField}>
               Add Field
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<AppIcon name="Eye" size={16} />}
+              onClick={() => setIsPreviewDialogOpen(true)}
+            >
+              Preview
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onCancel}>
+              Cancel
             </Button>
           </div>
         </div>
@@ -483,13 +551,27 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
                 ["Icon", "Icon", "text"],
                 ["Version", "Version", "text"],
                 ["DisplayOrder", "Display Order", "number"],
-                ["ModuleId", "Module *", "select"],
+                ["ModuleId", "Module *", "select"], // data source Modules
+                ["ClientPortalWCId", "Form Workflow *", "select"],  // data source workflowData
               ].map(([key, fullLabel, type]) => {
                 const isRequired = fullLabel.includes('*');
                 const labelText = fullLabel.replace('*', '').trim();
                 const placeholder = type === "select" ? `Select ${labelText}` : `Enter ${labelText}`;
 
                 if (type === "select") {
+                  let dataSource = [];
+                  if (key === "ModuleId") {
+                    dataSource = Modules;
+                  } else if (key === "ClientPortalWCId") {
+                    dataSource = [
+                      { value: 0, label: "None" },
+                      ...(workflowData?.map(item => ({
+                        value: item.Id,
+                        label: item.Name || item.WorkflowName
+                      })) || [])
+                    ];
+                  }
+
                   return (
                     <div key={key}>
                       <Label>
@@ -506,9 +588,9 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
                           <SelectValue placeholder={placeholder} />
                         </SelectTrigger>
                         <SelectContent>
-                          {Modules.map((module) => (
-                            <SelectItem key={module.value} value={module.value.toString()}>
-                              {module.label}
+                          {dataSource.map((item) => (
+                            <SelectItem key={item.value} value={item.value.toString()}>
+                              {item.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -585,7 +667,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
               showIndex={true}
               renderActions={(row) => {
                 const sortedFields = fields.sort((a, b) => a.DisplayOrder - b.DisplayOrder);
-                const currentIndex = sortedFields.findIndex(f => f.id === row.id);
+                const currentIndex = sortedFields.findIndex(f => f.DetailsCode === row.DetailsCode);
                 return (
                   <div className="flex gap-1">
                     <Button
@@ -610,7 +692,7 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
                       <AppIcon name="Edit" size={14} />
                     </Button>
 
-                    <Button size="sm" variant="outline" onClick={() => deleteField(row.id)}>
+                    <Button size="sm" variant="outline" onClick={() => deleteField(row.DetailsCode)}>
                       <AppIcon name="Trash2" size={14} />
                     </Button>
                   </div>
@@ -628,6 +710,8 @@ const FormBuilderForm = ({ id: propId, onSave, onCancel }) => {
           onClose={() => setIsFieldDialogOpen(false)}
           initialFieldForm={initialFieldForm}
           onSave={handleFieldSave}
+          setFields={setFields}
+          fields={fields}
         />
 
         {/* PREVIEW DIALOG */}

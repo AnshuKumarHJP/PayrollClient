@@ -47,23 +47,25 @@ export default function OffCanvas({
 
             {/* Panel */}
             <div
-                className={`fixed z-50 bg-white rounded-l-2xl shadow-xl transform transition-transform duration-300 
+                className={`fixed z-50 bg-white rounded-l-2xl shadow-xl transform transition-transform duration-300 flex flex-col
                  ${cfg.base} ${size ?? ""} 
                  ${isOpen ? cfg.open : cfg.closed}`}
             >
                 {/* Header with Close Button */}
                 {showClose && (
-                    <button
-                        onClick={onClose}
-                        className="absolute right-2 top-2 rounded p-1 text-gray-500 hover:bg-red-500 hover:text-white transition"
-                        aria-label="Close"
-                    >
-                        <AppIcon name="X" size={20} />
-                    </button>
+                    <div className="absolute right-2 top-2 z-10">
+                        <button
+                            onClick={onClose}
+                            className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+                            aria-label="Close"
+                        >
+                            <AppIcon name="X" size={20} />
+                        </button>
+                    </div>
                 )}
 
                 {/* Content */}
-                <div className="overflow-auto">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {children}
                 </div>
             </div>

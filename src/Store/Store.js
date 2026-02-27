@@ -16,8 +16,9 @@ import CryptoJS from "crypto-js";
 
 // Slices
 import GlobalReducer from "./Slices/GlobalSlice";
-import authReducer from "./Auth/AuhtSlice";
+import authReducer from "./Auth/AuthSlice";
 import { FormBuilder_Reducer } from "./FormBuilder/FormBuilderSlice";
+import ChecklistReducer from "./Slices/ChecklistSlice";
 
 // =============================================================
 // ENCRYPTION TRANSFORM
@@ -58,7 +59,7 @@ const encryptDecryptTransform = createTransform(
 const authPersistConfig = {
   key: "_",
   storage: storageSession,       //  FIXED
-  whitelist: ["LogResponce","Common"],
+  whitelist: ["LogResponce", "Common"],
   transforms: [encryptDecryptTransform],
 };
 
@@ -76,6 +77,7 @@ const rootReducer = combineReducers({
   GlobalStore: GlobalReducer,
   Auth: persistedAuthReducer,
   FormBuilderStore: FormBuilder_Reducer,
+  ChecklistStore: ChecklistReducer,
 });
 
 // =============================================================

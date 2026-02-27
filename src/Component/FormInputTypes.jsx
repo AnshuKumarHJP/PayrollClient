@@ -2,12 +2,16 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../Library/Select";
 import { Switch } from "../Library/Switch";
 import { Input } from "../Library/Input";
-import  Button  from "../Library/Button";
+import Textarea from "../Library/Textarea";
 import { cn } from "../Library/utils";
 import { toast } from "../Library/use-toast";
 import axios from "axios";
 import { motion } from "framer-motion";
 import AppIcon from "./AppIcon";
+import FileInputWithModal from "../Library/FileInputWithModal";
+import { Popover, PopoverContent, PopoverTrigger } from "../Library/Popover";
+import { Button } from "../Library/Button";
+import SimpleCalendar from "./SimpleCalendar";
 
 /* ===========================================================
    ANIMATION VARIANTS
@@ -17,10 +21,6 @@ const fade = {
   show: { opacity: 1, y: 0, transition: { duration: 0.15 } }
 };
 
-const fadeFast = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.12 } }
-};
 
 /* ===========================================================
    ✅ FIXED COMPONENT SIGNATURE (CRITICAL)
@@ -34,6 +34,7 @@ const FormInputTypes = ({
   const type = (f.InputType || f.DataType || "text").toLowerCase();
   // ✅ FIXED
   const disabled = Boolean(f.Disabled);
+  const [open, setOpen] = useState(false);
 
   const placeholder =
     f.Placeholder && f.Placeholder.trim()
@@ -44,39 +45,35 @@ const FormInputTypes = ({
   if (["file", "image", "document"].includes(type)) {
     return (
       <motion.div variants={fade} initial="hidden" animate="show">
-        <label className="w-full cursor-pointer">
-          <div
-            className={cn(
-              "flex items-center justify-center h-9 border border-dashed rounded-md gap-2 text-sm",
-              disabled
-                ? "bg-gray-100 text-gray-400"
-                : hasError
-                ? "border-red-400 text-red-600"
-                : "border-emerald-400 text-emerald-700 hover:bg-emerald-50"
-            )}
-          >
-            <AppIcon name="UploadCloud" className="h-4 w-4" />
-            Choose File
-          </div>
+        <FileInputWithModal
+          label={f.Label}
+          error={hasError}
+          mand={f.Required}
+          allowTypes={f.Accept ? f.Accept.split(',').map(t => t.trim()) : [".xlsx", ".xls", ".csv"]}
+          view={true}
+          download={true}
+          onChangeFile={(file) => {
+            if (file) {
+              // console.log("FormInputTypes - File Changed:", file);
+              // Prioritize Document ID (Result), then filename
+              const docId = file.Result;
+              const fileName = file.name || file.filename;
 
-          {!disabled && (
-            <input
-              type="file"
-              accept={f.Accept || "*"}
-              hidden
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  onChange?.(file.name);
-                  toast({
-                    title: "File Selected",
-                    description: file.name,
-                  });
-                }
-              }}
-            />
-          )}
-        </label>
+              // console.log("FormInputTypes - Value to Set:", docId || fileName);
+
+              // Pass the ID if available, otherwise the filename (as placeholder)
+              onChange?.(docId || fileName);
+
+              toast({
+                title: "File Selected",
+                description: fileName || "File uploaded successfully",
+              });
+            } else {
+              // console.log("FormInputTypes - File Cleared");
+              onChange?.(null);
+            }
+          }}
+        />
       </motion.div>
     );
   }
@@ -151,8 +148,9 @@ const FormInputTypes = ({
   /* ---------------- TEXTAREA ---------------- */
   if (type === "textarea") {
     return (
-      <textarea
+      <Textarea
         value={value ?? ""}
+        rows={2}
         onChange={(e) => onChange?.(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
@@ -164,6 +162,54 @@ const FormInputTypes = ({
     );
   }
 
+  /* ---------------- DATE ---------------- */
+  if (type === "date") {
+    const displayValue = value ? new Date(value).toLocaleDateString() : "";
+    // const [open, setOpen] = useState(false); // Moved to top level
+
+    const handleDateSelect = (date) => {
+      if (!date) return;
+      // Format to YYYY-MM-DD for form compatibility
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      onChange?.(`${y}-${m}-${d}`);
+      setOpen(false);
+    };
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              "flex h-10 w-full items-center bg-white dark:bg-slate-800 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              !value && "text-slate-400",
+              hasError && "border-red-400",
+              "hover:bg-slate-50 transition-colors border border-slate-200 dark:border-slate-700"
+            )}
+            disabled={disabled}
+          >
+            <AppIcon name="Calendar" className="mr-3 h-4 w-4 shrink-0 text-slate-400" />
+            <span className="flex-1 truncate text-left">
+              {value ? displayValue : placeholder}
+            </span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <SimpleCalendar
+            selectedDate={value}
+            onSelect={handleDateSelect}
+            disablePast={f.DisablePast || f.Validation?.DisablePast}
+            disableFuture={f.DisableFuture || f.Validation?.DisableFuture}
+            minDate={f.MinDate || f.Validation?.MinDate}
+            maxDate={f.MaxDate || f.Validation?.MaxDate}
+          />
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
   /* ---------------- DEFAULT INPUT ---------------- */
   return (
     <Input
@@ -172,7 +218,7 @@ const FormInputTypes = ({
       onChange={(e) => onChange?.(e.target.value)}
       disabled={disabled}
       placeholder={placeholder}
-      className={cn(hasError && "border-red-400")}
+      className={cn("text-sm", hasError && "border-red-400")}
     />
   );
 };
@@ -187,9 +233,9 @@ const SelectComponent = ({ f, value, onChange, hasError, disabled }) => {
     () =>
       Array.isArray(f.Options)
         ? f.Options.map((o) => ({
-            label: typeof o === "object" ? o.label : o,
-            value: typeof o === "object" ? o.value : o
-          }))
+          label: typeof o === "object" ? o.label : o,
+          value: typeof o === "object" ? o.value : o
+        }))
         : [],
     [f.Options]
   );

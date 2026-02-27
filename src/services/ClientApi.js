@@ -87,14 +87,17 @@ export default function ClientApi(
   let finalBaseUrl = "";
   let NORMAL_API_URL = import.meta.env.VITE_PAYROLL_API_BASE_URL;
   let SECURITY_API_URL = import.meta.env.VITE_SECURITY_API_BASE_URL;
+  let OBJECT_STORAGE_API_URL = import.meta.env.VITE_OBJECTSTORAGE_BASE_URL;
 
-  if (!NORMAL_API_URL || !SECURITY_API_URL) {
+  if (!NORMAL_API_URL || !SECURITY_API_URL || !OBJECT_STORAGE_API_URL) {
     console.error("API base URLs are not defined");
     return null;
   }
 
   if (apiType === "security") {
     finalBaseUrl = SECURITY_API_URL;
+  } else if (apiType === "objectStorage") {
+    finalBaseUrl = OBJECT_STORAGE_API_URL;
   } else if (apiType === "normal") {
     finalBaseUrl = NORMAL_API_URL;
   } else {
@@ -104,7 +107,7 @@ export default function ClientApi(
   }
 
   const Baseurl = `${finalBaseUrl}${url}`;
-  const token = sessionStorage.getItem("token");
+  const token = sessionStorage.getItem("__tn__");
 
   const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -120,11 +123,30 @@ export default function ClientApi(
 
   switch (httpMethod) {
     case "GET":
-      return axios.get(Baseurl, config).then(checkStatus).catch(checkStatus);
+      return axios({
+        method: "GET",
+        url: Baseurl,
+        data: payload?.data ?? payload,
+        headers,
+        signal, // 🔥 KEY LINE
+        transformRequest: [
+          (data) => (typeof data === "string" ? data : JSON.stringify(data)),
+        ],
+      })
+        .then(checkStatus)
+        .catch(checkStatus);
 
     case "POST":
-      return axios
-        .post(Baseurl, payload?.data ?? payload, config)
+      return axios({
+        method: "POST",
+        url: Baseurl,
+        data: payload?.data ?? payload,
+        headers,
+        signal, // 🔥 KEY LINE
+        transformRequest: [
+          (data) => (typeof data === "string" ? data : JSON.stringify(data)),
+        ],
+      })
         .then(checkStatus)
         .catch(checkStatus);
 

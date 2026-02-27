@@ -28,7 +28,7 @@ const InputModule = () => {
   );
 
   const selectedClientId = useSelector(
-    (s) => s.Auth?.Common?.SelectedClient
+    (s) => s.Auth?.Common?.SelectedClientCode
   );
 
   const lastFetchedClientRef = useRef(null);
@@ -103,7 +103,7 @@ const InputModule = () => {
     show: { opacity: 1, y: 0 },
   };
 
-  console.log(mappedForms);
+  // console.log(mappedForms);
 
 
   /* ================= RENDER ================= */
@@ -142,7 +142,7 @@ const InputModule = () => {
                 className={`group relative rounded border bg-slate-100/50 transition
                 ${inactive ? "opacity-40 pointer-events-none" : "hover:shadow-lg"}`}
               >
-                 {/* GRADIENT STRIP */}
+                {/* GRADIENT STRIP */}
                 <div className="absolute rounded-t inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600" />
 
                 {/* STATUS BADGES */}

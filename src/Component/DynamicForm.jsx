@@ -65,19 +65,19 @@ const DynamicForm = ({
     if (!Template?.FieldsConfigurations) return [];
 
     return Template.FieldsConfigurations.map((f) => {
-      let applicable = [];
+      let ApplicableJson = [];
       let options = [];
 
       try {
-        applicable = JSON.parse(f.ApplicableJson || "[]");
+        ApplicableJson = JSON.parse(f.ApplicableJson || "[]");
       } catch { }
 
       try {
         options = JSON.parse(f.OptionsJson || "[]");
       } catch { }
 
-      return { ...f, applicable, options };
-    }).filter((f) => f.applicable.includes("form"));
+      return { ...f, ApplicableJson, options };
+    }).filter((f) => f.ApplicableJson.includes("form"));
   }, [Template]);
 
   const groups = useMemo(() => groupFields(fields), [fields]);
@@ -131,17 +131,20 @@ const DynamicForm = ({
   ---------------------------------------------- */
   const handleValue = useCallback(
     async (i, fieldName, value) => {
+      // 1️⃣ Update form state
       setForms((prev) => {
         const copy = [...prev];
         copy[i] = { ...copy[i], [fieldName]: value };
         return copy;
       });
 
+      // 2️⃣ Validate full form (engine stays generic)
       const result = await validate({
         ...forms[i],
         [fieldName]: value
       });
 
+      // 3️⃣ IMPORTANT: store ONLY current field error
       setErrorsArr((prev) => {
         const copy = [...prev];
         copy[i] = {
@@ -153,6 +156,8 @@ const DynamicForm = ({
     },
     [forms, validate]
   );
+
+
 
   /* ----------------------------------------------
         ADD / REMOVE FORMS
@@ -305,17 +310,17 @@ const DynamicForm = ({
       {/* <div className="bg-white shadow-xl rounded-2xl overflow-hidden " > */}
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center
-         px-4 sm:px-6 py-3 sm:py-2 border-b  bg-gradient-to-r from-blue-700 to-indigo-500 rounded-lg mb-4">
+         px-4 sm:px-6 py-3 sm:py-2 border-b  bg-gradient-to-r from-primary-700 to-indigo-500 rounded-lg mb-4">
         {/* LEFT CONTENT */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 text-white ">
           <AppIcon
             name={Template.Icon}
             size={24}
-            className="text-white shrink-0 mt-1 sm:mt-0"
+            className=" shrink-0 mt-1 sm:mt-0"
           />
 
           <div>
-            <h2 className="text-base sm:text-xl font-semibold text-white leading-tight">
+            <h2 className="text-sm sm:text-lg font-semibold leading-tight">
               {Template?.Name}
             </h2>
             {Template?.Description && (
@@ -331,7 +336,7 @@ const DynamicForm = ({
           {/* GROUP / UNGROUP */}
           <Button
             variant="primary"
-            size="md"
+            size="sm"
             className="w-full sm:w-auto  text-white font-medium  shadow-md hover:shadow-lg"
             onClick={() => setIsGrouped((p) => !p)}
           >
@@ -342,7 +347,7 @@ const DynamicForm = ({
           {AddMore && (
             <Button
               variant="outline"
-              size="md"
+              size="sm"
               className=" w-full sm:w-auto  border-white text-white  hover:bg-indigo-50 hover:text-indigo-800  active:bg-indigo-100
                 shadow-sm hover:shadow-md"
               icon={<AppIcon name="Plus" />}
@@ -403,7 +408,7 @@ const DynamicForm = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {flds.map((f) => (
                             <div key={f.Name} >
-                              <Label>{f.Label}</Label>
+                              <Label className="text-sm">{f.Label}</Label>
                               {renderField(i, f)}
                             </div>
                           ))}
@@ -416,7 +421,7 @@ const DynamicForm = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fields.map((f) => (
                       <div key={f.Name}>
-                        <Label>{f.Label}</Label>
+                        <Label className="text-[13px]">{f.Label}</Label>
                         {renderField(i, f)}
                       </div>
                     ))}

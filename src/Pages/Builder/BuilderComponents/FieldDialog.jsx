@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 
-import  Button  from "../../../Library/Button";
+import Button from "../../../Library/Button";
 import { useToast } from "../../../Library/use-toast";
 
 // Field Components
@@ -18,7 +18,7 @@ import { CardContent } from "../../../Library/Card";
 // ------------------------------------------------
 // PROCESS FIELD DETAILS (VALIDATION & FILTERING)
 // ------------------------------------------------
-const processFieldDetails = (field) => {
+const processFieldDetails = (field, detailsCode) => {
   // Required validations (NOT NULL fields from database schema)
   if (!field.Name?.trim()) {
     throw new Error("Field Name is required.");
@@ -67,6 +67,7 @@ const processFieldDetails = (field) => {
   // Process and filter the field object
   const processed = {
     ...field,
+    DetailsCode: field.DetailsCode,
     Name: field.Name.trim(),
     Label: field.Label.trim(),
     Type: field.Type.trim(),
@@ -89,10 +90,10 @@ const processFieldDetails = (field) => {
 
 const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState(initialFieldForm);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    setFormData(initialFieldForm);
+    setFormData(JSON.parse(JSON.stringify(initialFieldForm)));
   }, [initialFieldForm]);
 
   const handleSave = () => {
@@ -134,9 +135,9 @@ const FieldDialog = ({ isOpen, onClose, onSave, initialFieldForm }) => {
           <Button variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </Button>
-          <Button 
-          size="sm"
-          onClick={handleSave}>
+          <Button
+            size="sm"
+            onClick={handleSave}>
             {initialFieldForm.id ? "Update Field" : "Add Field"}
           </Button>
         </div>

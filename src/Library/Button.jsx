@@ -43,14 +43,14 @@ const variants = {
 
   /* WARNING */
   warning:
-    "bg-warning text-white hover:bg-warning/90 focus:ring-warning/30",
+    "bg-warning text-white hover:bg-amber-500 focus:ring-warning/30",
 
   warningSoft:
     "bg-warning/10 text-warning hover:bg-warning/20 focus:ring-warning/20",
 
   /* DANGER */
   danger:
-    "bg-danger text-white hover:bg-danger/90 focus:ring-danger/30",
+    "bg-danger text-white hover:bg-red-700 focus:ring-red-300",
 
   dangerSoft:
     "bg-danger/10 text-danger hover:bg-danger/20 focus:ring-danger/20",
@@ -69,6 +69,7 @@ const variants = {
    RESPONSIVE SIZES
 ===================================================== */
 const sizes = {
+  xs: "h-6 px-2 text-xs sm:h-7 sm:px-2 sm:text-xs",
   sm: "h-8 px-3 text-xs sm:h-9 sm:px-3 sm:text-sm",
   md: "h-9 px-4 text-sm sm:h-10 sm:px-4 md:text-base",
   lg: "h-10 px-4 text-base sm:h-11 sm:px-5 md:h-12 md:px-6 md:text-lg",
@@ -78,6 +79,7 @@ const sizes = {
    ICON-ONLY SIZES
 ===================================================== */
 const iconSizes = {
+  xs: "h-6 w-6 sm:h-7 sm:w-7",
   sm: "h-8 w-8 sm:h-9 sm:w-9",
   md: "h-9 w-9 sm:h-10 sm:w-10",
   lg: "h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12",
@@ -140,7 +142,7 @@ const Button = React.forwardRef(
 
 Button.displayName = "Button";
 export default Button;
-export {Button}
+export { Button }
 
 /* =====================================================
    VARIANT HELPER (FOR COMPOUND COMPONENTS)

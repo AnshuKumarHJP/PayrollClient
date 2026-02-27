@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Select,
   SelectTrigger,
@@ -8,7 +8,7 @@ import {
 } from "@/Library/Select";
 // import { fetchClients } from "../../api/services/clientServices";
 import { useSelector, useDispatch } from "react-redux";
-import { setSelectedClient } from "../Store/Auth/AuhtSlice";
+import { setSelectedClient } from "../Store/Auth/AuthSlice";
 
 const ClientDropdown = ({
   value,
@@ -25,9 +25,14 @@ const ClientDropdown = ({
   const selectedClient = useSelector((state) => state.Auth?.Common?.SelectedClient || "");
   const [selectedValue, setSelectedValue] = useState(value ? String(value) : selectedClient || "");
 
-  const storeClients = useSelector(
-    (state) => state.Auth?.LogResponce?.data?.ClientList || []
+  /* =====================================================
+       🔐 SESSION AUTH (READ ONCE)
+       ===================================================== */
+  const AUTH_DATA = useSelector(
+    (state) => state.Auth.LogResponce.data
   );
+
+  const storeClients = AUTH_DATA?.ClientList || []
 
   /* =========================
      LOAD CLIENTS

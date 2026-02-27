@@ -1,42 +1,35 @@
+import { useEffect } from "react";
 import AppIcon from "../Component/AppIcon";
-import DataGrid from "../Library/Table/DataGrid";
+import Button from "../Library/Button";
 import CustomDataGrid from "../Library/Table/GenericTable";
-import { tableColumns, tableData, agGridColumns } from "../Data/TableData";
-import { useMemo } from "react";
+import { getStoredObjectById } from "../services/ObjectStorageService";
+
 const ActionComponent = ({ row }) => {
   return (
     <div className="flex items-center gap-2">
       {/* Edit */}
-      <button
+      <Button
         type="button"
         title="Edit"
-        className="
-          p-1.5 rounded-md
-          text-gray-600
-          hover:text-emerald-600
-          hover:bg-emerald-50
-          transition
-        "
+        size='sm'
+        variant="warning"
         onClick={() => console.log("Edit", row)}
+        icon={<AppIcon name="Pencil" size={16} />}
       >
-        <AppIcon name="Pencil" size={16} />
-      </button>
+        {/* Edit */}
+      </Button>
 
       {/* Delete */}
-      <button
+      <Button
         type="button"
         title="Delete"
-        className="
-          p-1.5 rounded-md
-          text-gray-600
-          hover:text-red-600
-          hover:bg-red-50
-          transition
-        "
+        size='sm'
+        variant="danger"
         onClick={() => console.log("Delete", row)}
+        icon={<AppIcon name="Trash2" size={16} />}
       >
-        <AppIcon name="Trash2" size={16} />
-      </button>
+        {/* Delete */}
+      </Button>
     </div>
   );
 };
@@ -212,42 +205,23 @@ const data = [
 
 
 const Home = () => {
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getStoredObjectById(134427);
+        console.log("Fetched Object:", res);
+      } catch (error) {
+        console.error("Error fetching object:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
 
     <>
-      <DataGrid
-        rowData={tableData}
-        columnDefs={agGridColumns}
-        height={520}
-        enableRowSelection="multiple"
-        enableSorting={true}
-        enableFilter={true}
-        enableColResize={true}
-        pagination={true}
-        paginationPageSize={10}
-        paginationPageSizeSelector={[10, 25, 50, 100]}
-        onSelectionChanged={(event) => console.log('Selection changed:', event.api.getSelectedRows())}
-        onCellClicked={(event) => console.log('Cell clicked:', event)}
-        onGridReady={(params) => console.log('Grid ready:', params)}
-        defaultColDef={{
-          sortable: true,
-          filter: true,
-          resizable: true,
-          minWidth: 100,
-          flex: 1,
-        }}
-        gridOptions={{
-          animateRows: true,
-          enableStatusBar: true,
-          enableCellTextSelection: true,
-          enableBrowserTooltips: true,
-        }}
-      />
-
-      <div>
-        Home
-
-      </div>
       <CustomDataGrid
         title="Participants"
         columns={columns}

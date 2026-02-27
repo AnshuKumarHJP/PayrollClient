@@ -41,10 +41,10 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        info: "border-l-[var(--toast-info-border)]",
-        success: "border-l-[var(--toast-success-border)]",
-        warning: "border-l-[var(--toast-warning-border)]",
-        danger: "border-l-[var(--toast-danger-border)]",
+        info: "border-l-blue-500",
+        success: "border-l-green-500",
+        warning: "border-l-yellow-500",
+        danger: "border-l-red-500",
       },
       size: {
         sm: "p-[var(--toast-sm-p)]",

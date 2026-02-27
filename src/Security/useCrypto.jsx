@@ -1,12 +1,3 @@
-// =======================================================
-// src/Security/useCrypto.js
-// =======================================================
-// ✅ Class-based CryptoService
-// ✅ Encrypt + Decrypt
-// ✅ Legacy backend compatible (+ → *, / → -)
-// ✅ Importable as: import CryptoService from "../Security/useCrypto";
-// =======================================================
-
 import CryptoJS from "crypto-js";
 import { store } from "../Store/Store";
 

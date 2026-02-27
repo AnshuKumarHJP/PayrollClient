@@ -12,7 +12,7 @@ const DropdownSelect = ({ items = [], onSelect, triggerIcon, triggerSize = 18 })
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="border-gray-200">
+        <Button variant="outline" className="border-gray-200 text-slate-800 dark:text-white dark:hover:text-slate-800">
           <AppIcon name={triggerIcon} size={triggerSize} />
         </Button>
       </DropdownMenuTrigger>

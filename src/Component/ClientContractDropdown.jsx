@@ -7,7 +7,7 @@ import {
   SelectItem,
 } from "@/Library/Select";
 import { useSelector, useDispatch } from "react-redux";
-import { setSelectedClientContract } from "../Store/Auth/AuhtSlice";
+import { setSelectedClientContract } from "../Store/Auth/AuthSlice";
 
 const ClientContractDropdown = ({
   value,
@@ -24,9 +24,14 @@ const ClientContractDropdown = ({
   const selectedClientContract = useSelector((state) => state.Auth?.Common?.SelectedClientContract || "");
   const [selectedValue, setSelectedValue] = useState(value ? String(value) : selectedClientContract || "");
 
-  const storeClientContract = useSelector(
-    (state) => state.Auth?.LogResponce?.data?.ClientContractList || []
+  /* =====================================================
+       🔐 SESSION AUTH (READ ONCE)
+       ===================================================== */
+  const AUTH_DATA = useSelector(
+    (state) => state.Auth.LogResponce.data
   );
+
+  const storeClientContract = AUTH_DATA?.ClientContractList || []
 
   /* =========================
      LOAD ClientContract

@@ -2,7 +2,7 @@ import * as React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 
 import { cn } from "./utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "../Library/Button";
 import AppIcon from "../Component/AppIcon";
 
 const CarouselContext = React.createContext(null);

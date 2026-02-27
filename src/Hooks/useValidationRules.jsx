@@ -6,6 +6,7 @@ export default function useValidationRules(template) {
 
   /* ----------------------------------------------
      LOADING STATE (TEMPLATE-DRIVEN)
+     Why: Manages loading state based on template availability to prevent premature validation calls.
   ---------------------------------------------- */
   useEffect(() => {
     if (!template) {
@@ -17,6 +18,7 @@ export default function useValidationRules(template) {
 
   /* ----------------------------------------------
      STABLE VALIDATE FUNCTION (NO LOOP)
+     Why: Provides a memoized validation function that filters fields based on context to ensure only relevant fields are validated.
   ---------------------------------------------- */
   const validate = useCallback(
     async (formData = {}, context = {}) => {
@@ -25,8 +27,26 @@ export default function useValidationRules(template) {
       }
 
       try {
+        // Filter fields based on context
+        // Why: For bulk upload, only validate fields applicable to "upload"; for other contexts, include "upload" or "form" fields.
+        const filteredTemplate = {
+          ...template,
+          FieldsConfigurations: template.FieldsConfigurations.filter(f => {
+            try {
+              const applicable = JSON.parse(f.ApplicableJson || "[]");
+              if (context.context === "bulk_upload") {
+                return applicable.includes("upload");
+              } else {
+                return applicable.includes("upload") || applicable.includes("form");
+              }
+            } catch {
+              return false;
+            }
+          })
+        };
+
         return await ValidationEngine.validate({
-          template,
+          template: filteredTemplate,
           formData,
           context
         });

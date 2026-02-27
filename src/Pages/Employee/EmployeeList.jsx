@@ -1,5 +1,5 @@
 import React from 'react'
-import AdvanceTable from '../../Component/AdvanceTable';
+import AdvanceTable from '../../Library/Table/AdvanceTable';
 import DropdownMenuBtn from './DropdownMenuBtn';
 
 const EmployeeList = () => {

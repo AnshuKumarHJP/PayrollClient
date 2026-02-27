@@ -1,5 +1,6 @@
 import React, { forwardRef, useState, useEffect } from "react";
-import { Avatar } from "./Avatar";
+import { Avatar } from "./avatar";
+import { Label } from "./Label";
 import AppIcon from "../Component/AppIcon";
 import { cn } from "./utils";
 
@@ -7,6 +8,7 @@ const FileInput = forwardRef((props, ref) => {
   const {
     label,
     error,
+    mand,
     className = "",
     allowTypes = [
       ".jpg",
@@ -87,7 +89,7 @@ const FileInput = forwardRef((props, ref) => {
   const handleDrop = (e) => {
     e.preventDefault();
     setDragActive(false);
-    const droppedFile = e.dataTransfer.files?.[0];
+    const droppedFile = e.dataTransfer.files?.[0] || null;
     processFile(droppedFile);
   };
 
@@ -102,14 +104,14 @@ const FileInput = forwardRef((props, ref) => {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className={cn("w-full my-4", className)}>
+    <div className={cn("w-full p-2 rounded-sm my-4", className)}>
       {label && (
-        <label
+        <Label
           htmlFor={inputId}
-          className="block text-[var(--p)] font-medium text-[var(--gray-700)] mb-1"
+          className="block font-medium text-gray-700 dark:text-gray-300 mb-1"
         >
-          {label}
-        </label>
+          {label} {mand &&<span className="text-red-600"> *</span>}
+        </Label>
       )}
 
       {/* Hidden input */}
@@ -150,18 +152,18 @@ const FileInput = forwardRef((props, ref) => {
       >
         <AppIcon
           name="CloudUpload"
-          className="mb-2 text-[var(--gray-500)]"
-          size={28}
+          className="mb-2 text-gray-500 dark:text-gray-400"
+          size={24}
         />
 
-        <p className="text-[var(--p)] text-[var(--gray-600)] text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
           Drag and drop your file here, or{" "}
-          <span className="font-medium text-[var(--primary-500)]">
+          <span className="font-medium text-primary-500 dark:text-primary-400">
             click to upload
           </span>
         </p>
 
-        <p className="text-[var(--p11)] text-[var(--gray-500)] mt-1">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Allowed: {allowTypes.join(", ")}
         </p>
       </div>
@@ -172,14 +174,14 @@ const FileInput = forwardRef((props, ref) => {
           (isImage ? (
             <div className="flex flex-col items-start gap-2">
               <Avatar src={preview || ""} size={160} />
-              <span className="text-[var(--p)] font-medium text-[var(--gray-600)]">
+              <span className="font-medium text-gray-600 dark:text-gray-300">
                 {file.name}
               </span>
             </div>
           ) : (
             <div className="flex flex-wrap items-center gap-3 p-1">
               {view && (
-                <span className="text-[var(--p)] font-medium text-[var(--primary-500)] cursor-pointer">
+                <span className="font-medium text-primary-500 dark:text-primary-400 cursor-pointer">
                   View
                 </span>
               )}
@@ -197,18 +199,18 @@ const FileInput = forwardRef((props, ref) => {
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                   }}
-                  className="flex items-center gap-1 text-[var(--p)] font-medium text-[var(--primary-500)] cursor-pointer"
+                  className="flex items-center gap-1 font-medium text-primary-500 dark:text-primary-400 cursor-pointer"
                 >
                   Download
                   <AppIcon name="Download" size={16} />
                 </span>
               )}
 
-              <span className="text-[var(--p)] text-[var(--gray-700)]">
+              <span className="text-gray-700 dark:text-gray-300">
                 📁 {file.name.split(".").pop()?.toUpperCase() || "FILE"}
               </span>
 
-              <span className="text-[var(--p11)] text-[var(--gray-500)] underline truncate max-w-xs">
+              <span className="text-gray-500 dark:text-gray-400 underline truncate max-w-xs">
                 {file.name}
               </span>
             </div>
@@ -217,7 +219,7 @@ const FileInput = forwardRef((props, ref) => {
 
       {/* Error */}
       {(error || invalidType) && (
-        <p className="text-[var(--p)] text-[var(--danger-500)] mt-2">
+        <p className="text-red-500 dark:text-red-400 mt-2">
           {invalidType
             ? `This file type is not allowed. Allowed: ${allowTypes.join(", ")}`
             : "Please select a valid file."}

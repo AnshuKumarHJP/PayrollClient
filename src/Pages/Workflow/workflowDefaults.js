@@ -1,0 +1,31 @@
+export const DEFAULT_STEP = {
+  FlowOrder: "",
+  CurrentRoleCode: "",
+  NextRoleCode: "",
+  IsUserGroupBased: false,
+  UserGroupCode: "",
+  ActionProcessingStatus: "",
+  NextActionProcessingStatus: "",
+  FailureActionProcessingStatus: "",
+  LetterTemplateId: "",
+  EmailTemplateId: "",
+  SmsTemplateId: "",
+  Metadata: null,
+};
+
+export const DEFAULT_WORKFLOW_FORM = {
+  Id: null,
+  Name: "",
+  Description: "",
+  ModuleId: null,
+  ModuleProcessId: null,
+  ModuleProcessActionId: null,
+  IsRuleBased: false,
+  IsRuleSetBased: false,
+  RuleId: null,
+  ActionBasedRuleSetId: null,
+  IsLetterGenerationRequired: false,
+  IsEmailNotificationRequired: false,
+  IsSmsNotificationRequired: false,
+  ClientPortalWorkflowProperties: [],
+};

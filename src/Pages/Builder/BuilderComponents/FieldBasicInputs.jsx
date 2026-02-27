@@ -28,7 +28,10 @@ const FieldBasicInputs = ({ fieldForm, setFieldForm }) => {
               value={fieldForm[key] || ""}
               placeholder={placeholder}
               onChange={(e) =>
-                setFieldForm({ ...fieldForm, [key]: e.target.value })
+                setFieldForm((prev) => ({
+                  ...prev,               // ✅ preserves id + all fields
+                  [key]: e.target.value, // ✅ update only one key
+                }))
               }
             />
           </div>

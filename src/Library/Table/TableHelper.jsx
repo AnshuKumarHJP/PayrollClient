@@ -2,30 +2,63 @@
 //  TABLE HELPER UTILITIES  (FINAL MERGED VERSION)
 // =============================================================
 
- /* ---------------- NORMALIZE VALUE ---------------- */
+/* ---------------- NORMALIZE VALUE ---------------- */
 export const normalizeValue = (value) => {
+  // null / undefined
   if (value === null || value === undefined) return "";
 
-  // date
-  if (value instanceof Date) return value.getTime();
-
-  // numeric string → number
-  if (typeof value === "string" && !isNaN(value)) {
-    return Number(value);
+  // Date
+  if (value instanceof Date) {
+    return value.getTime();
   }
 
-  // boolean
+  // Boolean
   if (typeof value === "boolean") {
     return value ? 1 : 0;
   }
 
-  // string (case-insensitive)
-  if (typeof value === "string") {
-    return value.toLowerCase();
+  // Number
+  if (typeof value === "number") {
+    return value;
   }
 
+  // Numeric string → number
+  if (typeof value === "string" && value.trim() !== "" && !isNaN(value)) {
+    return Number(value);
+  }
+
+  // JSON string → parsed value
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      return normalizeValue(parsed);
+    } catch {
+      // normal string
+      return trimmed.toLowerCase();
+    }
+  }
+
+  // Array → normalize each item
+  if (Array.isArray(value)) {
+    return value.map((v) => normalizeValue(v));
+  }
+
+  // Object → normalize each key (stable order)
+  if (typeof value === "object") {
+    return Object.keys(value)
+      .sort()
+      .reduce((acc, key) => {
+        acc[key] = normalizeValue(value[key]);
+        return acc;
+      }, {});
+  }
+
+  // Fallback
   return value;
 };
+
 
 
 // -------------------------------------------------------------
@@ -91,10 +124,7 @@ export const getColStyle = (
     padding: "10px"
   };
 
-  // ⭐ FIX: Only body sticky cells forced white
-  if (col.sticky || col.stickyRight) {
-    style.background = isHeader ? undefined : "#fff";
-  }
+  // Background handled by CSS class in AdvanceTable.jsx
 
   // Left sticky
   if (col.sticky) {
@@ -135,6 +165,7 @@ export const EllipsisCell = ({ width = 200, children }) => (
       whiteSpace: "nowrap"
     }}
     title={String(children)}
+    className="text-xs md:text-sm cursor-help text-slate-800 dark:text-white dark:hover:text-slate-800"
   >
     {children}
   </div>

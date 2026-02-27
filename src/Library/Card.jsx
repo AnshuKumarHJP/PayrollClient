@@ -10,8 +10,9 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
       `
       rounded-[var(--control-radius-lg)]
       border border-[var(--stroke-gray-300)]
-      bg-[var(--white)]
-      text-[var(--gray-800)]
+      bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50
+      dark:from-slate-900 dark:via-slate-800 dark:to-slate-900
+      text-[var(--gray-800)] dark:text-[var(--gray-100)]
       shadow-sm
       min-w-0
       `,
@@ -47,11 +48,11 @@ const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
     ref={ref}
     className={cn(
       `
-      text-[var(--h6)]
-      md:text-[var(--h4)]
+      text-base
+      md:text-md
       font-medium
       leading-tight
-      text-[var(--gray-900)]
+      text-gray-900 dark:text-gray-100
       `,
       className
     )}
@@ -67,8 +68,8 @@ const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
     ref={ref}
     className={cn(
       `
-      text-[var(--p)]
-      text-[var(--gray-500)]
+      text-sm
+      text-gray-500 dark:text-gray-400
       `,
       className
     )}

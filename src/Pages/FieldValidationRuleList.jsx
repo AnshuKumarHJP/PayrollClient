@@ -181,21 +181,36 @@ const FieldValidationRuleList = ({ onAddEditMode }) => {
 
   return (
     <div>
-      <div className="flex justify-end mb-2">
-        <Button
-          variant="primary"
-          className="text-white"
-          icon={<AppIcon name="Plus" />}
-          onClick={handleCreateNew}
-        >
-          Add New Field Validation Rule
-        </Button>
+      <div className="md:flex md:items-center md:justify-between mb-6 space-y-3 md:space-y-0">
+        {/* LEFT: TITLE + DESCRIPTION */}
+        <div>
+          <div className="flex items-center gap-2">
+            <AppIcon name="ShieldCheck" size={22} className="text-primary" />
+            <h1 className="text-base md:text-xl font-semibold">
+              Field Validation Rules
+            </h1>
+          </div>
 
+          <p className="mt-1 text-xs md:text-sm text-muted-foreground max-w-xl">
+            Define and manage validation logic to ensure data accuracy, consistency,
+            and compliance across forms and bulk uploads.
+          </p>
+        </div>
+
+        {/* RIGHT: ACTION */}
+        <Button
+          onClick={handleCreateNew}
+          icon={<AppIcon name="Plus" size={16} />}
+          className="w-full md:w-auto"
+          size="sm"
+        >
+          Create New Rule
+        </Button>
       </div>
 
       <AdvanceTable
-        title="Field Validation Rules"
-        icon="ShieldCheck"
+        // title="Field Validation Rules"
+        // icon="ShieldCheck"
         columns={columns}
         data={tableData}
         renderActions={renderActionCell}

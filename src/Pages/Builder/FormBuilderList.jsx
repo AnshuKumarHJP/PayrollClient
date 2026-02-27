@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent } from "../../Library/Card";
@@ -9,24 +9,20 @@ import { useToast } from "../../Library/use-toast";
 import AdvanceTable from "../../Library/Table/AdvanceTable";
 import AppIcon from "../../Component/AppIcon";
 import { SweetConfirm, SweetSuccess } from "../../Component/SweetAlert";
+import CryptoService from "../../Security/useCrypto";
 
-const FormBuilderList = ({ onAddEditMode }) => {
+const FormBuilderList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toast } = useToast();
   const { FormBuilder, isLoading: loading, error } = useSelector((state) => state.FormBuilderStore);
-  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
-    const controller = new AbortController();
-    if (!hasLoadedRef.current) {
-      hasLoadedRef.current = true;
-      dispatch(GetFormBuilder(controller.signal));
+    if (!FormBuilder?.data?.length) {
+      dispatch(GetFormBuilder());
     }
-    return () => {
-      controller.abort(); // 🔥 API CANCELLED HERE
-    };
-  }, [dispatch]);
+  }, [dispatch, FormBuilder?.data?.length]);
+
 
   const getStatusBadge = (active) => {
     return (
@@ -39,7 +35,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
   const columns = [
     { key: "Name", label: "Name", minWidth: 150, sticky: true },
     { key: "Description", label: "Description", minWidth: 200 },
-
+    { key: "ClientPortalWCName", label: "Client Portal Workflow ", minWidth: 200 },
     {
       key: "IsActive", label: "Status", minWidth: 80,
       render: (value) => getStatusBadge(value)
@@ -86,11 +82,8 @@ const FormBuilderList = ({ onAddEditMode }) => {
   );
 
   const handleEdit = (HeaderCode) => {
-    if (onAddEditMode) {
-      onAddEditMode(true, { id: HeaderCode, type: 'edit' });
-    } else {
-      navigate(`/config/forms/edit/${HeaderCode}`);
-    }
+    const encryptedId = CryptoService.encrypt(HeaderCode.toString());
+    navigate(`/formbuilder/edit/${encryptedId}`);
   };
 
   const handleDelete = async (HeaderCode) => {
@@ -122,11 +115,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
   };
 
   const handleCreateNew = () => {
-    if (onAddEditMode) {
-      onAddEditMode(true, { type: 'add' });
-    } else {
-      navigate(`/config/forms/edit`);
-    }
+    navigate(`/formbuilder/add`);
   };
 
   const data = Array.isArray(FormBuilder?.data) ? FormBuilder.data : [];
@@ -171,18 +160,34 @@ const FormBuilderList = ({ onAddEditMode }) => {
   }
 
   return (
-    <div className="p-2 w-full">
-      <div className="md:flex space-y-3 items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <AppIcon name="FileText" size={24} />
-          <h1 className="text-sm md:text-xl font-bold">Form Builder Management</h1>
+    <div className="p-2 w-full text-slate-800 dark:text-white">
+      <div className="md:flex md:items-center md:justify-between mb-6 space-y-3 md:space-y-0">
+        {/* LEFT: TITLE + DESCRIPTION */}
+        <div>
+          <div className="flex items-center gap-2">
+            <AppIcon name="FileText" size={22} className="text-primary" />
+            <h1 className="text-base md:text-xl font-semibold">
+              Form Builder Management
+            </h1>
+          </div>
+
+          <p className="mt-1 text-xs md:text-sm text-muted-foreground max-w-xl">
+            Create, configure, and manage dynamic forms used across payroll,
+            onboarding, and operational workflows.
+          </p>
         </div>
-        <Button onClick={handleCreateNew}
-        icon={<AppIcon name="Plus" size={16} />}
+
+        {/* RIGHT: ACTION */}
+        <Button
+          onClick={handleCreateNew}
+          icon={<AppIcon name="Plus" size={16} />}
+          className="w-full md:w-auto"
+          size="sm"
         >
-          Create Form
+          Create New
         </Button>
       </div>
+
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -190,7 +195,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Forms</p>
+                <p className="text-sm text-gray-600 dark:text-white">Total Forms</p>
                 <p className="text-2xl font-bold">{totalForms}</p>
               </div>
               <AppIcon name="FileText" className="h-8 w-8 text-blue-500" />
@@ -201,7 +206,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Active Forms</p>
+                <p className="text-sm text-gray-600 dark:text-white">Active Forms</p>
                 <p className="text-2xl font-bold text-green-600">{activeForms}</p>
               </div>
               <AppIcon name="FileText" className="h-8 w-8 text-green-500" />
@@ -212,7 +217,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Inactive Forms</p>
+                <p className="text-sm text-gray-600 dark:text-white">Inactive Forms</p>
                 <p className="text-2xl font-bold text-red-600">{inactiveForms}</p>
               </div>
               <AppIcon name="FileText" className="h-8 w-8 text-red-500" />
@@ -223,7 +228,7 @@ const FormBuilderList = ({ onAddEditMode }) => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Fields</p>
+                <p className="text-sm text-gray-600 dark:text-white">Total Fields</p>
                 <p className="text-2xl font-bold text-indigo-600">{FormBuilder?.data[0]?.TotalField}</p>
               </div>
               <AppIcon name="Columns3Cog" className="h-8 w-8 text-green-500" />

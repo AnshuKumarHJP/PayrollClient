@@ -14,7 +14,7 @@ const baseWrapper = "flex flex-col gap-1";
 const labelStyle = "text-p11 font-medium text-gray-500";
 
 const baseInput =
-  "w-full rounded-md border px-3 py-2 text-p font-regular outline-none transition-all " +
+  "w-full rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-p font-regular outline-none transition-all dark:bg-slate-800 dark:text-white " +
   "placeholder:text-lightGray-500 disabled:bg-lightGray-100 disabled:cursor-not-allowed";
 
 const states = {
@@ -26,7 +26,7 @@ const states = {
 
 const errorText = "text-p10 text-danger mt-0.5";
 
- function Input({
+function Input({
   label,
   error,
   helperText,
@@ -46,7 +46,7 @@ const errorText = "text-p10 text-danger mt-0.5";
       />
       {error && <span className={errorText}>{error}</span>}
       {!error && helperText && (
-        <span className="text-p10 text-gray-400">{helperText}</span>
+        <span className="text-sm text-gray-400">{helperText}</span>
       )}
     </div>
   );

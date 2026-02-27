@@ -36,7 +36,8 @@ export default function Modal({
   Footer,     // JSX | (ctx) => JSX
 
   title = "Modal",
-  children
+  children,
+  hideDefaultActions = false,
 }) {
   const [mode, setMode] = useState("normal");
   const layout = MODES[mode];
@@ -75,7 +76,7 @@ export default function Modal({
               exit={{ scale: 0.96 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               className={`
-                bg-white shadow-xl flex flex-col overflow-hidden
+                bg-white dark:bg-slate-800 shadow-xl flex flex-col overflow-hidden
                 ${layout.size}
               `}
             >
@@ -92,53 +93,55 @@ export default function Modal({
                 </div>
 
                 {/* HEADER ACTIONS */}
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AppIcon
-                          onClick={() => setMode("minimized")}
-                          name="Minus"
-                          size={18}
-                          className="cursor-pointer"
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>Minimize</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                {!hideDefaultActions && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AppIcon
+                            onClick={() => setMode("minimized")}
+                            name="Minus"
+                            size={18}
+                            className="cursor-pointer dark:text-white text-slate-800"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Minimize</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AppIcon
-                          onClick={() =>
-                            setMode(mode === "fullscreen" ? "normal" : "fullscreen")
-                          }
-                          name={mode === "fullscreen" ? "Minimize2" : "Expand"}
-                          size={14}
-                          className="cursor-pointer"
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {mode === "fullscreen" ? "Restore" : "Maximize"}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AppIcon
+                            onClick={() =>
+                              setMode(mode === "fullscreen" ? "normal" : "fullscreen")
+                            }
+                            name={mode === "fullscreen" ? "Minimize2" : "Expand"}
+                            size={14}
+                            className="cursor-pointer dark:text-white text-slate-800"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {mode === "fullscreen" ? "Restore" : "Maximize"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AppIcon
-                          onClick={onClose}
-                          name="X"
-                          size={18}
-                          className="cursor-pointer"
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>Close</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AppIcon
+                            onClick={onClose}
+                            name="X"
+                            size={18}
+                            className="cursor-pointer dark:text-white text-slate-800"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Close</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                )}
               </div>
 
               {/* ───────── BODY (SCROLLABLE) ───────── */}

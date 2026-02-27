@@ -1,273 +1,402 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../Library/Card";
-import  Button  from "../Library/Button";
-import { Input } from "../Library/Input";
-import { Label } from "../Library/Label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../Library/Select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../Library/table";
-import { Badge } from "../Library/Badge";
-import { History, Download, Search, Filter, Loader2 } from "lucide-react";
-// import { importHistoryService } from "../../api/services/importHistoryService";
-import { useToast } from "../Library/use-toast";
-import MaintenancePage from "../Routes/MaintenancePage";
+/* =====================================================
+   🚀 Import History + Workflow Timeline (Enterprise UX)
+   ===================================================== */
 
-const ImportHistory = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("");
-  const [importHistory, setImportHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { toast } = useToast();
+import React, { useState } from "react";
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
+  FileText,
+  User,
+  Calendar,
+  Database,
+  Server,
+  Download,
+  AlertTriangle,
+  RefreshCcw,
+  Eye,
+  MessageSquare,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 
+/* ---------------- STATUS CONFIG ---------------- */
+const STATUS = {
+  completed: {
+    label: "Completed",
+    icon: CheckCircle,
+    badge:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    ring: "ring-green-500/20",
+  },
+  processing: {
+    label: "Processing",
+    icon: Clock,
+    badge:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+    ring: "ring-yellow-500/20",
+  },
+  failed: {
+    label: "Failed",
+    icon: XCircle,
+    badge:
+      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+    ring: "ring-red-500/20",
+  },
+};
 
-  return(
-   <MaintenancePage/>
-  )
+/* ---------------- SMALL UI ---------------- */
+const Metric = ({ label, value, color = "" }) => (
+  <div className="text-center">
+    <div className={`text-lg font-semibold ${color}`}>{value}</div>
+    <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
+  </div>
+);
 
-  useEffect(() => {
-    fetchImportHistory();
-  }, []);
+const Meta = ({ icon: Icon, text }) => (
+  <span className="flex items-center gap-1">
+    <Icon className="w-4 h-4" />
+    {text}
+  </span>
+);
 
-  const fetchImportHistory = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await importHistoryService.getAll();
-      setImportHistory(data);
-    } catch (err) {
-      setError('Failed to fetch import history');
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch import history. Please try again.',
-        variant: 'danger',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredHistory = importHistory.filter(item => {
-    const matchesSearch = item.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.uploadedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.module.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    const matchesDate = !dateFilter || item.uploadDate === dateFilter;
-
-    return matchesSearch && matchesStatus && matchesDate;
-  });
-
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      completed: { variant: "default", color: "bg-green-100 text-green-800" },
-      processing: { variant: "secondary", color: "bg-yellow-100 text-yellow-800" },
-      failed: { variant: "destructive", color: "bg-red-100 text-red-800" }
-    };
-
-    return (
-      <Badge className={statusConfig[status]?.color || "bg-gray-100 text-gray-800"}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  };
-
-  const downloadErrorReport = (id) => {
-    // Simulate downloading error report
-    console.log(`Downloading error report for import ${id}`);
-  };
-
-  if (loading) {
-    return (
-      <div className="p-2">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Loading import history...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-2">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <History className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Import History</h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={fetchImportHistory}>
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+/* ---------------- WORKFLOW TIMELINE ---------------- */
+const WorkflowTimeline = ({ steps }) => {
   return (
-    <div className="p-2">
-      <div className="flex items-center gap-2 mb-6">
-        <History size={24} />
-        <h1 className="text-xl font-bold">Import History</h1>
-      </div>
+    <div className="relative pl-6 mt-4 border-l border-slate-300 dark:border-slate-700 space-y-6">
+      {steps.map((s, i) => (
+        <div key={i} className="relative">
+          <span
+            className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full flex items-center justify-center
+              ${
+                s.status === "approved"
+                  ? "bg-green-500"
+                  : s.status === "rejected"
+                  ? "bg-red-500"
+                  : "bg-yellow-500"
+              }
+            `}
+          >
+            {s.status === "approved" && (
+              <UserCheck className="w-3 h-3 text-white" />
+            )}
+            {s.status === "rejected" && (
+              <UserX className="w-3 h-3 text-white" />
+            )}
+            {s.status === "pending" && (
+              <Clock className="w-3 h-3 text-white" />
+            )}
+          </span>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter size={20} />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="search">Search</Label>
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  id="search"
-                  placeholder="Search by file name, user, or module..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+          <div className="ml-4 bg-slate-50 dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <div className="font-medium text-slate-800 dark:text-slate-100">
+                {s.step}
               </div>
+              <span className="text-xs text-slate-500">{s.time}</span>
             </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="date">Upload Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              />
-            </div>
-            <div className="flex items-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("all");
-                  setDateFilter("");
-                }}
-              >
-                Clear Filters
-              </Button>
+
+            <div className="mt-1 flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
+              <Meta icon={User} text={s.by} />
+              <Meta icon={MessageSquare} text={s.comment || "—"} />
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Import History Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Import Records</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>File Name</TableHead>
-                <TableHead>Module</TableHead>
-                <TableHead>Uploaded By</TableHead>
-                <TableHead>Upload Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Total Records</TableHead>
-                <TableHead>Success</TableHead>
-                <TableHead>Failed</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredHistory.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.fileName}</TableCell>
-                  <TableCell>{item.module}</TableCell>
-                  <TableCell>{item.uploadedBy}</TableCell>
-                  <TableCell>{item.uploadDate}</TableCell>
-                  <TableCell>{getStatusBadge(item.status)}</TableCell>
-                  <TableCell>{item.totalRecords}</TableCell>
-                  <TableCell className="text-green-600">{item.successRecords}</TableCell>
-                  <TableCell className="text-red-600">{item.failedRecords}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {item.failedRecords > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => downloadErrorReport(item.id)}
-                        >
-                          <Download size={14} className="mr-1" />
-                          Errors
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {filteredHistory.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No import records found matching your criteria.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Summary Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-blue-600">{importHistory.length}</div>
-            <div className="text-sm text-gray-600">Total Imports</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-green-600">
-              {importHistory.filter(item => item.status === "completed").length}
-            </div>
-            <div className="text-sm text-gray-600">Completed</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-yellow-600">
-              {importHistory.filter(item => item.status === "processing").length}
-            </div>
-            <div className="text-sm text-gray-600">Processing</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-red-600">
-              {importHistory.filter(item => item.status === "failed").length}
-            </div>
-            <div className="text-sm text-gray-600">Failed</div>
-          </CardContent>
-        </Card>
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default ImportHistory;
+/* ---------------- CARD ---------------- */
+const ImportHistoryCard = ({ data,index }) => {
+  const S = STATUS[data.status];
+  const StatusIcon = S.icon;
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div
+    key={index}
+      className={`
+        rounded-md border border-slate-200 dark:border-slate-800
+        bg-white dark:bg-slate-900
+        hover:shadow-md  transition-all
+        ring-1 ${S.ring}
+      `}
+    >
+      {/* HEADER */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5">
+        <div className="flex gap-4">
+          <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+            <StatusIcon className="w-6 h-6" />
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-slate-400" />
+              {data.fileName}
+            </h3>
+
+            <div className="mt-1 flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
+              <Meta icon={User} text={data.uploadedBy} />
+              <Meta icon={Calendar} text={data.uploadDate} />
+              <Meta icon={Database} text={data.module} />
+              <Meta icon={Server} text={data.environment} />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${S.badge}`}>
+            {S.label}
+          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {data.duration}
+          </span>
+        </div>
+      </div>
+
+      {/* METRICS */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 px-5 pb-4">
+        <Metric label="Total" value={data.total} />
+        <Metric label="Success" value={data.success} color="text-green-600 dark:text-green-400" />
+        <Metric label="Failed" value={data.failed} color="text-red-600 dark:text-red-400" />
+        <Metric label="Skipped" value={data.skipped} />
+        <Metric label="Warnings" value={data.warnings} />
+        <Metric label="Validation Errors" value={data.validationErrors} />
+      </div>
+
+      {/* ACTION BAR */}
+      <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-5 py-3 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex gap-4">
+          <Meta icon={AlertTriangle} text={data.importId} />
+          <Meta icon={RefreshCcw} text={data.source} />
+          <span>{data.size}</span>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setOpen((p) => !p)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <Eye className="w-4 h-4" />
+            {open ? "Hide Workflow" : "View Workflow"}
+          </button>
+
+          {data.failed > 0 && (
+            <button className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+              <Download className="w-4 h-4" />
+              Error File
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* WORKFLOW TIMELINE */}
+      {open && (
+        <div className="px-5 pb-5">
+          <WorkflowTimeline steps={data.workflow} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ---------------- SAMPLE DATA ---------------- */
+const SAMPLE = [
+  {
+    fileName: "employee_data_jan.xlsx",
+    uploadedBy: "John Smith",
+    uploadDate: "15 Jan 2024, 10:22 AM",
+    module: "Employee",
+    environment: "Production",
+    status: "completed",
+    total: 1250,
+    success: 1245,
+    failed: 5,
+    skipped: 12,
+    warnings: 7,
+    validationErrors: 3,
+    duration: "2m 30s",
+    importId: "IMP-EMP-10231",
+    source: "Manual Upload",
+    size: "2.4 MB",
+    workflow: [
+      {
+        step: "File Uploaded",
+        by: "John Smith",
+        status: "approved",
+        time: "10:22 AM",
+      },
+      {
+        step: "Manager Approval",
+        by: "Anshu Kumar",
+        status: "approved",
+        time: "10:25 AM",
+        comment: "Looks good",
+      },
+      {
+        step: "HR Validation",
+        by: "HR Team",
+        status: "approved",
+        time: "10:27 AM",
+      },
+      {
+        step: "Import Executed",
+        by: "System",
+        status: "approved",
+        time: "10:30 AM",
+      },
+    ],
+  },
+   {
+    fileName: "employee_data_jan.xlsx",
+    uploadedBy: "John Smith",
+    uploadDate: "15 Jan 2024, 10:22 AM",
+    module: "Employee",
+    environment: "Production",
+    status: "completed",
+    total: 1250,
+    success: 1245,
+    failed: 5,
+    skipped: 12,
+    warnings: 7,
+    validationErrors: 3,
+    duration: "2m 30s",
+    importId: "IMP-EMP-10231",
+    source: "Manual Upload",
+    size: "2.4 MB",
+    workflow: [
+      {
+        step: "File Uploaded",
+        by: "John Smith",
+        status: "approved",
+        time: "10:22 AM",
+      },
+      {
+        step: "Manager Approval",
+        by: "Anshu Kumar",
+        status: "approved",
+        time: "10:25 AM",
+        comment: "Looks good",
+      },
+      {
+        step: "HR Validation",
+        by: "HR Team",
+        status: "approved",
+        time: "10:27 AM",
+      },
+      {
+        step: "Import Executed",
+        by: "System",
+        status: "approved",
+        time: "10:30 AM",
+      },
+    ],
+  },
+   {
+    fileName: "employee_data_jan.xlsx",
+    uploadedBy: "John Smith",
+    uploadDate: "15 Jan 2024, 10:22 AM",
+    module: "Employee",
+    environment: "Production",
+    status: "completed",
+    total: 1250,
+    success: 1245,
+    failed: 5,
+    skipped: 12,
+    warnings: 7,
+    validationErrors: 3,
+    duration: "2m 30s",
+    importId: "IMP-EMP-10231",
+    source: "Manual Upload",
+    size: "2.4 MB",
+    workflow: [
+      {
+        step: "File Uploaded",
+        by: "John Smith",
+        status: "approved",
+        time: "10:22 AM",
+      },
+      {
+        step: "Manager Approval",
+        by: "Anshu Kumar",
+        status: "approved",
+        time: "10:25 AM",
+        comment: "Looks good",
+      },
+      {
+        step: "HR Validation",
+        by: "HR Team",
+        status: "approved",
+        time: "10:27 AM",
+      },
+      {
+        step: "Import Executed",
+        by: "System",
+        status: "approved",
+        time: "10:30 AM",
+      },
+    ],
+  },
+   {
+    fileName: "employee_data_jan.xlsx",
+    uploadedBy: "John Smith",
+    uploadDate: "15 Jan 2024, 10:22 AM",
+    module: "Employee",
+    environment: "Production",
+    status: "completed",
+    total: 1250,
+    success: 1245,
+    failed: 5,
+    skipped: 12,
+    warnings: 7,
+    validationErrors: 3,
+    duration: "2m 30s",
+    importId: "IMP-EMP-10231",
+    source: "Manual Upload",
+    size: "2.4 MB",
+    workflow: [
+      {
+        step: "File Uploaded",
+        by: "John Smith",
+        status: "approved",
+        time: "10:22 AM",
+      },
+      {
+        step: "Manager Approval",
+        by: "Anshu Kumar",
+        status: "approved",
+        time: "10:25 AM",
+        comment: "Looks good",
+      },
+      {
+        step: "HR Validation",
+        by: "HR Team",
+        status: "approved",
+        time: "10:27 AM",
+      },
+      {
+        step: "Import Executed",
+        by: "System",
+        status: "approved",
+        time: "10:30 AM",
+      },
+    ],
+  },
+];
+
+/* ---------------- PAGE ---------------- */
+export default function ImportHistory() {
+  return (
+    <div className="min-h-screen  bg-slate-50 dark:bg-slate-950 space-y-4">
+      <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+        Import History
+      </h2>
+
+      {SAMPLE.map((item, i) => (
+        <ImportHistoryCard key={i} data={item} />
+      ))}
+    </div>
+  );
+}

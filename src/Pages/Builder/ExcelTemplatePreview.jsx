@@ -4,12 +4,12 @@ import { Button } from "../../Library/Button";
 import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Library/Select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Lib/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../Library/table";
 import { Badge } from "../../Library/Badge";
 import { Alert } from "../../Library/Alert";
 import { FileSpreadsheet, Download, CheckCircle, AlertTriangle, Info } from "lucide-react";
 import { useToast } from "../../Library/use-toast";
-import { templateService } from "../../../api/services/templateService";
+// import { templateService } from "../../../api/services/templateService";
 import { downloadExcelTemplate, downloadCSV } from "../../services/excelUtils";
 
 const ExcelTemplatePreview = () => {
@@ -24,75 +24,75 @@ const ExcelTemplatePreview = () => {
     loadTemplates();
   }, []);
 
-  const loadTemplates = async () => {
-    try {
-      setIsLoadingTemplates(true);
-      const templateList = await templateService.getAll();
-      setTemplates(templateList);
-      if (templateList.length > 0) {
-        setSelectedTemplate(templateList[0].id.toString());
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load templates. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingTemplates(false);
-    }
-  };
+  // const loadTemplates = async () => {
+  //   try {
+  //     setIsLoadingTemplates(true);
+  //     const templateList = await templateService.getAll();
+  //     setTemplates(templateList);
+  //     if (templateList.length > 0) {
+  //       setSelectedTemplate(templateList[0].id.toString());
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to load templates. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsLoadingTemplates(false);
+  //   }
+  // };
 
-  const generatePreview = async () => {
-    try {
-      setIsGenerating(true);
-      const templateId = selectedTemplate;
-      const template = await templateService.getById(templateId);
+  // const generatePreview = async () => {
+  //   try {
+  //     setIsGenerating(true);
+  //     const templateId = selectedTemplate;
+  //     const template = await templateService.getById(templateId);
 
-      // Generate mock sample data based on template fields
-      const sampleData = [];
-      for (let i = 0; i < 3; i++) {
-        const row = {};
-        template.fields.forEach(field => {
-          switch (field.type) {
-            case 'text':
-              row[field.name] = `Sample ${field.label} ${i + 1}`;
-              break;
-            case 'email':
-              row[field.name] = `user${i + 1}@example.com`;
-              break;
-            case 'number':
-              row[field.name] = (1000 + i * 100).toString();
-              break;
-            case 'date':
-              row[field.name] = new Date(Date.now() + i * 86400000).toISOString().split('T')[0];
-              break;
-            case 'select':
-              row[field.name] = field.options ? field.options[0] : 'Option 1';
-              break;
-            default:
-              row[field.name] = `Sample ${field.label}`;
-          }
-        });
-        sampleData.push(row);
-      }
+  //     // Generate mock sample data based on template fields
+  //     const sampleData = [];
+  //     for (let i = 0; i < 3; i++) {
+  //       const row = {};
+  //       template.fields.forEach(field => {
+  //         switch (field.type) {
+  //           case 'text':
+  //             row[field.name] = `Sample ${field.label} ${i + 1}`;
+  //             break;
+  //           case 'email':
+  //             row[field.name] = `user${i + 1}@example.com`;
+  //             break;
+  //           case 'number':
+  //             row[field.name] = (1000 + i * 100).toString();
+  //             break;
+  //           case 'date':
+  //             row[field.name] = new Date(Date.now() + i * 86400000).toISOString().split('T')[0];
+  //             break;
+  //           case 'select':
+  //             row[field.name] = field.options ? field.options[0] : 'Option 1';
+  //             break;
+  //           default:
+  //             row[field.name] = `Sample ${field.label}`;
+  //         }
+  //       });
+  //       sampleData.push(row);
+  //     }
 
-      setPreviewData({
-        template: template,
-        sampleData: sampleData,
-        columnHeaders: template.fields.map(f => f.label),
-        columnKeys: template.fields.map(f => f.name)
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate preview. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  //     setPreviewData({
+  //       template: template,
+  //       sampleData: sampleData,
+  //       columnHeaders: template.fields.map(f => f.label),
+  //       columnKeys: template.fields.map(f => f.name)
+  //     });
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to generate preview. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsGenerating(false);
+  //   }
+  // };
 
   const downloadTemplate = async () => {
     try {
@@ -268,8 +268,8 @@ const ExcelTemplatePreview = () => {
                     {getValidationInfo(field) && (
                       <div><strong>Validation:</strong> {getValidationInfo(field)}</div>
                     )}
-                    <div><strong>Field Applocable For :</strong> {Array.isArray(field.applicable) && field.applicable.length > 0
-                      ? field.applicable.join(", ").toUpperCase()
+                    <div><strong>Field Applocable For :</strong> {Array.isArray(field.ApplicableJson) && field.ApplicableJson.length > 0
+                      ? field.ApplicableJson.join(", ").toUpperCase()
                       : "-"}</div>
                   </div>
                 </div>

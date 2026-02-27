@@ -1,109 +1,132 @@
+
 import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
 import { Button } from "../../Library/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../Library/Card";
-import { Input } from "../../Library/Input";
 import { Label } from "../../Library/Label";
 import { Textarea } from "../../Library/Textarea";
 import { Switch } from "../../Library/Switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../Library/Select";
 import { useToast } from "../../Library/use-toast";
+
 import AppIcon from "../../Component/AppIcon";
-import RoleSelect from "../../Component/RoleSelect";
-import { SweetSuccess } from "../../Component/SweetAlert";
 import StepCard from "./StepCard";
 import StepFormModal from "./StepFormModal";
+import CryptoService from "../../Security/useCrypto";
 
 import {
-  STATIC_WORKFLOWS,
-  STATIC_WORKFLOW_DETAILS,
-  STATIC_ROLES,
+  Modules,
 } from "../../Data/StaticData";
+import { GetMasterDataForClientPortalWorkflowCreation, UpsertClientPortalWorkflowConfiguration } from "../../Store/FormBuilder/Action";
+import { DEFAULT_STEP, DEFAULT_WORKFLOW_FORM } from "./workflowDefaults";
+import Input from "../../Library/Input";
+import { SweetSuccess } from "../../Component/SweetAlert";
 
 /* =====================================================
-   DEFAULT FORM
+   COMPONENT
 ===================================================== */
-const defaultForm = {
-  WorkflowCode: null,
-  WorkflowName: "",
-  Description: "",
-  DisplayOrder: 1,
-  IsActive: true,
-  Steps: [],
-};
-
-const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
+const WorkflowConfigurationForm = () => {
   const { toast } = useToast();
-  const [form, setForm] = useState(defaultForm);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { id } = useParams();
+
+  const decryptedId = useMemo(
+    () => (id ? CryptoService.decrypt(id) : null),
+    [id]
+  );
+
+  const { Common } = useSelector((s) => s.Auth);
+  const { data: workflowMasterData } = useSelector((s) => s.FormBuilderStore.ClientPortalWorkflowConfigurationMaster);
+  const { data: workflowData, isLoading: workflowLoading } = useSelector((s) => s.FormBuilderStore.ClientPortalWorkflowConfiguration);
+
+
+  const [form, setForm] = useState({
+    ...DEFAULT_WORKFLOW_FORM,
+    ClientPortalWorkflowProperties: [{ ...DEFAULT_STEP }],
+  });
+
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState(null);
 
   /* =====================================================
-     LOAD DATA FOR EDIT (Id PRESENT)
+     LOAD MASTER DATA
   ===================================================== */
   useEffect(() => {
-    if (!id) {
-      setForm(defaultForm);
-      return;
+    dispatch(
+      GetMasterDataForClientPortalWorkflowCreation({
+        ClientId: Common?.SelectedClientCode,
+        ClientContractId: Common?.SelectedClientContractCode,
+      })
+    );
+  }, [dispatch, Common]);
+
+  /* =====================================================
+     LOAD WORKFLOW DATA FOR EDITING
+  ===================================================== */
+
+  useEffect(() => {
+    if (workflowData && workflowData.length > 0 && workflowMasterData && decryptedId) {
+      const existingWorkflow = workflowData.find(w => w && w.Id === Number(decryptedId));
+      if (existingWorkflow && (form.ModuleId === null || form.ModuleId === 0)) { // Only set if form is not already populated with existing data (Description is empty for new forms)
+        setForm({
+          Id: existingWorkflow?.Id || "",
+          Name: existingWorkflow?.Name || "",
+          Description: existingWorkflow?.Description || "",
+          ModuleId: existingWorkflow?.ModuleId || 0,
+          ModuleProcessId: existingWorkflow?.ModuleProcessId || 0,
+          ModuleProcessActionId: existingWorkflow?.ModuleProcessActionId || 0,
+          IsRuleBased: existingWorkflow?.IsRuleBased || false,
+          IsRuleSetBased: existingWorkflow?.IsRuleSetBased || false,
+          RuleId: existingWorkflow?.RuleId || 0,
+          ActionBasedRuleSetId: existingWorkflow?.ActionBasedRuleSetId || 0,
+          IsLetterGenerationRequired: existingWorkflow?.IsLetterGenerationRequired || false,
+          IsEmailNotificationRequired: existingWorkflow?.IsEmailNotificationRequired || false,
+          IsSmsNotificationRequired: existingWorkflow?.IsSmsNotificationRequired || false,
+          ClientPortalWorkflowProperties: existingWorkflow?.ClientPortalWorkflowProperties || [],
+          ClientId: existingWorkflow?.ClientId || Number(Common?.SelectedClientCode),
+          ClientContractId: existingWorkflow?.ClientContractId || Number(Common?.SelectedClientContractCode),
+        });
+      }
+      // console.log("existingWorkflow", existingWorkflow);
+    } else if (!decryptedId) {
+      // For new workflows, ensure form is reset to default
+      setForm({
+        ...DEFAULT_WORKFLOW_FORM,
+        ClientId: Number(Common?.SelectedClientCode),
+        ClientContractId: Number(Common?.SelectedClientContractCode),
+      });
+    } else {
+      navigate("/workflow-config");
     }
-
-    const workflow = STATIC_WORKFLOW_DETAILS[id];
-    if (!workflow) return;
-
-    setForm({
-      WorkflowCode: workflow.Header.WorkflowCode ?? null,
-      WorkflowName: workflow.Header.WorkflowName ?? "",
-      Description: workflow.Header.Description ?? "",
-      DisplayOrder: workflow.Header.DisplayOrder ?? 1,
-      IsActive: workflow.Header.IsActive ?? true,
-      Steps: workflow.Details?.map(step => ({
-        ...step,
-        DisplayOrder: step.DisplayOrder ?? 1,
-        IsActive: step.IsActive ?? true,
-      })) ?? [
-          {
-            StepOrder: 1,
-            StepName: "",
-            ApproverRoleCode: "",
-            EscalationTo: "",
-            EscalationHours: "",
-            DisplayOrder: 1,
-            IsActive: true,
-          },
-        ],
-    });
-  }, [id]);
+  }, [workflowData, workflowMasterData, decryptedId, Common]);
 
   /* =====================================================
      HANDLERS
   ===================================================== */
-  const handleChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+  const updateForm = useCallback((key, value) => {
+    setForm((p) => ({ ...p, [key]: value }));
   }, []);
 
-  const addStep = useCallback(() => {
-    setEditingStep(null);
-    setIsModalOpen(true);
-  }, []);
-
-  const moveStepUp = useCallback((index) => {
-    if (index === 0) return;
+  const moveStep = useCallback((from, to) => {
     setForm((p) => {
-      const steps = [...p.Steps];
-      [steps[index - 1], steps[index]] = [steps[index], steps[index - 1]];
-      steps[index - 1].StepOrder = index;
-      steps[index].StepOrder = index + 1;
-      return { ...p, Steps: steps };
-    });
-  }, []);
+      const steps = [...p.ClientPortalWorkflowProperties];
+      const temp = steps[from];
+      steps[from] = steps[to];
+      steps[to] = temp;
 
-  const moveStepDown = useCallback((index) => {
-    if (index === form.Steps.length - 1) return;
-    setForm((p) => {
-      const steps = [...p.Steps];
-      [steps[index], steps[index + 1]] = [steps[index + 1], steps[index]];
-      steps[index].StepOrder = index + 1;
-      steps[index + 1].StepOrder = index + 2;
-      return { ...p, Steps: steps };
+      return {
+        ...p,
+        ClientPortalWorkflowProperties: steps.map((s, i) => ({ ...s, FlowOrder: i + 1 })),
+      };
     });
   }, []);
 
@@ -112,40 +135,29 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
   ===================================================== */
   const errors = useMemo(() => {
     const e = [];
-    if (!form.WorkflowName.trim()) e.push("Workflow Name is required");
-    if (form.Steps.length === 0) e.push("At least one step is required");
+    if (!form.Name) e.push("Name * required");
+    if (!form.Description) e.push("Description * required");
+    if (!form.ModuleId) e.push("Module * required");
+    if (!form.ModuleProcessActionId) e.push("Module Process Action * required");
 
-    form.Steps.forEach((step, i) => {
-      if (!step.StepName.trim()) {
-        e.push(`Step ${i + 1}: Step Name is required`);
+    if (form.IsRuleBased && !form.RuleId) e.push("Rule * required when Rule Based is enabled");
+    if (form.IsRuleSetBased && !form.ActionBasedRuleSetId) e.push("Action Based Rule Set * required when Rule Set Based is enabled");
+
+    if (!form.ClientPortalWorkflowProperties.length) e.push("At least one step required");
+
+    form.ClientPortalWorkflowProperties.forEach((s, i) => {
+      if (s.IsUserGroupBased) {
+        if (!s.UserGroupCode) e.push(`Step ${i + 1}: User Group * required when User Group Based is enabled`);
+      } else {
+        if (!s.CurrentRoleCode) e.push(`Step ${i + 1}: Current Role * required`);
       }
-      if (!step.ApproverRoleCode) {
-        e.push(`Step ${i + 1}: Approver Role is required`);
-      }
-      if ((step.EscalationTo && !step.EscalationHours) || (!step.EscalationTo && step.EscalationHours)) {
-        e.push(`Step ${i + 1}: Both Escalation Role and Hours must be provided together`);
-      }
+      if (!s.ActionProcessingStatus) e.push(`Step ${i + 1}: Action Processing Status required`);
     });
-
-    // Check for duplicate step names
-    const stepNames = form.Steps.map((s) => s.StepName.trim()).filter((name) => name);
-    const duplicateNames = stepNames.filter((name, index) => stepNames.indexOf(name) !== index);
-    if (duplicateNames.length > 0) {
-      e.push(`Duplicate step names found: ${duplicateNames.join(", ")}`);
-    }
-
-    // Check for consecutive same roles
-    for (let i = 1; i < form.Steps.length; i++) {
-      if (form.Steps[i].ApproverRoleCode === form.Steps[i - 1].ApproverRoleCode) {
-        e.push(`Step ${i + 1}: Same role cannot approve consecutively`);
-      }
-    }
-
     return e;
   }, [form]);
 
   /* =====================================================
-     SUBMIT (UPSERT)
+     SUBMIT
   ===================================================== */
   const handleSubmit = useCallback(
     async (e) => {
@@ -159,191 +171,304 @@ const WorkflowConfigurationForm = ({ id, onSave, onCancel }) => {
         });
         return;
       }
-
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        SweetSuccess({
-          title: form.WorkflowCode ? "Updated" : "Created",
-          text: `Workflow ${form.WorkflowCode ? "updated" : "created"} successfully.`,
-        });
-        onSave?.(form);
-      } catch (err) {
+        const response = await dispatch(
+          UpsertClientPortalWorkflowConfiguration(form)
+        );
+        if (response?.Status) {
+          SweetSuccess({
+            title: "Success",
+            text: decryptedId ? "Workflow updated successfully!" : "Workflow created successfully!",
+          });
+          navigate("/workflow-config");
+        } else {
+          toast({
+            title: "Error",
+            description: response?.Message || "Save failed",
+            variant: "danger",
+          });
+        }
+      } catch (error) {
         toast({
           title: "Error",
-          description: err.message || "Save failed",
+          description: error.message || "Save failed",
           variant: "danger",
         });
       }
     },
-    [form, errors, toast, onSave]
+    [errors, form, dispatch, toast, navigate]
   );
 
   /* =====================================================
-     MODAL HANDLERS
+     STEP CRUD
   ===================================================== */
-  const openEditModal = useCallback((step) => {
-    setEditingStep(step);
-    setIsModalOpen(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setEditingStep(null);
-  }, []);
-
-  const handleSaveStep = useCallback((stepData) => {
-    setForm((prev) => {
-      const steps = [...prev.Steps];
-      if (editingStep) {
-        // Edit existing step
-        const index = steps.findIndex((s) => s.StepOrder === editingStep.StepOrder);
-        if (index !== -1) {
-          steps[index] = { ...stepData };
+  const saveStep = useCallback(
+    (step) => {
+      setForm((p) => {
+        const steps = [...p.ClientPortalWorkflowProperties];
+        if (editingStep) {
+          const idx = steps.findIndex(
+            (s) => s.FlowOrder === editingStep.FlowOrder
+          );
+          steps[idx] = step;
+        } else {
+          steps.push({ ...step, FlowOrder: steps.length + 1 });
         }
-      } else {
-        // Add new step at the end
-        steps.push({
-          ...stepData,
-          StepOrder: steps.length + 1,
-        });
-      }
-      return { ...prev, Steps: steps };
-    });
-    closeModal();
-  }, [editingStep, closeModal]);
-
-  const handleDeleteStep = useCallback((stepOrder) => {
-    setForm((prev) => ({
-      ...prev,
-      Steps: prev.Steps.filter((s) => s.StepOrder !== stepOrder).map((step, i) => ({
-        ...step,
-        StepOrder: i + 1,
-      })),
-    }));
-  }, []);
-
-  /* =====================================================
-     UTILITY FUNCTIONS
-  ===================================================== */
-  const getRoleName = useCallback((roleCode) => {
-    const role = STATIC_ROLES.find((r) => r.RoleCode === roleCode);
-    return role ? role.Role_Name : roleCode;
-  }, []);
+        return { ...p, ClientPortalWorkflowProperties: steps };
+      });
+      setModalOpen(false);
+      setEditingStep(null);
+    },
+    [editingStep]
+  );
 
   /* =====================================================
      RENDER
   ===================================================== */
   return (
-    <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-      {/* Header */}
-      <form onSubmit={handleSubmit}>
-        <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-2 flex items-center justify-between border-b bg-gradient-to-r from-blue-400 to-indigo-400">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+    >
+      {/* HEADER */}
+      <div className="md:flex space-y-4 items-center justify-between px-6 py-2 bg-gradient-to-r from-primary-500 to-indigo-600 rounded-t-2xl">
+        <div className="flex items-center gap-3 text-white">
+          <AppIcon name="Settings" size={26} />
           <div>
-            <h2 className="text-sm sm:text-xl font-semibold text-white flex items-center gap-2">
-              <AppIcon name={"Settings"} size={30} /> Workflow Configuration
-            </h2>
-            <p className="text-green-100 text-xs sm:text-sm">
-              Configure workflow processes and approval steps
+            <h2 className="text-lg font-semibold">Workflow Configuration</h2>
+            <p className="text-xs opacity-80">
+              Define workflow rules & approvals
             </p>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button type="submit">
-              {form.WorkflowCode ? "Update Workflow" : "Create Workflow"}
-            </Button>
-            <Button 
-            type="button"
-             variant="soft"
-              onClick={addStep}
-              icon={<AppIcon name="Plus" className="w-4 h-4 mr-2" />}>
-              
-              Add Step
-            </Button>
-          </div>
         </div>
+        <div className="flex gap-2 items-center">
+          <Button type="submit" disabled={workflowLoading}>Save</Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setModalOpen(true)}
+            icon={<AppIcon name={"Plus"} />}
+          >
+            New Step
+          </Button>
+          <Button type="button"
+            variant="outline"
+            onClick={() => navigate("/workflow-config")} >
+            Cancel
+          </Button>
+        </div>
+      </div>
 
-        <div className="space-y-6 p-4 sm:p-6">
-          {/* BASIC INFO */}
+      {/* FORM */}
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={form.Name}
+                  onChange={(e) => updateForm("Name", e.target.value)}
+                  placeholder="Enter workflow name"
+                />
+              </div>
+              {/* Module */}
+              <div className="space-y-2">
+                <Label className="">Module <span className="text-red-600"> *</span></Label>
+                <Select
+                  value={form.ModuleId?.toString() || ""}
+                  onValueChange={(v) => {
+                    updateForm("ModuleId", Number(v));
+                    updateForm("ModuleProcessId", Number(v))
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select module" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Modules?.map((m) => (
+                      <SelectItem key={`module-${m.value}`} value={m.value.toString()}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Module */}
+              <div className="space-y-2">
+                <Label className="">Module Process Action <span className="text-red-600"> *</span></Label>
+                <Select
+                  value={form.ModuleProcessActionId?.toString() || ""}
+                  onValueChange={(v) => {
+                    updateForm("ModuleProcessActionId", Number(v))
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select module" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[{ label: "None", value: 0 }, ...(workflowMasterData?.ModuleProcessActionDetailsList || [])].map((m) => (
+                      <SelectItem key={`ModuleProcessActionDetailsList-${m.Id || m.value}`} value={(m.Id || m.value).toString()}>
+                        {m.Description || m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {/* Description */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Description <span className="text-red-600"> *</span></Label>
+              <Textarea
+                className="min-h-[110px] rounded-xl shadow-sm resize-none"
+                value={form.Description}
+                onChange={(e) => updateForm("Description", e.target.value)}
+                placeholder="Enter workflow description..."
+              />
+            </div>
+
+            {/* Feature Toggles Section */}
+            <div className="">
+              <h3 className="text-sm font-semibold mb-4 tracking-wide">
+                Workflow Options
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {[
+                  ["IsRuleBased", "Rule Based"],
+                  ["IsRuleSetBased", "Rule Set Based"],
+                  ["IsLetterGenerationRequired", "Letter Generation Required"],
+                  ["IsSmsNotificationRequired", "SMS Notification Required"],
+                  ["IsEmailNotificationRequired", "Email Notification Required"],
+                ].map(([key, label]) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between rounded-xl border bg-background px-4 py-2 hover:shadow-sm transition"
+                  >
+                    <Label className="text-sm font-medium">{label} {(key === "IsRuleBased" && form.IsRuleBased) || (key === "IsRuleSetBased" && form.IsRuleSetBased) ? <span className="text-red-600"> *</span> : null}</Label>
+                    <Switch
+                      checked={form[key]}
+                      onCheckedChange={(v) => {
+                        if (key === "IsRuleBased") {
+                          setForm((p) => ({ ...p, IsRuleBased: v, IsRuleSetBased: v ? false : p.IsRuleSetBased, ActionBasedRuleSetId: v ? 0 : p.ActionBasedRuleSetId }));
+                        } else if (key === "IsRuleSetBased") {
+                          setForm((p) => ({ ...p, IsRuleSetBased: v, IsRuleBased: v ? false : p.IsRuleBased, RuleId: v ? 0 : p.RuleId }));
+                        } else {
+                          updateForm(key, v);
+                        }
+                      }}
+                    />
+                  </div>
+
+                ))}
+              </div>
+              {form.IsRuleBased && (
+                <div className="mt-2 space-y-1">
+                  <Label>Rule {form.IsRuleBased && !form.IsRuleSetBased && <span className="text-red-600"> *</span>}</Label>
+                  <Select
+                    value={form.RuleId?.toString() || ""}
+                    onValueChange={(value) => updateForm("RuleId", value ? Number(value) : 0)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Rule" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[{ label: "None", value: 0 }, ...(workflowMasterData?.RuleDetails || [])].map((ruleDetails) => (
+                        <SelectItem key={`rule-${ruleDetails.RuleId || ruleDetails.value}`} value={(ruleDetails.RuleId || ruleDetails.value).toString()}>
+                          {ruleDetails.Code || ruleDetails.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {form.IsRuleSetBased && (
+                <div className="mt-2 space-y-1">
+                  <Label>Action Based Rule Set {!form.IsRuleBased && form.IsRuleSetBased && <span className="text-red-600"> *</span>}</Label>
+                  <Select
+                    value={form.ActionBasedRuleSetId?.toString() || ""}
+                    onValueChange={(value) => updateForm("ActionBasedRuleSetId", value ? Number(value) : 0)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Rule Set" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[{ Name: "None", RulesetId: 0 }, ...(workflowMasterData?.RuleSetDetails || [])]?.map((ruleSet) => (
+                        <SelectItem key={`ruleset-${ruleSet.RulesetId}`} value={ruleSet?.RulesetId.toString()}>
+                          {ruleSet.Name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+            </div>
+
+          </CardContent>
+
+        </Card>
+
+        {/* STEPS */}
+        {form.ClientPortalWorkflowProperties.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>
-                {form.WorkflowCode ? "Edit Workflow" : "Create Workflow"}
-              </CardTitle>
+              <CardTitle>Workflow Steps</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Workflow Name</Label>
-                <Input
-                  name="WorkflowName"
-                  placeholder="Enter workflow name"
-                  value={form.WorkflowName}
-                  onChange={handleChange}
+            <CardContent className="space-y-4">
+              {form.ClientPortalWorkflowProperties.map((step, i) => (
+                <StepCard
+                  key={i}
+                  step={step}
+                  roles={workflowMasterData?.Roles || []}
+                  userGroups={workflowMasterData?.UserGroups || []}
+                  emailTemplates={workflowMasterData?.EmailTemplateDetails || []}
+                  smsTemplates={workflowMasterData?.SMSTemplateDetails || []}
+                  letterTemplates={workflowMasterData?.TemplateDetails || []}
+                  isFirst={i === 0}
+                  isLast={i === form.ClientPortalWorkflowProperties.length - 1}
+                  onEdit={() => {
+                    setEditingStep(step);
+                    setModalOpen(true);
+                  }}
+                  onDelete={() =>
+                    setForm((p) => ({
+                      ...p,
+                      ClientPortalWorkflowProperties: p.ClientPortalWorkflowProperties.filter((_, x) => x !== i),
+                    }))
+                  }
+                  onMoveUp={() => moveStep(i, i - 1)}
+                  onMoveDown={() => moveStep(i, i + 1)}
                 />
-              </div>
-              <div>
-                <Label>Display Order</Label>
-                <Input
-                  name="DisplayOrder"
-                  type="number"
-                  placeholder="Enter display order"
-                  value={form.DisplayOrder}
-                  onChange={(e) => setForm({ ...form, DisplayOrder: Number(e.target.value) })}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Description</Label>
-                <Textarea
-                  name="Description"
-                  placeholder="Enter workflow description"
-                  value={form.Description}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="flex gap-4 md:col-span-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.IsActive}
-                    onCheckedChange={(v) => setForm({ ...form, IsActive: v })}
-                  />
-                  <Label>Active</Label>
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
+        )}
+      </div>
 
-          {/* STEPS */}
-          <div className="space-y-2">
-            {form.Steps.length > 0 && form.Steps.map((step, i) => (
-              <StepCard
-                key={step.StepOrder}
-                step={step}
-                onEdit={() => openEditModal(step)}
-                onDelete={() => handleDeleteStep(step.StepOrder)}
-                onMoveUp={() => moveStepUp(i)}
-                onMoveDown={() => moveStepDown(i)}
-                isFirst={i === 0}
-                isLast={i === form.Steps.length - 1}
-                getRoleName={getRoleName}
-              />
-            ))}
-          </div>
-
-          {/* FOOTER */}
-
-        </div>
-      </form>
-
-      {/* STEP FORM MODAL */}
+      {/* MODAL */}
       <StepFormModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingStep(null);
+        }}
         initial={editingStep}
-        onSave={handleSaveStep}
-        existingOrders={form.Steps.map((s) => s.StepOrder)}
-        existingNames={form.Steps.map((s) => s.StepName)}
+        onSave={saveStep}
+        existingOrders={form.ClientPortalWorkflowProperties.map((s) => s.FlowOrder)}
+        roles={workflowMasterData?.Roles || []}
+        userGroups={workflowMasterData?.UserGroups || []}
+        emailTemplates={workflowMasterData?.EmailTemplateDetails || []}
+        smsTemplates={workflowMasterData?.SMSTemplateDetails || []}
+        letterTemplates={workflowMasterData?.TemplateDetails || []}
+        isLetterRequired={form.IsLetterGenerationRequired}
+        isSmsRequired={form.IsSmsNotificationRequired}
+        isEmailRequired={form.IsEmailNotificationRequired}
       />
-    </div>
+    </form>
   );
 };
 

@@ -15,7 +15,7 @@ export const Popover = PopoverPrimitive.Root;
 export const PopoverTrigger = PopoverPrimitive.Trigger;
 
 const popoverVariants = cva(
-  "z-50 rounded-[var(--popover-radius)] border bg-[var(--popover-bg)] " +
+  "z-[1200] rounded-[var(--popover-radius)] border bg-[var(--popover-bg)] " +
     "border-[var(--popover-border)] shadow-md animate-in fade-in zoom-in-95",
   {
     variants: {

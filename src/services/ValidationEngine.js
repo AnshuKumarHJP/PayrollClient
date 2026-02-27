@@ -1,11 +1,3 @@
-// src/services/ValidationEngine.js
-// ✅ PURE GENERIC ENGINE
-// ❌ NO static rules
-// ❌ NO switch / case
-// ❌ NO hardcoded validation types
-// ✅ 100% TEMPLATE DRIVEN
-// ✅ BACKEND CONTROLS EVERYTHING
-
 const safeJsonParse = (v, fallback = []) => {
   try {
     return JSON.parse(v);
@@ -29,16 +21,13 @@ class ValidationEngine {
 
       const value = formData[field.Name];
 
-      /* ---------- REQUIRED (FLAG BASED, NOT RULE BASED) ---------- */
-      if (field.Required) {
-        if (value === undefined || value === null || value === "") {
-          errors[field.Name] = `${field.Label} is required`;
-          valid = false;
-          continue;
-        }
+      /* ---------- REQUIRED FLAG ---------- */
+      if (field.Required && (value === "" || value === null || value === undefined)) {
+        errors[field.Name] = `${field.Label} is required`;
+        valid = false;
+        continue;
       }
 
-      /* ---------- RULES FROM BACKEND ---------- */
       const rules = field.FieldValidationRule ?? [];
 
       for (const rule of rules) {
@@ -50,23 +39,19 @@ class ValidationEngine {
           return acc;
         }, {});
 
-        try {
-          const error = await ValidationEngine.executeRule({
-            value,
-            field,
-            rule,
-            params,
-            formData,
-            context
-          });
+        const error = ValidationEngine.executeRule({
+          value,
+          field,
+          rule,
+          params,
+          formData,
+          context,
+        });
 
-          if (error) {
-            errors[field.Name] = error;
-            valid = false;
-            break; // stop first error per field
-          }
-        } catch {
-          continue; // NEVER break form
+        if (error) {
+          errors[field.Name] = error;
+          valid = false;
+          break;
         }
       }
     }
@@ -75,76 +60,60 @@ class ValidationEngine {
   }
 
   /* =======================================================
-     RULE EXECUTOR (WITH BUILT-IN VALIDATION TYPES)
+     GENERIC RULE EXECUTOR
   ======================================================= */
-  static async executeRule({ value, field, rule, params, formData, context }) {
-    /**
-     * Resolution order:
-     * 1. window.genericValidationHandler (runtime injected)
-     * 2. built-in validation types
-     * 3. backend validation API (future)
-     * 4. no-op (ignore rule)
-     */
+  static executeRule({ value, field, rule, params }) {
+    if (value === "" || value === null || value === undefined) return null;
 
-    if (typeof window?.genericValidationHandler === "function") {
-      return await window.genericValidationHandler({ value, field, rule, params, formData, context });
+    const type = String(rule.ValidationType);
+
+    /* ---------- LENGTH (ValidationType = 1) ---------- */
+    if (type === "1") {
+      const length = String(value).length;
+
+      for (const key in params) {
+        const ruleValue = Number(params[key]);
+
+        if (key.toLowerCase().includes("min") && length < ruleValue) {
+          return `${field.Label} must be at least ${ruleValue} characters`;
+        }
+
+        if (key.toLowerCase().includes("max") && length > ruleValue) {
+          return `${field.Label} must be at most ${ruleValue} characters`;
+        }
+      }
     }
 
-    // Built-in validation types
-    const validationType = rule.ValidationType;
-
-    switch (validationType) {
-      case "required":
-        if (!value || value === "") {
-          return `${field.Label} is required`;
-        }
-        break;
-
-      case "email":
-        const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-        if (value && !emailRegex.test(value)) {
-          return `${field.Label} must be a valid email`;
-        }
-        break;
-
-      case "max-length":
-        if (value && value.length > parseInt(params.Max)) {
-          return `${field.Label} must be at most ${params.Max} characters`;
-        }
-        break;
-
-      case "min-length":
-        if (value && value.length < parseInt(params.Min)) {
-          return `${field.Label} must be at least ${params.Min} characters`;
-        }
-        break;
-
-      case "0": // Range validation (for numbers)
-        const numValue = parseFloat(value);
-        if (isNaN(numValue)) {
-          return `${field.Label} must be a valid number`;
-        } else {
-          if (params.Min && numValue < parseFloat(params.Min)) {
-            return `${field.Label} must be at least ${params.Min}`;
-          }
-          if (params.Max && numValue > parseFloat(params.Max)) {
-            return `${field.Label} must be at most ${params.Max}`;
-          }
-        }
-        break;
-
-      case "2": // Regex validation
-        if (params.Pattern) {
-          const regex = new RegExp(params.Pattern);
-          if (value && !regex.test(value)) {
+    /* ---------- REGEX (ValidationType = 2) ---------- */
+    if (type === "2") {
+      for (const key in params) {
+        try {
+          const regex = new RegExp(params[key]);
+          if (!regex.test(value)) {
             return `${field.Label} format is invalid`;
           }
+        } catch {
+          return null;
         }
-        break;
+      }
+    }
 
-      default:
-        // Unknown validation type, ignore
-        break;
+    /* ---------- RANGE (ValidationType = 3) ---------- */
+    if (type === "3") {
+      const num = Number(value);
+      if (isNaN(num)) return `${field.Label} must be a number`;
+
+      for (const key in params) {
+        const ruleValue = Number(params[key]);
+
+        if (key.toLowerCase().includes("min") && num < ruleValue) {
+          return `${field.Label} must be ≥ ${ruleValue}`;
+        }
+
+        if (key.toLowerCase().includes("max") && num > ruleValue) {
+          return `${field.Label} must be ≤ ${ruleValue}`;
+        }
+      }
     }
 
     return null;

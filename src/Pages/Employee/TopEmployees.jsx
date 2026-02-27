@@ -1,4 +1,4 @@
-import { Progress } from "../../Lib/progress";
+import { Progress } from "../../Library/progress";
 
 export default function TopEmployees() {
   const list = [
